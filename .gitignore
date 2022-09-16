@@ -2,4 +2,5 @@
 
 venv
 
-data
+data/*.csv
+data/*.xlsx
