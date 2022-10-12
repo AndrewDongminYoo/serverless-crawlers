@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 
 def set_queries(queries: dict):
@@ -15,8 +16,14 @@ def date_to_string(dts: datetime, fmt: str):
         return dts.strftime('%Y%m')
     elif fmt == 'year':
         return str(dts.year)
+    elif fmt == 'M':
+        return str(dts.month)
 
 
 def object_to_list(data: dict):
     if all(isinstance(int(key), int) for key in data.keys()):
         return [x for x in data.values()]
+
+
+def pprint(data):
+    print(json.dumps(data, indent=4, ensure_ascii=False))

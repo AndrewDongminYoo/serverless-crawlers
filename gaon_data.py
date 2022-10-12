@@ -70,8 +70,8 @@ def save_to_excel(sales_table: pd.DataFrame, new_sales: pd.DataFrame, sales: pd.
 
 
 if __name__ == '__main__':
-    sales = sales_clean_up()
-    producer = producer_clean_up()
-    new_sales = merge_sales_with_producer(sales, producer)
-    sales_table = pivot_data(new_sales)
-    save_to_excel(sales_table, new_sales, sales, producer)
+    _sales = sales_clean_up()
+    _producer = producer_clean_up()
+    _new_sales = merge_sales_with_producer(_sales, _producer)
+    _sales_table = pivot_data(_new_sales)
+    save_to_excel(_sales_table, _new_sales, _sales, _producer)
