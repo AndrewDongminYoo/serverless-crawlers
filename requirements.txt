@@ -1,4 +1,5 @@
-autopep8=1.6.0
-pandas=1.4.2
-ipython=8.4.0
-xlsxwriter=3.0.3
+autopep8==1.7.0
+pandas==1.5.0
+numpy==1.23.3
+ipython==8.5.0
+xlsxwriter==3.0.3
