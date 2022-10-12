@@ -18,16 +18,16 @@ CIRCLE_URL = 'https://circlechart.kr'
 
 def fetch_chart_api(period: str, chart_type: str, dt: datetime):
     queries = {'termGbn': period}
-    ymd = date_to_string(dt, period)
+    yyyymm = date_to_string(dt, period)
     if chart_type == "global":
-        queries['yyyymmdd'] = ymd
+        queries['yyyymmdd'] = yyyymm
     elif chart_type == "album":
         queries['hitYear'] = date_to_string(dt, 'year')
         queries['targetTime'] = date_to_string(dt, 'M')
         queries['nationGbn'] = 'T'
         queries['yearTime'] = '3'
         queries['curUrl'] = f'{CIRCLE_URL}/page_chart/{chart_type}.circle{set_queries(queries)}'
-    url = f'{CIRCLE_URL}/data/api/chart/{chart_type}'
+    url = f'{CIRCLE_URL}/data/api/chart/{chart_type}{set_queries(queries)}'
     headers = {
         'Accept': 'application/json, text/javascript, */*; q=0.01',
         'Connection': 'keep-alive',
@@ -35,10 +35,10 @@ def fetch_chart_api(period: str, chart_type: str, dt: datetime):
         'X-Requested-With': 'XMLHttpRequest',
         'Referer': f'{CIRCLE_URL}/page_chart/{chart_type}.circle'
     }
-    req = post(url, headers=headers, params=queries)
+    req = post(url, headers=headers)
     result = json.loads(req.text)
     if result["ResultStatus"] == "OK":
-        return as_chart_array(object_to_list(result["List"]), ymd)
+        return as_chart_array(object_to_list(result["List"]), yyyymm, url)
     else:
         return {
             "status_code": req.status_code,
