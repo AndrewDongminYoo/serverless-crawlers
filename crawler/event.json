@@ -1,0 +1,16 @@
+{
+  "version": "0",
+  "id": "fd7cf240-9f95-fcf6-2395-599cdb4fe0c2",
+  "detail-type": "Scheduled Task",
+  "source": "bside.ai",
+  "account": "784579398270",
+  "time": "2022-10-27T02:00:00Z",
+  "region": "ap-northeast-2",
+  "resources": [
+    "arn:aws:lambda:ap-northeast-2:784579398270:function:crawler-dev-worker",
+    "arn:aws:lambda:ap-northeast-2:784579398270:function:crawler-dev-processor"
+  ],
+  "detail": {
+    "ip": "121.131.178.122"
+  }
+}
