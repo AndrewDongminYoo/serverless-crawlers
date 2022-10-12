@@ -15,3 +15,8 @@ def date_to_string(dts: datetime, fmt: str):
         return dts.strftime('%Y%m')
     elif fmt == 'year':
         return str(dts.year)
+
+
+def object_to_list(data: dict):
+    if all(isinstance(int(key), int) for key in data.keys()):
+        return [x for x in data.values()]
