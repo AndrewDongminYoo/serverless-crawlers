@@ -1,11 +1,6 @@
 import csv
 from abc import ABC
 
-
-global_file = open("../data/gaon_chart_all.csv", mode="w", newline="")
-global_writer = csv.writer(global_file, dialect="excel")
-album_file = open("../data/producer_all.csv", mode="w", newline="")
-album_writer = csv.writer(album_file, dialect="excel")
 gaon_header = [
     'selector',
     'selector-href',
@@ -32,7 +27,11 @@ prod_header = [
     'sales_volume',
     'title',
 ]
+global_file = open("../data/gaon_chart_all.csv", mode="w", newline="")
+global_writer = csv.writer(global_file, dialect="excel")
 global_writer.writerow(gaon_header)
+album_file = open("../data/producer_all.csv", mode="w", newline="")
+album_writer = csv.writer(album_file, dialect="excel")
 album_writer.writerow(prod_header)
 
 
@@ -49,11 +48,10 @@ class Chart(ABC):
     sales_volume = "0 / 0"
     title = ''
 
-    def to_csv(self):
+    def to_csv(self, ):
+        writer = album_writer
         if self.__class__ is GlobalChart:
             writer = global_writer
-        elif self.__class__ is AlbumChart:
-            writer = album_writer
         writer.writerow([
             self.month,
             self.link,

@@ -49,8 +49,8 @@ def fetch_chart_api(period: str, chart_type: str, dt: datetime):
         }
 
 
-def main(period: str):
-    if period == "all":
+def main(mode: str):
+    if mode == "w":
         roll(TODAY, fetch_chart_api, "global", TERM, MONTH, 10)
         roll(TODAY, fetch_chart_api, "album", TERM, MONTH, 130)
     else:

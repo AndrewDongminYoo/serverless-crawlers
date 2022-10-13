@@ -81,8 +81,8 @@ def crawl_browser(period: str, chart_type: str, dt: datetime):
     return as_chart_array(result, date_to_string(dt, period), url)
 
 
-def main(period: str):
-    if period == "all":
+def main(mode: str):
+    if mode == "w":
         roll(TODAY, crawl_browser, "global", TERM, MONTH, 10)
         roll(TODAY, crawl_browser, "album", TERM, MONTH, 130)
     else:
