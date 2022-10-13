@@ -1,5 +1,5 @@
-from datetime import datetime
 import json
+from datetime import datetime, timedelta
 
 
 def set_queries(queries: dict):
@@ -27,3 +27,11 @@ def object_to_list(data: dict):
 
 def pprint(data):
     print(json.dumps(data, indent=4, ensure_ascii=False))
+
+
+def roll(today: datetime, func, chart_type: str, term: int, month: str, count: int):
+    for n in range(count, 0, -1):
+        n_month = timedelta(days=term * n)
+        n_month_ago = today - n_month
+        chart_array = func(month, chart_type, n_month_ago)
+        pprint(chart_array)

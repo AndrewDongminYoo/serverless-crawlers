@@ -1,14 +1,86 @@
-class GlobalChart(object):
+import csv
+from abc import ABC
+
+
+global_file = open("../data/gaon_chart_all.csv", mode="w", newline="")
+global_writer = csv.writer(global_file, dialect="excel")
+album_file = open("../data/producer_all.csv", mode="w", newline="")
+album_writer = csv.writer(album_file, dialect="excel")
+gaon_header = [
+    'selector',
+    'selector-href',
+    'image',
+    'album',
+    'artist',
+    'distributor',
+    'production',
+    'ranking',
+    'rank_status',
+    'sales_volume',
+    'title',
+]
+prod_header = [
+    'link',
+    'link-href',
+    'image',
+    'album',
+    'artist',
+    'distributor',
+    'producer',
+    'ranking',
+    'rank_status',
+    'sales_volume',
+    'title',
+]
+global_writer.writerow(gaon_header)
+album_writer.writerow(prod_header)
+
+
+class Chart(ABC):
     month = ''
     link = ''
-    image = ''
+    image = 'https://circlechart.kr/assets/img/no_img.png'
     album = ''
     artist = ''
     distributor = ''
     producer = ''
     ranking = "101"
     rank_status = '-'
-    # sales_volume = "0"
+    sales_volume = "0 / 0"
+    title = ''
+
+    def to_csv(self):
+        if self.__class__ is GlobalChart:
+            writer = global_writer
+        elif self.__class__ is AlbumChart:
+            writer = album_writer
+        writer.writerow([
+            self.month,
+            self.link,
+            self.image,
+            self.album,
+            self.artist,
+            self.distributor,
+            self.producer,
+            self.ranking,
+            self.rank_status,
+            self.sales_volume,
+            self.title,
+        ])
+        return self.__dict__
+
+
+class GlobalChart(Chart):
+    month = ''  # 'selector'
+    link = ''  # 'selector-href'
+    image = 'https://circlechart.kr/assets/img/no_img.png'
+    album = ''
+    artist = ''
+    distributor = ''
+    producer = ''  # 'production'
+    ranking = "101"
+    rank_status = '-'
+    sales_volume = "0 / 0"
     title = ''
 
     def __init__(self, data: dict, month, url):
@@ -20,14 +92,14 @@ class GlobalChart(object):
         self.distributor = data['CompanyDist']
         self.producer = set_producer(data['CompanyMake'], data['Album'])
         self.ranking = data['Rank']  # 랭킹
-        self.rank_status = data['RankStatus']  # 전월대비 (+1)
+        self.rank_status = str(data['RankStatus'])  # 전월대비 (+1)
         # self.sales_volume = data[""]
         self.title = data['Title']  # 곡명
 
 
-class AlbumChart(object):
-    month = ''
-    link = ''
+class AlbumChart(Chart):
+    month = ''  # 'link'
+    link = ''  # 'link-href'
     image = ''
     album = ''
     artist = ''
@@ -48,7 +120,8 @@ class AlbumChart(object):
         self.producer = get_producer(data['ALBUM_NAME'])
         self.ranking = data['SERVICE_RANKING']  # 랭킹
         self.rank_status = rank_status(data['RankStatus'], data['RankChange'])  # 전월대비 (1up)
-        self.sales_volume = data["Album_CNT"] + " / " + data["Total_CNT"]  # 앨범 판매량
+        # self.sales_volume = data["Total_CNT"]  # 앨범 판매량
+        self.sales_volume = data["Album_CNT"] + " / " + data["Total_CNT"]  # 앨범 판매량 / 전체 판매량
         # self.title = data['']
 
 
@@ -60,7 +133,7 @@ def as_chart(data: dict, ts: str, url: str):
 
 
 def as_chart_array(array: list, ts: str, url: str):
-    return [as_chart(x, ts, url).__dict__ for x in array]
+    return [as_chart(x, ts, url).to_csv() for x in array]
 
 
 def rank_status(status: str, change: str):

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from requests import post
 import json
 
@@ -7,7 +7,7 @@ from crawler.utils import (
     date_to_string,
     set_queries,
     object_to_list,
-    pprint
+    roll
 )
 
 TODAY = datetime.today()
@@ -49,14 +49,10 @@ def fetch_chart_api(period: str, chart_type: str, dt: datetime):
         }
 
 
-if __name__ == '__main__':
-    for n in range(10, 0, -1):
-        N_months = timedelta(days=TERM * n)
-        N_month_ago = TODAY - N_months
-        chart_array = fetch_chart_api(MONTH, "global", N_month_ago)
-        pprint(chart_array)
-    for n in range(130, 0, -1):
-        N_months = timedelta(days=TERM * n)
-        N_month_ago = TODAY - N_months
-        chart_array = fetch_chart_api(MONTH, "album", N_month_ago)
-        pprint(chart_array)
+def main(period: str):
+    if period == "all":
+        roll(TODAY, fetch_chart_api, "global", TERM, MONTH, 10)
+        roll(TODAY, fetch_chart_api, "album", TERM, MONTH, 130)
+    else:
+        roll(TODAY, fetch_chart_api, "global", TERM, MONTH, 1)
+        roll(TODAY, fetch_chart_api, "album", TERM, MONTH, 1)
