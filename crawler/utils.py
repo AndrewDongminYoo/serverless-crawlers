@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 def set_queries(queries: dict):
     result = "?"
     for key, value in queries.items():
-        result += key + "=" + value + "&"
+        if key and value:
+            result += key + "=" + value + "&"
     return result[:-1]
 
 

@@ -1,22 +1,11 @@
 import csv
 from abc import ABC
+from pathlib import Path
 
-gaon_header = [
-    'selector',
-    'selector-href',
-    'image',
-    'album',
-    'artist',
-    'distributor',
-    'production',
-    'ranking',
-    'rank_status',
-    'sales_volume',
-    'title',
-]
-prod_header = [
+
+header = [
+    'month',
     'link',
-    'link-href',
     'image',
     'album',
     'artist',
@@ -27,26 +16,37 @@ prod_header = [
     'sales_volume',
     'title',
 ]
-global_file = open("../data/gaon_chart_all.csv", mode="w", newline="")
-global_writer = csv.writer(global_file, dialect="excel")
-global_writer.writerow(gaon_header)
-album_file = open("../data/producer_all.csv", mode="w", newline="")
-album_writer = csv.writer(album_file, dialect="excel")
-album_writer.writerow(prod_header)
+
+GLOBAL = Path("../data/global_kpop_chart.csv")
+ALBUMS = Path("../data/album_chart.csv")
+if GLOBAL.exists():
+    global_file = open(GLOBAL, mode="a", newline="")
+    global_writer = csv.writer(global_file, dialect="excel")
+else:
+    global_file = open(GLOBAL, mode="w", newline="")
+    global_writer = csv.writer(global_file, dialect="excel")
+    global_writer.writerow(header)
+if ALBUMS.exists():
+    album_file = open(ALBUMS, mode="a", newline="")
+    album_writer = csv.writer(album_file, dialect="excel")
+else:
+    album_file = open(ALBUMS, mode="w", newline="")
+    album_writer = csv.writer(album_file, dialect="excel")
+    album_writer.writerow(header)
 
 
 class Chart(ABC):
-    month = ''
-    link = ''
-    image = 'https://circlechart.kr/assets/img/no_img.png'
-    album = ''
-    artist = ''
-    distributor = ''
-    producer = ''
-    ranking = "101"
-    rank_status = '-'
-    sales_volume = "0 / 0"
-    title = ''
+    month = None  # 'selector'
+    link = None  # 'selector-href'
+    image = None
+    album = None
+    artist = None
+    distributor = None
+    producer = None  # 'production'
+    ranking = None
+    rank_status = None
+    sales_volume = None
+    title = None
 
     def to_csv(self, ):
         writer = album_writer
@@ -69,18 +69,6 @@ class Chart(ABC):
 
 
 class GlobalChart(Chart):
-    month = ''  # 'selector'
-    link = ''  # 'selector-href'
-    image = 'https://circlechart.kr/assets/img/no_img.png'
-    album = ''
-    artist = ''
-    distributor = ''
-    producer = ''  # 'production'
-    ranking = "101"
-    rank_status = '-'
-    sales_volume = "0 / 0"
-    title = ''
-
     def __init__(self, data: dict, month, url):
         self.month = month[2:]
         self.link = url
@@ -88,7 +76,7 @@ class GlobalChart(Chart):
         self.album = data['Album']
         self.artist = data['Artist']
         self.distributor = data['CompanyDist']
-        self.producer = set_producer(data['CompanyMake'], data['Album'])
+        self.producer = data['CompanyMake']
         self.ranking = data['Rank']  # 랭킹
         self.rank_status = str(data['RankStatus'])  # 전월대비 (+1)
         # self.sales_volume = data[""]
@@ -96,18 +84,6 @@ class GlobalChart(Chart):
 
 
 class AlbumChart(Chart):
-    month = ''  # 'link'
-    link = ''  # 'link-href'
-    image = ''
-    album = ''
-    artist = ''
-    distributor = ''
-    producer = ''
-    ranking = "101"
-    rank_status = '-'
-    sales_volume = "0 / 0"
-    title = ''
-
     def __init__(self, data: dict, month, url):
         self.month = month[2:]
         self.link = url
@@ -115,26 +91,25 @@ class AlbumChart(Chart):
         self.album = data['ALBUM_NAME']
         self.artist = data['ARTIST_NAME']
         self.distributor = data['de_nm']
-        self.producer = get_producer(data['ALBUM_NAME'])
+        # self.producer = data['de_nm']
         self.ranking = data['SERVICE_RANKING']  # 랭킹
-        self.rank_status = rank_status(data['RankStatus'], data['RankChange'])  # 전월대비 (1up)
-        # self.sales_volume = data["Total_CNT"]  # 앨범 판매량
+        self.rank_status = rank_to_string(data['RankStatus'], data['RankChange'])  # 전월대비 (1up)
         self.sales_volume = data["Album_CNT"] + " / " + data["Total_CNT"]  # 앨범 판매량 / 전체 판매량
         # self.title = data['']
 
 
-def as_chart(data: dict, ts: str, url: str):
-    if "Total_CNT" in data.keys():
-        return AlbumChart(data, ts, url)
-    elif "Title" in data.keys():
-        return GlobalChart(data, ts, url)
+def as_chart(chart_data: dict, timestamp: str, url: str):
+    if "Total_CNT" in chart_data.keys():
+        return AlbumChart(chart_data, timestamp, url)
+    elif "Title" in chart_data.keys():
+        return GlobalChart(chart_data, timestamp, url)
 
 
 def as_chart_array(array: list, ts: str, url: str):
-    return [as_chart(x, ts, url).to_csv() for x in array]
+    return [as_chart(chart, ts, url).to_csv() for chart in array]
 
 
-def rank_status(status: str, change: str):
+def rank_to_string(status: str, change: str):
     if status == "new":
         return status
     elif change == "0":
@@ -144,22 +119,3 @@ def rank_status(status: str, change: str):
             return "-" + change
         else:
             return "+" + change
-
-
-global_producers = dict()
-global_total_counts = dict()
-
-
-def set_producer(producer: str, album_name: str):
-    if album_name not in global_producers.keys():
-        global_producers[album_name] = producer
-    else:
-        global_producers[album_name] = ""
-    return producer
-
-
-def get_producer(album_name: str):
-    if album_name in global_producers.keys():
-        return global_producers[album_name]
-    else:
-        return ""
