@@ -9,38 +9,46 @@ OUTPUT_PATH = '../data/global_kpop_chart_cleanup.xlsx'
 
 
 def global_clean_up():
-    global_chart = pd.read_csv(CHART_PATH, usecols=['month', 'artist', 'producer', 'title'])
-    global_chart = global_chart.astype({'month': 'int32'}, errors='raise')
+    global_chart = pd.read_csv(CHART_PATH, usecols=['month', 'artist', 'producer', 'album', 'title'])
+    global_chart = global_chart.astype({
+        'month': 'int32',
+        'artist': 'string',
+        'producer': 'string',
+        'album': 'string',
+        'title': 'string'
+    }, errors='raise')
     global_chart['artist'] = global_chart['artist'].str.split(pat='|', n=1).str[0]
     global_chart = global_chart.drop_duplicates(subset=['artist', 'producer'], keep='first')
-    global_chart.head()
+    global_chart = global_chart.astype({'artist': 'string'}, errors='raise')
     return global_chart
 
 
 def album_clean_up():
-    album_chart = pd.read_csv(ALBUM_PATH, usecols=['month', 'artist', 'sales_volume'])
-    album_chart = album_chart.astype({'month': 'int32'}, errors='raise')
+    album_chart = pd.read_csv(ALBUM_PATH, usecols=['month', 'artist', 'sales_volume', 'album'])
+    album_chart = album_chart.astype({'month': 'int32', 'artist': 'string', 'album': 'string'}, errors='raise')
     album_chart[['monthly_sales', 'annual_sales']] = album_chart['sales_volume'].str.split(pat='/', n=1, expand=True)
     album_chart = album_chart.astype({'monthly_sales': 'int32', 'annual_sales': 'int32'}, errors='raise')
     album_chart = album_chart.drop(columns=['sales_volume']).drop_duplicates(['artist', 'month'])
     # Caution: Some artists has multiple agencies that has changed
-    album_chart = album_chart.reindex(columns=['month', 'artist', 'monthly_sales', 'annual_sales'])
+    album_chart = album_chart.reindex(columns=['month', 'album', 'artist', 'monthly_sales', 'annual_sales'])
     album_chart = album_chart.sort_values(by=['month', 'monthly_sales'])
     return album_chart
 
 
-def merge_sales_with_producer(sales: pd.DataFrame, producer: pd.DataFrame):
+def merge_sales_with_producer(global_chart: pd.DataFrame, album_chart: pd.DataFrame):
     # Search producer from producer dataframe and insert into new_sales
-    new_sales = pd.merge(left=sales, right=producer, how='left', on='artist')
+    new_sales = pd.merge(left=album_chart, right=global_chart, how='outer', on='artist')
     new_sales['month_y'] = new_sales['month_y'].fillna(1800)
     new_sales['producer'] = new_sales['producer'].fillna('미상')
-    new_sales = new_sales.astype({'month_y': 'int32'}, errors='raise')
+    new_sales = new_sales.astype({'month_y': 'int32', 'artist': 'string', 'producer': 'string'}, errors='raise')
     # find the producer artist belonged to before the release of the album
-    new_sales = new_sales.sort_values('month_y', ascending=True).drop_duplicates(['title', 'artist', 'month_x'])
-    new_sales.rename(columns={'month_x': 'month'}, inplace=True)
-    new_sales = new_sales.drop(columns=['month_y'])
-    new_sales = new_sales.reindex(columns=['month', 'title', 'artist', 'producer', 'monthly_sales', 'annual_sales'])
+    new_sales = new_sales.sort_values('month_y', ascending=True).drop_duplicates(['artist', 'month_x'])
+    new_sales.rename(columns={'month_x': 'month', 'album_x': 'album'}, inplace=True)
+    new_sales = new_sales.drop(columns=['month_y', 'album_y', 'title'])
+    new_sales = new_sales.reindex(columns=['month', 'album', 'artist', 'producer', 'monthly_sales', 'annual_sales'])
     new_sales = new_sales.sort_values(by=['month', 'monthly_sales'])
+    new_sales = new_sales.dropna(axis="index")
+    new_sales = new_sales.astype({'month': 'int32', 'annual_sales': 'int32', 'monthly_sales': 'int32'}, errors='raise')
     return new_sales
 
 
@@ -48,7 +56,7 @@ def pivot_data(new_sales: pd.DataFrame):
     return pd.pivot_table(
         new_sales,
         values="monthly_sales",
-        index=['producer', 'artist', 'title'],
+        index=['producer', 'artist', 'album'],
         columns="month",
         aggfunc=np.sum
     ).fillna(0)

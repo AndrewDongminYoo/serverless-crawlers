@@ -5,7 +5,8 @@ from crawler.gaon_data import main as reformat_data
 
 def main():
     try:
-        fetch_api_data("w")
+        raise TypeError()
+        # fetch_api_data("w")
     except Exception as e:
         crawl_browser_data("w")
         print(e)

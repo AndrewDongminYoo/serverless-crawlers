@@ -4,7 +4,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import os
 from datetime import datetime
-
 from crawler.comon import as_chart_array
 from crawler.utils import (
     date_to_string,
@@ -20,10 +19,11 @@ options = Options()
 options.headless = True
 paths = os.getenv("PATH").split(":")
 pws = [x for x in paths if "venv" in x]
-print(pws[0])
-
 service = Service(executable_path="/Users/bside/Downloads/chromedriver")
 driver = Chrome(service=service, options=options)
+
+
+def nth(tag: str, order: int): return f"{tag}:nth-child({order})"
 
 
 def crawl_browser(period: str, chart_type: str, dt: datetime):
@@ -40,43 +40,29 @@ def crawl_browser(period: str, chart_type: str, dt: datetime):
     table_body = soup.find("tbody", {"id": "pc_chart_tbody"})
     result = list()
     for child in table_body.select("tr"):
-        data = {
-            "month": date_to_string(dt, period)[2:],
-            "url": url
-        }
+        data = dict(url=url)
+        data["month"] = date_to_string(dt, period)[2:]
         if chart_type == "global":
-            data['Rank'] = child.select_one("td:nth-child(1) > div > span").text
-            data['Title'] = child.select_one(
-                "td:nth-child(3) > div > section:nth-child(2) > div > div.font-bold.mb-2").text
-            data['Album'] = child.select_one(
-                "td:nth-child(3) > div > section:nth-child(2) > div > div.font-bold.mb-2").text
-            data['ALBUMIMG'] = child.select_one(
-                "td:nth-child(3) > div > section:nth-child(1) > div > div.rounded-full.w-[70px].h-[70px] > img").get(
-                "src")
-            data['Artist'] = child.select_one("td:nth-child(3) > div > section:nth-child(2) > div > "
-                                              "div.text-sm.text-gray-400.font-bold").text
-            data['CompanyDist'] = child.select_one("td.text-left.text-xs > div > span").text
-            data['CompanyMake'] = child.select_one("td.text-left.text-xs > div.mt-2 > span").text
-            data['RankStatus'] = child.select_one(
-                "td:nth-child(2) > div.h-full.text-center.leading-[30px].mt-[7px].pl-[10px] > span").text
+            data['Rank'] = child.select_one(f"{nth('td',1)} > div > span").text
+            data['Title'] = child.select_one(f"{nth('td',3)} > div > {nth('section',2)} > div > div.font-bold.mb-2").text
+            data['Album'] = child.select_one(f"{nth('td',3)} > div > {nth('section',2)} > div > div.font-bold.mb-2").text
+            data['ALBUMIMG'] = child.select_one(f"{nth('td',3)} > div > {nth('section',1)} > div > div.rounded-full.w-\[70px\].h-\[70px\] > img").get("src")
+            data['Artist'] = child.select_one(f"{nth('td',3)} > div > {nth('section',2)} > div > div.text-sm.text-gray-400.font-bold").text
+            data['CompanyDist'] = child.select_one(f"td.text-left.text-xs > div.mt-2 > span").text
+            data['CompanyMake'] = child.select_one(f"td.text-left.text-xs > {nth('div',1)} > span").text
+            data['RankStatus'] = child.select_one(f"{nth('td',2)} > div.h-full.text-center.leading-\[30px\].mt-\[7px\].pl-\[10px\] > span").text
         elif chart_type == "album":
-            data['FILE_NAME'] = child.select_one(
-                "td:nth-child(3) > div > section:nth-child(1) > div > div.rounded-full.w-[70px].h-[70px] > img").get(
-                "src")
-            data['ALBUM_NAME'] = child.select_one(
-                "td:nth-child(3) > div > section:nth-child(2) > div > div.font-bold.mb-2").text
-            data['ARTIST_NAME'] = child.select_one(
-                "td:nth-child(3) > div > section:nth-child(2) > div > div.text-sm.text-gray-400.font-bold").text
+            data['FILE_NAME'] = child.select_one(f"{nth('td',3)} > div > {nth('section',1)} > div > div.rounded-full.w-\[70px\].h-\[70px\] > img").get("src")
+            data['ALBUM_NAME'] = child.select_one(f"{nth('td',3)} > div > {nth('section',2)} > div > div.font-bold.mb-2").text
+            data['ARTIST_NAME'] = child.select_one(f"{nth('td',3)} > div > {nth('section',2)} > div > div.text-sm.text-gray-400.font-bold").text
             data['de_nm'] = child.select_one("td.text-left.text-xs > div > span").text
-            data['SERVICE_RANKING'] = child.select_one("td:nth-child(1) > div > span").text  # 랭킹
-            data['RankStatus'] = child.select_one(
-                "td:nth-child(2) > div.h-full.text-center.leading-[30px].mt-[7px].pl-[10px] > span").text
-            data['RankChange'] = child.select_one(
-                "td:nth-child(2) > div.h-full.text-center.leading-[30px].mt-[7px].pl-[10px] > span").text  # 전월대비 (1up)
+            data['SERVICE_RANKING'] = child.select_one(f"{nth('td',1)} > div > span").text  # 랭킹
+            data['RankStatus'] = child.select_one(f"{nth('td',2)} > div.h-full.text-center.leading-\[30px\].mt-\[7px\].pl-\[10px\] > span").text
+            data['RankChange'] = child.select_one(f"{nth('td',2)} > div.h-full.text-center.leading-\[30px\].mt-\[7px\].pl-\[10px\] > span").text  # 전월대비 (1up)
             count = child.select_one("td.text-center > span").text.split(" / ")
             if count:
-                data["Album_CNT"] = count[0]
-                data["Total_CNT"] = count[1]  # 앨범 판매량
+                data["Album_CNT"] = count[0].replace(",", '').strip()
+                data["Total_CNT"] = count[1].replace(",", '').strip()  # 앨범 판매량
         result.append(data)
     return as_chart_array(result, date_to_string(dt, period), url)
 
