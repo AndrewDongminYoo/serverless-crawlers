@@ -4,11 +4,36 @@ import boto3
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-client = boto3.client('efs')
+args = {'region_name': 'us-east-1'}
+client = boto3.client('efs', **args)
+dataSync = boto3.client('datasync', **args)
 NOW = datetime.now()
+EFS_ARN = "arn:aws:elasticfilesystem:us-east-1:784579398270:file-system/fs-046eafe8ccd352be9"
+ACP_ARN = "arn:aws:elasticfilesystem:us-east-1:784579398270:access-point/fsap-066111f32dd26ec79"
+ROL_ARN = "arn:aws:iam::784579398270:role/lambda+efs@full_access"
+SUB_ARNS = [
+    'arn:aws:ec2:us-east-1:784579398270:subnet/subnet-03fc33596c3e2a196',
+    'arn:aws:ec2:us-east-1:784579398270:subnet/subnet-079319ca7cf6872c4',
+    'arn:aws:ec2:us-east-1:784579398270:subnet/subnet-01f5b567de825bc80',
+    'arn:aws:ec2:us-east-1:784579398270:subnet/subnet-09fdd6bb0fffc4c27',
+    'arn:aws:ec2:us-east-1:784579398270:subnet/subnet-0a1846a219d6e6a31',
+    'arn:aws:ec2:us-east-1:784579398270:subnet/subnet-0db586241dd71ab29',
+]
+SEC_ARN = ['arn:aws:ec2:us-east-1:784579398270:security-group/sg-0b8f13f1c916d203c']
 
 
 def run(event, context):
+    dataSync.create_location_efs(
+        EfsFilesystemArn=EFS_ARN,
+        Subdirectory='/mnt/efs',
+        Ec2Config={
+            'SubnetArn': SUB_ARNS[0],
+            'SecurityGroupArns': SEC_ARN
+        },
+        # AccessPointArn=ACP_ARN,
+        # FileSystemAccessRoleArn=ROL_ARN,
+        # InTransitEncryption='TLS1_2'
+    )
     current_time = NOW.time()
     name = context.function_name
     logger.info("Your cron function " + name + " ran at " + str(current_time))
@@ -69,17 +94,3 @@ def delete_file_systems(file_systems: list) -> bool:
         print("Error on delete_file_systems")
         logger.info(error)
         exit(1)
-
-
-def lambda_handler(event, context):
-    file_systems = list_file_systems()
-    for fs in file_systems:
-        mt = list_mount_targets(fs)
-        for target in mt:
-            print(target)
-    logger.info(event)
-    return file_systems
-
-
-if __name__ == '__main__':
-    run({}, "event")

@@ -13,4 +13,5 @@ functions:
     handler: handler.run
     events:
       # Invoke Lambda function At 01:00 on Thursday.
-      - schedule: cron(0 1 * * THU)
+      # https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
+      - schedule: cron(0 1 ? * THU *)
