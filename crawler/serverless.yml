@@ -1,0 +1,16 @@
+org: ydm2790
+app: scheduled-chart-crawler
+service: scheduled-chart-crawler
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.8
+
+functions:
+  cronHandler:
+    handler: handler.run
+    events:
+      # Invoke Lambda function At 01:00 on Thursday.
+      - schedule: cron(0 1 * * THU)
