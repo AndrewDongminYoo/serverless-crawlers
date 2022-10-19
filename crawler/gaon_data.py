@@ -3,9 +3,9 @@ import numpy as np
 
 # Get sales data from raw gaon chart data
 
-CHART_PATH = '../data/global_kpop_chart.csv'
-ALBUM_PATH = '../data/album_chart.csv'
-OUTPUT_PATH = '../data/global_kpop_chart_cleanup.xlsx'
+CHART_PATH = '/mnt/efs/global_kpop_chart.csv'
+ALBUM_PATH = '/mnt/efs/album_chart.csv'
+OUTPUT_PATH = '/mnt/efs/global_kpop_chart_cleanup.xlsx'
 
 
 def global_clean_up():

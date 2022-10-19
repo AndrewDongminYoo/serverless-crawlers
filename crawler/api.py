@@ -1,9 +1,9 @@
 from datetime import datetime
-from requests import post
+import requests
 import json
 
-from crawler.comon import as_chart_array
-from crawler.utils import (
+from comon import as_chart_array
+from utils import (
     date_to_string,
     set_queries,
     object_to_list,
@@ -35,7 +35,7 @@ def fetch_chart_api(period: str, chart_type: str, dt: datetime):
         'X-Requested-With': 'XMLHttpRequest',
         'Referer': f'{CIRCLE_URL}/page_chart/{chart_type}.circle'
     }
-    req = post(url, headers=headers)
+    req = requests.post(url, headers=headers)
     result = json.loads(req.text)
     if result["ResultStatus"] == "OK":
         return as_chart_array(object_to_list(result["List"]), yyyymm, url)

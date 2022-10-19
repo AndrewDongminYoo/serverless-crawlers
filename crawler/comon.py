@@ -17,8 +17,8 @@ header = [
     'title',
 ]
 
-GLOBAL = Path("../data/global_kpop_chart.csv")
-ALBUMS = Path("../data/album_chart.csv")
+GLOBAL = Path("/mnt/efs/global_kpop_chart.csv")
+ALBUMS = Path("/mnt/efs/album_chart.csv")
 if GLOBAL.exists():
     global_file = open(GLOBAL, mode="a", newline="")
     global_writer = csv.writer(global_file, dialect="excel")

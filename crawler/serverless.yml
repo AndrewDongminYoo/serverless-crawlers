@@ -1,17 +1,66 @@
-org: ydm2790
-app: scheduled-chart-crawler
-service: scheduled-chart-crawler
-
+service: crawler
 frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: python3.8
+  region: ap-northeast-2
+  stage: 'dev'
+  architecture: "x86_64"
+  stackName: crawler-dev
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    pythonBin: python3
+#    dockerizePip: non-linux
+    useDownloadCache: false # Not important as far as I know
+    useStaticCache: false # Not important as far as I know
+    invalidateCaches: true
+    zip: true
+    layer:
+      name: all_packages
+      description: Python requirements lambda layer
+      compatibleRuntimes:
+        - python3.7
+        - python3.8
+        - python3.9
+      licenseInfo: GPLv3
+      allowedAccounts:
+        - '*'
 
 functions:
   cronHandler:
     handler: handler.run
+    runtime: python3.9
     events:
-      # Invoke Lambda function At 01:00 on Thursday.
+      # Invoke Lambda function At 01:00(UTC) on Thursday.
       # https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
-      - schedule: cron(0 1 ? * THU *)
+      - eventBridge:
+          schedule: cron(0 1 ? * THU *)
+    fileSystemConfig:
+      localMountPath: "/mnt/efs"
+      arn: "arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-073038fccb00fde34"
+    vpc:
+      securityGroupIds:
+        - "sg-04043145475495c40"
+      subnetIds:
+        - "subnet-0559852666cd1be46"
+        - "subnet-0185736a45fdb18fc"
+        - "subnet-0a8cb17ccd0e8bc96"
+        - "subnet-0522dceaaa1a7c80b"
+    role: "arn:aws:iam::784579398270:role/lambda+efs@full_access"
+    timeout: 60
+    memorySize: 1024
+
+package:
+  patterns:
+    - '!.idea'
+    - '!./node_modules/**'
+    - '!./venv'
+    - '!README.md'
+    - '*.py'
+    - 'package.json'
+    - 'package-lock.json'
+    - '!requirements.txt'

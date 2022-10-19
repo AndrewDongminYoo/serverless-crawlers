@@ -82,7 +82,7 @@ serverless deploy
 After running deploy, you should see output similar to:
 
 ```bash
-Deploying aws-python-scheduled-cron-project to stage dev (ap-northeast-2)
+Deploying aws-python-scheduled-cron-project to stage dev (us-east-1)
 
 ✔ Service deployed to stack aws-python-scheduled-cron-project-dev (205s)
 
