@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup
+import subprocess
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import os
 from datetime import datetime
-from comon import as_chart_array
+from common import as_chart_array
 from utils import (
     date_to_string,
     roll,
@@ -15,11 +16,25 @@ TODAY = datetime.today()
 TERM = 30
 MONTH = 'month'
 CIRCLE_URL = 'https://circlechart.kr'
-paths = os.getenv("PATH").split(":")
-pws = [x for x in paths if "venv" in x]
+chrome_path = '/opt/python/chromedriver'
+print(os.path.isfile(chrome_path))
+print(os.path.isdir(chrome_path))
+print(os.path.exists(chrome_path))
+paths = os.environ["PATH"].split(':')
+for (root, dirName, fileName) in os.walk("/opt/python"):
+    for f in fileName:
+        if "chro" in f or "chro" in root:
+            paths.append(root)
+            print(root+"/"+f)
+os.environ["PATH"] = ":".join(paths)
 
 
 def get_driver():
+    subprocess.Popen("yum install ./google-chrome-stable_current_x86_64.rpm",
+                     stdout=subprocess.PIPE, shell=True)
+    subprocess.Popen("sudo ln -s /usr/bin/google-chrome-stable /opt/python/bin/headless-chromium",
+                     stdout=subprocess.PIPE, shell=True)
+    os.environ["PATH"] += os.pathsep + "/opt/python/bin/headless-chromium"
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
@@ -40,7 +55,7 @@ def get_driver():
         'AppleWebKit/537.36 (KHTML, like Gecko) '
         'Chrome/61.0.3163.100 Safari/537.36')
     options.binary_location = "/opt/python/bin/headless-chromium"
-    service = Service(executable_path="/opt/python/bin/chromedriver")
+    service = Service(executable_path='/opt/python/chromedriver')
     driver = Chrome(service=service, options=options)
     return driver
 

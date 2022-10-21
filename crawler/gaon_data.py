@@ -75,13 +75,9 @@ def save_to_excel(sales_table: pd.DataFrame, new_sales: pd.DataFrame, sales: pd.
             data_frame.to_excel(writer, sheet_name=sheet_name)
 
 
-def main():
+def lambda_handler(event, context):
     _globals = global_clean_up()
     _albums = album_clean_up()
     _new_sales = merge_sales_with_producer(_globals, _albums)
     _sales_table = pivot_data(_new_sales)
     save_to_excel(_sales_table, _new_sales, _globals, _albums)
-
-
-if __name__ == '__main__':
-    main()

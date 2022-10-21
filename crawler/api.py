@@ -2,7 +2,7 @@ from datetime import datetime
 import requests
 import json
 
-from comon import as_chart_array
+from common import as_chart_array
 from utils import (
     date_to_string,
     set_queries,

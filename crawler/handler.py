@@ -1,57 +1,75 @@
-try:
-  import unzip_requirements
-except ImportError:
-  pass
-
-from datetime import datetime
-import logging
-import boto3
 import os
+import json
+import boto3
+import logging
+from datetime import datetime
 from api import main as fetch_api_data
 from browser import main as crawl_browser_data
-from gaon_data import main as reformat_data
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-efs = boto3.client('efs')
+EFS = boto3.client('efs')
+LAMBDA = boto3.client('lambda')
 NOW = datetime.now()
+TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
+EFS_PATH = "/mnt/efs/"
+DESTINATION = 'circle-chart-dev-csvMerger'
 
 
 def run(event, context):
-    logger.info(f"Client: {efs}")
-    logger.info(f"ls: {','.join(os.listdir('/'))}")
-    logger.info(f"GID: {os.getgid()}")
-    logger.info(f"UID: {os.getuid()}")
-    logger.info(f"EUID: {os.geteuid()}")
+    paths = ['.', '..']
+    for (_, dirNames, filenames) in os.walk(EFS_PATH):
+        for d in dirNames:
+            paths.append(d+"/")
+        paths.extend(filenames)
+    logger.info(f"$efs/: {'    '.join(paths)}")
+    logger.info(f"$/: os.getuid()={os.getuid()}")
+    logger.info(f"$/: os.getgid()={os.getgid()}")
+    date_object = datetime.strptime(event["time"], TIME_FMT)
+    if date_object.weekday() == 3 and date_object.hour == 1:
+        cron()
+    else:
+        delete()
+        main()
+    args = {
+        'FunctionName': DESTINATION,
+        'InvokeArgs': '{}',
+    }
+    LAMBDA.invoke_async(**args)
+    return paths
 
-    response = efs.describe_file_systems()
-    logger.info(response)
-    # parse and return file system ids from above response
-    file_systems = [file_system['FileSystemId'] for file_system in response['FileSystems']]
-    logger.info(file_systems)
-    for fs in file_systems:
-        response = efs.describe_mount_targets(FileSystemId=fs)
-        mounts = [mount_target['MountTargetId'] for mount_target in response['MountTargets']]
-        logger.info(mounts)
-        for target in mounts:
-            logger.info(target)
-    main()
-    return file_systems
+
+def delete():
+    for filename in os.listdir(EFS_PATH):
+        file_path = os.path.join(EFS_PATH, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.remove(file_path)
+            elif os.path.isdir(file_path):
+                os.rmdir(file_path)
+        except Exception as e:
+            logger.exception('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
 def main():
     try:
         fetch_api_data("w")
     except Exception as e:
+        print(e)
+        logger.error(e)
         crawl_browser_data("w")
-        logger.debug(e)
-    reformat_data()
 
 
 def cron():
     try:
         fetch_api_data("a")
     except Exception as e:
+        print(e)
+        logger.error(e)
         crawl_browser_data("a")
-        logger.debug(e)
+
+
+if __name__ == '__main__':
+    _event = json.load(open("./event.json", mode="r"))
+    _context = json.load(open("./context.json", mode="r"))
+    run(_event, _context)

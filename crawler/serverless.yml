@@ -1,47 +1,57 @@
-service: crawler
+service: circle-chart
 frameworkVersion: '3'
 
 provider:
   name: aws
   region: ap-northeast-2
+  runtime: python3.7
   stage: 'dev'
   architecture: "x86_64"
-  stackName: crawler-dev
+  stackName: circle-chart
+  iam:
+    role: "arn:aws:iam::784579398270:role/lambda+efs@full_access"
 
 plugins:
   - serverless-python-requirements
+  - serverless-latest-layer-version
 
 custom:
   pythonRequirements:
-    pythonBin: python3
-#    dockerizePip: non-linux
-    useDownloadCache: false # Not important as far as I know
-    useStaticCache: false # Not important as far as I know
+    pythonBin: 'python3'
     invalidateCaches: true
-    zip: true
     layer:
-      name: all_packages
-      description: Python requirements lambda layer
+      name: 'all_packages'
+      description: 'Python requirements lambda layer'
       compatibleRuntimes:
-        - python3.7
-        - python3.8
-        - python3.9
-      licenseInfo: GPLv3
+        - 'python3.7'
+      licenseInfo: 'MIT'
       allowedAccounts:
         - '*'
 
+package:
+  individually: true
+  patterns:
+    - '!.idea'
+    - '!./node_modules/**'
+    - '!./venv'
+    - '!README.md'
+    - '!requirements.txt'
+    - '!.requirements.zip'
+    - '!*.json'
+
 functions:
   cronHandler:
-    handler: handler.run
-    runtime: python3.9
+    layers:
+      - "arn:aws:lambda:ap-northeast-2:784579398270:layer:all_packages:latest"
+      - "arn:aws:lambda:ap-northeast-2:784579398270:layer:chromedriver:4"
+    handler: 'handler.run'
     events:
-      # Invoke Lambda function At 01:00(UTC) on Thursday.
       # https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
       - eventBridge:
-          schedule: cron(0 1 ? * THU *)
+          schedule: 'cron(0 1 ? * THU *)'
     fileSystemConfig:
       localMountPath: "/mnt/efs"
-      arn: "arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-073038fccb00fde34"
+      arn: "arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f679797e5f089cdc"
     vpc:
       securityGroupIds:
         - "sg-04043145475495c40"
@@ -50,17 +60,42 @@ functions:
         - "subnet-0185736a45fdb18fc"
         - "subnet-0a8cb17ccd0e8bc96"
         - "subnet-0522dceaaa1a7c80b"
-    role: "arn:aws:iam::784579398270:role/lambda+efs@full_access"
-    timeout: 60
+    timeout: 360
     memorySize: 1024
+    ephemeralStorageSize: 1024
+    destinations:
+      onSuccess: 'csvMerger'
+    package:
+      patterns:
+        - 'api.py'
+        - 'browser.py'
+        - 'common.py'
+        - 'handler.py'
+        - 'utils.py'
+        - '!gaon_data.py'
+  csvMerger:
+    layers:
+      - "arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python37:1"
+    handler: 'gaon_data.lambda_handler'
+    fileSystemConfig:
+      localMountPath: "/mnt/efs"
+      arn: "arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f679797e5f089cdc"
+    vpc:
+      securityGroupIds:
+        - "sg-04043145475495c40"
+      subnetIds:
+        - "subnet-0559852666cd1be46"
+        - "subnet-0185736a45fdb18fc"
+        - "subnet-0a8cb17ccd0e8bc96"
+        - "subnet-0522dceaaa1a7c80b"
+    timeout: 120
+    memorySize: 1024
+    package:
+      patterns:
+        - '!api.py'
+        - '!browser.py'
+        - '!common.py'
+        - '!handler.py'
+        - '!utils.py'
+        - 'gaon_data.py'
 
-package:
-  patterns:
-    - '!.idea'
-    - '!./node_modules/**'
-    - '!./venv'
-    - '!README.md'
-    - '*.py'
-    - 'package.json'
-    - 'package-lock.json'
-    - '!requirements.txt'
