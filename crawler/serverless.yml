@@ -1,15 +1,24 @@
-service: circle-chart
+service: crawler
 frameworkVersion: '3'
 
 provider:
   name: aws
   region: ap-northeast-2
-  runtime: python3.7
+  runtime: python3.8
   stage: 'dev'
   architecture: "x86_64"
-  stackName: circle-chart
+  stackName: circular
   iam:
     role: "arn:aws:iam::784579398270:role/lambda+efs@full_access"
+  vpc:
+    securityGroupIds:
+      - "sg-04043145475495c40"
+    subnetIds:
+      - "subnet-0559852666cd1be46"
+      - "subnet-0185736a45fdb18fc"
+      - "subnet-0a8cb17ccd0e8bc96"
+      - "subnet-0522dceaaa1a7c80b"
+
 
 plugins:
   - serverless-python-requirements
@@ -20,13 +29,17 @@ custom:
     pythonBin: 'python3'
     invalidateCaches: true
     layer:
-      name: 'all_packages'
+      name: 'requirements'
       description: 'Python requirements lambda layer'
       compatibleRuntimes:
-        - 'python3.7'
+        - python3.8
       licenseInfo: 'MIT'
       allowedAccounts:
         - '*'
+    noDeploy:
+      - beautifulsoup4
+      - pandas
+      - requests
 
 package:
   individually: true
@@ -40,31 +53,24 @@ package:
     - '!*.json'
 
 functions:
-  cronHandler:
+  worker:
     layers:
-      - "arn:aws:lambda:ap-northeast-2:784579398270:layer:all_packages:latest"
-      - "arn:aws:lambda:ap-northeast-2:784579398270:layer:chromedriver:4"
+      - "arn:aws:lambda:ap-northeast-2:784579398270:layer:headless-chromium:latest"
+      - "arn:aws:lambda:ap-northeast-2:784579398270:layer:requirements:latest"
+      - "arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-requests:7"
+      - "arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-beautifulsoup4:1"
     handler: 'handler.run'
     events:
-      # https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
       - eventBridge:
           schedule: 'cron(0 1 ? * THU *)'
     fileSystemConfig:
       localMountPath: "/mnt/efs"
       arn: "arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f679797e5f089cdc"
-    vpc:
-      securityGroupIds:
-        - "sg-04043145475495c40"
-      subnetIds:
-        - "subnet-0559852666cd1be46"
-        - "subnet-0185736a45fdb18fc"
-        - "subnet-0a8cb17ccd0e8bc96"
-        - "subnet-0522dceaaa1a7c80b"
     timeout: 360
     memorySize: 1024
     ephemeralStorageSize: 1024
     destinations:
-      onSuccess: 'csvMerger'
+      onSuccess: processor
     package:
       patterns:
         - 'api.py'
@@ -73,21 +79,13 @@ functions:
         - 'handler.py'
         - 'utils.py'
         - '!gaon_data.py'
-  csvMerger:
+  processor:
     layers:
-      - "arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python37:1"
+      - "arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-pandas:8"
     handler: 'gaon_data.lambda_handler'
     fileSystemConfig:
       localMountPath: "/mnt/efs"
       arn: "arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f679797e5f089cdc"
-    vpc:
-      securityGroupIds:
-        - "sg-04043145475495c40"
-      subnetIds:
-        - "subnet-0559852666cd1be46"
-        - "subnet-0185736a45fdb18fc"
-        - "subnet-0a8cb17ccd0e8bc96"
-        - "subnet-0522dceaaa1a7c80b"
     timeout: 120
     memorySize: 1024
     package:
@@ -98,4 +96,3 @@ functions:
         - '!handler.py'
         - '!utils.py'
         - 'gaon_data.py'
-

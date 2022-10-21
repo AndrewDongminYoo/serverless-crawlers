@@ -14,17 +14,18 @@ NOW = datetime.now()
 TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
 EFS_PATH = "/mnt/efs/"
 DESTINATION = 'circle-chart-dev-csvMerger'
+TAB = chr(0x09)
 
 
 def run(event, context):
-    paths = ['.', '..']
+    paths = [os.curdir, os.pardir]
     for (_, dirNames, filenames) in os.walk(EFS_PATH):
         for d in dirNames:
             paths.append(d+"/")
         paths.extend(filenames)
-    logger.info(f"$efs/: {'    '.join(paths)}")
-    logger.info(f"$/: os.getuid()={os.getuid()}")
-    logger.info(f"$/: os.getgid()={os.getgid()}")
+    logger.info(TAB.join(paths))
+    logger.info(f"id = {os.getuid()}")
+    logger.info(f"gid = {os.getgid()}")
     date_object = datetime.strptime(event["time"], TIME_FMT)
     if date_object.weekday() == 3 and date_object.hour == 1:
         cron()

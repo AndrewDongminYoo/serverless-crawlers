@@ -1,12 +1,18 @@
 import json
 from datetime import datetime, timedelta
 
+USER_AGENT = ' '.join([
+    'Mozilla/5.0', '(Macintosh; Intel Mac OS X 10_15_7)',
+    'AppleWebKit/537.36', '(KHTML, like Gecko)',
+    'Chrome/106.0.0.0', 'Safari/537.36'
+])
+
 
 def set_queries(queries: dict):
     result = "?"
     for key, value in queries.items():
         if key and value:
-            result += key + "=" + value + "&"
+            result += f"{key}={value}&"
     return result[:-1]
 
 
@@ -36,3 +42,12 @@ def roll(today: datetime, func, chart_type: str, term: int, month: str, count: i
         n_month_ago = today - n_month
         chart_array = func(month, chart_type, n_month_ago)
         pprint(chart_array)
+
+
+def nth(tag: str, order: int): return f"{tag}:nth-child({order})"
+
+
+def css(selectors: list): return " > ".join(selectors)
+
+
+def pair(key: str, value): return f"{key}={value}"
