@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 
 USER_AGENT = ' '.join([
@@ -32,22 +31,13 @@ def object_to_list(data: dict):
         return [x for x in data.values()]
 
 
-def pprint(data):
-    print(json.dumps(data, indent=4, ensure_ascii=False))
-
-
 def roll(today: datetime, func, chart_type: str, term: int, month: str, count: int):
     for n in range(count, 0, -1):
         n_month = timedelta(days=term * n)
         n_month_ago = today - n_month
-        chart_array = func(month, chart_type, n_month_ago)
-        pprint(chart_array)
+        func(month, chart_type, n_month_ago)
 
 
 def nth(tag: str, order: int): return f"{tag}:nth-child({order})"
-
-
 def css(selectors: list): return " > ".join(selectors)
-
-
 def pair(key: str, value): return f"{key}={value}"

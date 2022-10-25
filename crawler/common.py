@@ -1,9 +1,9 @@
 import csv
+import os
 from abc import ABC
-from pathlib import Path
 
 
-def check_is_first(path: Path):
+def check_is_first(path: str):
     header = [
         'month',
         'link',
@@ -24,6 +24,13 @@ def check_is_first(path: Path):
     return writer
 
 
+TMP_PATH = os.environ["TMP_PATH"]
+GLOBAL = os.path.join(TMP_PATH, "global_kpop_chart.csv")
+ALBUMS = os.path.join(TMP_PATH, "album_chart.csv")
+global_writer = check_is_first(GLOBAL)
+albums_writer = check_is_first(ALBUMS)
+
+
 class Chart(ABC):
     month = None  # 'selector'
     link = None  # 'selector-href'
@@ -37,18 +44,10 @@ class Chart(ABC):
     sales_volume = None
     title = None
 
-    GLOBAL = Path("/mnt/efs/global_kpop_chart.csv")
-    ALBUMS = Path("/mnt/efs/album_chart.csv")
-    RESULT = Path("/mnt/efs/global_kpop_chart_cleanup.xlsx")
-
-    global_writer = check_is_first(GLOBAL)
-    albums_writer = check_is_first(ALBUMS)
-    result_writer = check_is_first(RESULT)
-
-    def to_csv(self, ):
-        writer = self.albums_writer
+    def to_csv(self):
+        writer = albums_writer
         if self.__class__ is GlobalChart:
-            writer = self.global_writer
+            writer = global_writer
         writer.writerow([
             self.month,
             self.link,

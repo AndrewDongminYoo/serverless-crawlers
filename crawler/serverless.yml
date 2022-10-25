@@ -1,4 +1,4 @@
-service: crawler
+service: get-chart
 frameworkVersion: '3'
 
 provider:
@@ -7,7 +7,7 @@ provider:
   runtime: python3.8
   stage: dev
   architecture: x86_64
-  stackName: crawler
+  stackName: get-chart
   iam:
     role: 'arn:aws:iam::784579398270:role/lambda+efs@full_access'
   vpc:
@@ -16,11 +16,15 @@ provider:
     subnetIds:
       - 'subnet-08d3d77497ed285bc'
       - 'subnet-0298565e5d4a39c96'
+  environment:
+    EFS_PATH: '/mnt/lambda/'
+    TMP_PATH: '/tmp/'
+
 
 plugins:
   - serverless-python-requirements
   - serverless-latest-layer-version
-
+  - serverless-offline
 custom:
   pythonRequirements:
     pythonBin: python3
@@ -48,11 +52,13 @@ package:
     - '!requirements.txt'
     - '!.requirements.zip'
     - '!*.json'
+    - '!.env'
 
 functions:
   worker:
     layers:
       - Ref: PythonRequirementsLambdaLayer
+      - 'arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1'
       - 'arn:aws:lambda:ap-northeast-2:784579398270:layer:headless-chromium:latest'
       - 'arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-requests:7'
       - 'arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-beautifulsoup4:1'
@@ -61,13 +67,11 @@ functions:
       - eventBridge:
           schedule: cron(0 1 ? * THU *)
     fileSystemConfig:
-      localMountPath: /mnt/efs
-      arn: 'arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f6de1c46644a4425'
+      localMountPath: /mnt/lambda
+      arn: 'arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0b89c64e4738eba5e'
     timeout: 180
     memorySize: 1024
     ephemeralStorageSize: 1024
-    destinations:
-      onSuccess: processor
     package:
       patterns:
         - 'api.py'
@@ -75,22 +79,4 @@ functions:
         - 'common.py'
         - 'handler.py'
         - 'utils.py'
-        - '!gaon_data.py'
-  processor:
-    layers:
-      - 'arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1'
-    handler: gaon_data.lambda_handler
-    fileSystemConfig:
-      localMountPath: /mnt/efs
-      arn: 'arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f6de1c46644a4425'
-    timeout: 120
-    memorySize: 1024
-    ephemeralStorageSize: 1024
-    package:
-      patterns:
-        - '!api.py'
-        - '!browser.py'
-        - 'common.py'
-        - '!handler.py'
-        - '!utils.py'
         - 'gaon_data.py'

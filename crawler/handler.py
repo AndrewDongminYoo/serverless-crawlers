@@ -1,29 +1,33 @@
 import os
 import json
-import boto3
 import logging
 from datetime import datetime
-from api import main as fetch_api_data
-from browser import main as crawl_browser_data
+from api import fetch_api_data
+from browser import crawl_browser_data
+from gaon_data import chart_processor
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-EFS = boto3.client('efs')
-LAMBDA = boto3.client('lambda')
 NOW = datetime.now()
 TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
-EFS_PATH = "/mnt/efs/"
-DESTINATION = 'crawler-dev-processor'
+EFS_PATH = os.environ["EFS_PATH"]
+TMP_PATH = os.environ["TMP_PATH"]
 TAB = chr(0x09)
 
 
-def run(event, context):
+def run(event, _context):
     paths = [os.curdir, os.pardir]
     for (_, dirNames, filenames) in os.walk(EFS_PATH):
         for d in dirNames:
             paths.append(d + "/")
         paths.extend(filenames)
-    logger.info(TAB.join(paths))
+    logger.info(f"EFS PATH: {TAB.join(paths)}")
+    paths = [os.curdir, os.pardir]
+    for (_, dirNames, filenames) in os.walk(TMP_PATH):
+        for d in dirNames:
+            paths.append(d + "/")
+        paths.extend(filenames)
+    logger.info(f"TMP PATH: {TAB.join(paths)}")
     logger.info(f"id = {os.getuid()}")
     logger.info(f"gid = {os.getgid()}")
     try:
@@ -36,15 +40,7 @@ def run(event, context):
     else:
         delete()
         main()
-    args = {
-        'FunctionName': DESTINATION,
-        'InvocationType': 'RequestResponse',
-        'LogType': 'Tail',
-        'Payload': json.dumps(event),
-    }
-    EFS.close()
-    response = LAMBDA.invoke(**args)
-    return response["Payload"].read()
+    chart_processor()
 
 
 def delete():
@@ -63,7 +59,6 @@ def main():
     try:
         fetch_api_data("w")
     except Exception as e:
-        print(e)
         logger.error(e)
         crawl_browser_data("w")
 
@@ -72,7 +67,6 @@ def cron():
     try:
         fetch_api_data("a")
     except Exception as e:
-        print(e)
         logger.error(e)
         crawl_browser_data("a")
 

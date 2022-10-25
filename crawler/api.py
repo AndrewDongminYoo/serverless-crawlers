@@ -15,12 +15,13 @@ TODAY = datetime.today()
 TERM = 30
 MONTH = 'month'
 CIRCLE_URL = 'https://circlechart.kr'
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger.setLevel(logging.INFO)
+logger.info(f"requests module version: {requests.__version__}")
 
 
 def fetch_chart_api(period: str, chart_type: str, dt: datetime):
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    logger.info(f"requests module version: {requests.__version__}")
     try:
         queries = {'termGbn': period}
         yyyymm = date_to_string(dt, period)
@@ -48,8 +49,6 @@ def fetch_chart_api(period: str, chart_type: str, dt: datetime):
         request = req.prepare()
         request.prepare_headers(headers=headers)
         res = requests.Session().send(request=request)
-        logger.info(f"request's header: {headers}")
-        logger.info(f"response's header: {res.headers}")
         result = res.json()
         if result["ResultStatus"] == "OK":
             return as_chart_array(object_to_list(result["List"]), yyyymm, url)
@@ -66,7 +65,7 @@ def fetch_chart_api(period: str, chart_type: str, dt: datetime):
         raise e
 
 
-def main(mode: str):
+def fetch_api_data(mode: str):
     if mode == "w":
         roll(TODAY, fetch_chart_api, "global", TERM, MONTH, 10)
         roll(TODAY, fetch_chart_api, "album", TERM, MONTH, 130)

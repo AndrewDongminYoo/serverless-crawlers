@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.service import Service as ChromiumService
-from webdriver_manager.chrome import ChromeDriverManager as DriverManager
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver import ChromeOptions
 import logging
 import os
@@ -13,7 +13,8 @@ TODAY = datetime.today()
 TERM = 30
 MONTH = 'month'
 CIRCLE_URL = 'https://circlechart.kr'
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 logger.setLevel(logging.INFO)
 logger.info(f"""
 BeautifulSoup: {BeautifulSoup.__dict__['__doc__']}""")
@@ -26,11 +27,7 @@ def get_driver():
             for f in fileName:
                 if "chrom" in f:
                     paths.add(root)
-                    print(root + "/" + f)
-        driver_path = DriverManager(path='/opt/usr/bin/').install()
-        print(f"{driver_path} isfile: {os.path.isfile(driver_path)}")
-        print(f"{driver_path} is dir: {os.path.isdir(driver_path)}")
-        print(f"{driver_path} exists: {os.path.exists(driver_path)}")
+        driver_path = ChromeDriverManager(path='/opt/usr/bin/').install()
         options = ChromeOptions()
         arguments = [
             # '--allow-running-insecure-content',
@@ -58,7 +55,7 @@ def get_driver():
         ]
         options.arguments.extend(arguments)
         options.binary_location = driver_path
-        service = ChromiumService(executable_path=driver_path)
+        service = Service(executable_path=driver_path)
         paths.add(options.binary_location)
         os.environ["PATH"] = ":".join(paths)
         driver = Chrome(service=service, options=options, service_log_path='/tmp/chromedriver.log')
@@ -113,7 +110,7 @@ def crawl_browser(period: str, chart_type: str, dt: datetime):
         raise e
 
 
-def main(mode: str):
+def crawl_browser_data(mode: str):
     if mode == "w":
         roll(TODAY, crawl_browser, "global", TERM, MONTH, 10)
         roll(TODAY, crawl_browser, "album", TERM, MONTH, 130)
