@@ -50,7 +50,7 @@ def fetch_chart_api(period: str, chart_type: str, dt: datetime):
         res = requests.Session().send(request=request)
         logger.info(f"request's header: {headers}")
         logger.info(f"response's header: {res.headers}")
-        result = json.loads(res.text)
+        result = res.json()
         if result["ResultStatus"] == "OK":
             return as_chart_array(object_to_list(result["List"]), yyyymm, url)
         else:

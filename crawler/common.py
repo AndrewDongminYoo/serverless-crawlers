@@ -3,36 +3,25 @@ from abc import ABC
 from pathlib import Path
 
 
-header = [
-    'month',
-    'link',
-    'image',
-    'album',
-    'artist',
-    'distributor',
-    'producer',
-    'ranking',
-    'rank_status',
-    'sales_volume',
-    'title',
-]
-
-GLOBAL = Path("/mnt/efs/global_kpop_chart.csv")
-ALBUMS = Path("/mnt/efs/album_chart.csv")
-if GLOBAL.exists():
-    global_file = open(GLOBAL, mode="a", newline="")
-    global_writer = csv.writer(global_file, dialect="excel")
-else:
-    global_file = open(GLOBAL, mode="w", newline="")
-    global_writer = csv.writer(global_file, dialect="excel")
-    global_writer.writerow(header)
-if ALBUMS.exists():
-    album_file = open(ALBUMS, mode="a", newline="")
-    album_writer = csv.writer(album_file, dialect="excel")
-else:
-    album_file = open(ALBUMS, mode="w", newline="")
-    album_writer = csv.writer(album_file, dialect="excel")
-    album_writer.writerow(header)
+def check_is_first(path: Path):
+    header = [
+        'month',
+        'link',
+        'image',
+        'album',
+        'artist',
+        'distributor',
+        'producer',
+        'ranking',
+        'rank_status',
+        'sales_volume',
+        'title',
+    ]
+    file = open(path, "w+", newline="")
+    writer = csv.writer(file, dialect="excel")
+    if len(file.readlines()) < 1:
+        writer.writerow(header)
+    return writer
 
 
 class Chart(ABC):
@@ -48,10 +37,18 @@ class Chart(ABC):
     sales_volume = None
     title = None
 
+    GLOBAL = Path("/mnt/efs/global_kpop_chart.csv")
+    ALBUMS = Path("/mnt/efs/album_chart.csv")
+    RESULT = Path("/mnt/efs/global_kpop_chart_cleanup.xlsx")
+
+    global_writer = check_is_first(GLOBAL)
+    albums_writer = check_is_first(ALBUMS)
+    result_writer = check_is_first(RESULT)
+
     def to_csv(self, ):
-        writer = album_writer
+        writer = self.albums_writer
         if self.__class__ is GlobalChart:
-            writer = global_writer
+            writer = self.global_writer
         writer.writerow([
             self.month,
             self.link,

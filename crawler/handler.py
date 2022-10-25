@@ -13,7 +13,7 @@ LAMBDA = boto3.client('lambda')
 NOW = datetime.now()
 TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
 EFS_PATH = "/mnt/efs/"
-DESTINATION = 'circle-chart-dev-csvMerger'
+DESTINATION = 'crawler-dev-processor'
 TAB = chr(0x09)
 
 
@@ -21,12 +21,16 @@ def run(event, context):
     paths = [os.curdir, os.pardir]
     for (_, dirNames, filenames) in os.walk(EFS_PATH):
         for d in dirNames:
-            paths.append(d+"/")
+            paths.append(d + "/")
         paths.extend(filenames)
     logger.info(TAB.join(paths))
     logger.info(f"id = {os.getuid()}")
     logger.info(f"gid = {os.getgid()}")
-    date_object = datetime.strptime(event["time"], TIME_FMT)
+    try:
+        date_object = datetime.strptime(event["time"], TIME_FMT)
+    except TypeError as e:
+        logger.error(e)
+        date_object = NOW
     if date_object.weekday() == 3 and date_object.hour == 1:
         cron()
     else:
@@ -34,10 +38,13 @@ def run(event, context):
         main()
     args = {
         'FunctionName': DESTINATION,
-        'InvokeArgs': '{}',
+        'InvocationType': 'RequestResponse',
+        'LogType': 'Tail',
+        'Payload': json.dumps(event),
     }
-    LAMBDA.invoke_async(**args)
-    return paths
+    EFS.close()
+    response = LAMBDA.invoke(**args)
+    return response["Payload"].read()
 
 
 def delete():

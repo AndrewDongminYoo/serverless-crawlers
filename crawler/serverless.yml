@@ -5,20 +5,17 @@ provider:
   name: aws
   region: ap-northeast-2
   runtime: python3.8
-  stage: 'dev'
-  architecture: "x86_64"
-  stackName: circular
+  stage: dev
+  architecture: x86_64
+  stackName: crawler
   iam:
-    role: "arn:aws:iam::784579398270:role/lambda+efs@full_access"
+    role: 'arn:aws:iam::784579398270:role/lambda+efs@full_access'
   vpc:
     securityGroupIds:
-      - "sg-04043145475495c40"
+      - 'sg-08f66349e83108a89'
     subnetIds:
-      - "subnet-0559852666cd1be46"
-      - "subnet-0185736a45fdb18fc"
-      - "subnet-0a8cb17ccd0e8bc96"
-      - "subnet-0522dceaaa1a7c80b"
-
+      - 'subnet-08d3d77497ed285bc'
+      - 'subnet-0298565e5d4a39c96'
 
 plugins:
   - serverless-python-requirements
@@ -26,20 +23,20 @@ plugins:
 
 custom:
   pythonRequirements:
-    pythonBin: 'python3'
+    pythonBin: python3
     invalidateCaches: true
     layer:
       name: 'requirements'
       description: 'Python requirements lambda layer'
       compatibleRuntimes:
-        - python3.8
-      licenseInfo: 'MIT'
+        - 'python3.8'
+      licenseInfo: MIT
       allowedAccounts:
         - '*'
     noDeploy:
-      - beautifulsoup4
-      - pandas
-      - requests
+      - 'beautifulsoup4'
+      - 'pandas'
+      - 'requests'
 
 package:
   individually: true
@@ -55,18 +52,18 @@ package:
 functions:
   worker:
     layers:
-      - "arn:aws:lambda:ap-northeast-2:784579398270:layer:headless-chromium:latest"
-      - "arn:aws:lambda:ap-northeast-2:784579398270:layer:requirements:latest"
-      - "arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-requests:7"
-      - "arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-beautifulsoup4:1"
-    handler: 'handler.run'
+      - Ref: PythonRequirementsLambdaLayer
+      - 'arn:aws:lambda:ap-northeast-2:784579398270:layer:headless-chromium:latest'
+      - 'arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-requests:7'
+      - 'arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-beautifulsoup4:1'
+    handler: handler.run
     events:
       - eventBridge:
-          schedule: 'cron(0 1 ? * THU *)'
+          schedule: cron(0 1 ? * THU *)
     fileSystemConfig:
-      localMountPath: "/mnt/efs"
-      arn: "arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f679797e5f089cdc"
-    timeout: 360
+      localMountPath: /mnt/efs
+      arn: 'arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f6de1c46644a4425'
+    timeout: 180
     memorySize: 1024
     ephemeralStorageSize: 1024
     destinations:
@@ -81,18 +78,19 @@ functions:
         - '!gaon_data.py'
   processor:
     layers:
-      - "arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-pandas:8"
-    handler: 'gaon_data.lambda_handler'
+      - 'arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1'
+    handler: gaon_data.lambda_handler
     fileSystemConfig:
-      localMountPath: "/mnt/efs"
-      arn: "arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f679797e5f089cdc"
+      localMountPath: /mnt/efs
+      arn: 'arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0f6de1c46644a4425'
     timeout: 120
     memorySize: 1024
+    ephemeralStorageSize: 1024
     package:
       patterns:
         - '!api.py'
         - '!browser.py'
-        - '!common.py'
+        - 'common.py'
         - '!handler.py'
         - '!utils.py'
         - 'gaon_data.py'

@@ -57,7 +57,7 @@ def get_driver():
             pair('user-agent', USER_AGENT)
         ]
         options.arguments.extend(arguments)
-        options.binary_location = os.path.realpath(os.path.join(driver_path, os.pardir))
+        options.binary_location = driver_path
         service = ChromiumService(executable_path=driver_path)
         paths.add(options.binary_location)
         os.environ["PATH"] = ":".join(paths)
