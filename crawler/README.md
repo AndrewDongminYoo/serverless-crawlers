@@ -91,7 +91,7 @@ serverless deploy --verbose
 기능을 테스트하려면 다음 명령을 사용하여 기능을 호출할 수 있습니다.
 
 ```shell
-serverless invoke --verbose --function worker --path ./event.json --context ./context.json 
+serverless invoke --verbose --function worker --path ./event.json 
 ```
 
 오프라인 실행을 위해 `serverless-offline` 플러그인을 설치했습니다. 

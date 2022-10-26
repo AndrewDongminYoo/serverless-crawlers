@@ -15,7 +15,7 @@ TMP_PATH = os.environ["TMP_PATH"]
 TAB = chr(0x09)
 
 
-def run(event, _context):
+def run(event, _context=None):
     paths = [os.curdir, os.pardir]
     for (_, dirNames, filenames) in os.walk(EFS_PATH):
         for d in dirNames:
@@ -73,5 +73,4 @@ def cron():
 
 if __name__ == '__main__':
     _event = json.load(open("./event.json", mode="r"))
-    _context = json.load(open("./context.json", mode="r"))
-    run(_event, _context)
+    run(_event)
