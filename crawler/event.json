@@ -7,8 +7,7 @@
   "time": "2022-10-27T02:00:00Z",
   "region": "ap-northeast-2",
   "resources": [
-    "arn:aws:lambda:ap-northeast-2:784579398270:function:crawler-dev-worker",
-    "arn:aws:lambda:ap-northeast-2:784579398270:function:crawler-dev-processor"
+    "arn:aws:lambda:ap-northeast-2:784579398270:function:get-chart-dev-worker"
   ],
   "detail": {
     "ip": "121.131.178.122"

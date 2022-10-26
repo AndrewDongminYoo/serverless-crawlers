@@ -1,11 +1,10 @@
 {
   "aws_request_id": "53457860-ed5e-45d3-a6b6-c93da91448b1",
-  "log_group_name": "/aws/lambda/circle-chart-dev-cronHandler",
-  "log_stream_name": "2022/10/20/[$LATEST]7735ca26ef8e4d2eac78123291f25a4f",
-  "function_name": "circle-chart-dev-cronHandler",
+  "log_group_name": "/aws/lambda/get-chart-dev-worker",
+  "function_name": "get-chart-dev-worker",
   "memory_limit_in_mb": "1024",
   "function_version": "$LATEST",
-  "invoked_function_arn": "arn:aws:lambda:ap-northeast-2:784579398270:function:circle-chart-dev-cronHandler",
+  "invoked_function_arn": "arn:aws:lambda:ap-northeast-2:784579398270:function:get-chart-dev-worker",
   "client_context": null,
   "_epoch_deadline_time_in_ms": 1666253195999
 }

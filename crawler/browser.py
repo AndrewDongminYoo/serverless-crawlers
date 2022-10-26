@@ -16,8 +16,6 @@ CIRCLE_URL = 'https://circlechart.kr'
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.setLevel(logging.INFO)
-logger.info(f"""
-BeautifulSoup: {BeautifulSoup.__dict__['__doc__']}""")
 
 
 def get_driver():
@@ -58,7 +56,8 @@ def get_driver():
         service = Service(executable_path=driver_path)
         paths.add(options.binary_location)
         os.environ["PATH"] = ":".join(paths)
-        driver = Chrome(service=service, options=options, service_log_path='/tmp/chromedriver.log')
+        log_path = '/tmp/chromedriver.log'
+        driver = Chrome(service=service, options=options, service_log_path=log_path)
         return driver
     except Exception as e:
         logger.exception(e)
