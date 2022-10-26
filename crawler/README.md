@@ -88,9 +88,9 @@ serverless deploy --verbose
 
 ### Local invocation
 
-로컬에서 기능을 테스트하려면 다음 명령을 사용하여 기능을 호출할 수 있습니다.
+기능을 테스트하려면 다음 명령을 사용하여 기능을 호출할 수 있습니다.
 
-```
+```shell
 serverless invoke --verbose --function worker --path ./event.json --context ./context.json 
 ```
 

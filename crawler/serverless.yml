@@ -9,13 +9,13 @@ provider:
   architecture: x86_64
   stackName: get-chart
   iam:
-    role: 'arn:aws:iam::784579398270:role/lambda+efs@full_access'
+    role: 'arn:aws:iam::554974515599:role/CloudWatch_Lambda_VPC_EFS'
   vpc:
     securityGroupIds:
-      - 'sg-08f66349e83108a89'
+      - 'sg-072f5b9f254adccfc'
     subnetIds:
-      - 'subnet-08d3d77497ed285bc'
-      - 'subnet-0298565e5d4a39c96'
+      - 'subnet-05f21302b208855ea'
+      - 'subnet-0d2a9d7904bebb1ca'
   environment:
     EFS_PATH: '/mnt/lambda/'
     TMP_PATH: '/tmp/'
@@ -64,16 +64,14 @@ functions:
     layers:
       - Ref: PythonRequirementsLambdaLayer
       - 'arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1'
-      - 'arn:aws:lambda:ap-northeast-2:784579398270:layer:headless-chromium:2'
       - 'arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-requests:7'
-      - 'arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-beautifulsoup4:1'
     handler: handler.run
     events:
       - eventBridge:
           schedule: cron(10 1 ? * 2#4 *)
     fileSystemConfig:
       localMountPath: /mnt/lambda
-      arn: 'arn:aws:elasticfilesystem:ap-northeast-2:784579398270:access-point/fsap-0b89c64e4738eba5e'
+      arn: 'arn:aws:elasticfilesystem:ap-northeast-2:554974515599:access-point/fsap-02ad908821bd03bc6'
     timeout: 180
     memorySize: 1024
     ephemeralStorageSize: 1024

@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import logging
+import boto3
 import os
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ def global_clean_up(global_path):
         global_chart['artist'] = global_chart['artist'].str.split(pat='|', n=1).str[0]
         global_chart = global_chart.drop_duplicates(subset=['artist', 'producer'], keep='first')
         global_chart = global_chart.astype({'artist': 'string'}, errors='raise')
-        logger.info(global_chart.info())
+        logger.info(global_chart.head())
         return global_chart
     except Exception as e:
         logger.exception(e)
@@ -47,7 +48,7 @@ def album_clean_up(albums_path):
         # Caution: Some artists has multiple agencies that has changed
         album_chart = album_chart.reindex(columns=['month', 'album', 'artist', 'monthly_sales', 'annual_sales'])
         album_chart = album_chart.sort_values(by=['month', 'monthly_sales'])
-        logger.info(album_chart.info())
+        logger.info(album_chart.head())
         return album_chart
     except Exception as e:
         logger.exception(e)
@@ -133,6 +134,15 @@ def chart_processor():
         _new_sales = merge_sales_with_producer(_globals, _albums)
         _sales_table = pivot_data(_new_sales)
         save_to_excel(_sales_table, _new_sales, _globals, _albums, RESULT)
+        S3 = boto3.client("s3")
+        for bucket in S3.list_buckets()["Buckets"]:
+            if bucket["Name"].startswith('get-chart-'):
+                bucket_name = bucket["Name"]
+                break
+        S3.upload_file(RESULT,
+                       Filename="global_kpop_chart_cleanup.xlsx",
+                       Bucket=bucket_name,
+                       Key="serverless/get-chart/efs/")
     except Exception as e:
         logger.exception(e)
 

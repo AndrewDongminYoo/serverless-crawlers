@@ -34,7 +34,6 @@ def fetch_chart_api(period: str, chart_type: str, dt: datetime):
             queries['yearTime'] = '3'
             queries['curUrl'] = f'{CIRCLE_URL}/page_chart/{chart_type}.circle{set_queries(queries)}'
         url = f'{CIRCLE_URL}/data/api/chart/{chart_type}{set_queries(queries)}'
-        logger.info(f"TARGET URL IS = {url}")
         headers = requests.utils.default_headers()
         headers["User-Agent"] = USER_AGENT
         headers['Accept'] = 'application/json, text/javascript, */*; q=0.01'
