@@ -139,8 +139,7 @@ def chart_processor():
             if bucket["Name"].startswith('get-chart-'):
                 bucket_name = bucket["Name"]
                 break
-        S3.upload_file(RESULT,
-                       Filename="global_kpop_chart_cleanup.xlsx",
+        S3.upload_file(Filename="global_kpop_chart_cleanup.xlsx",
                        Bucket=bucket_name,
                        Key="serverless/get-chart/efs/")
     except Exception as e:

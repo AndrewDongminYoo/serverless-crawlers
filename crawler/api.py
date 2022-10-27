@@ -8,8 +8,8 @@ from utils import (
     set_queries,
     object_to_list,
     roll,
-    USER_AGENT
 )
+from driver import USER_AGENT
 
 TODAY = datetime.today()
 TERM = 30

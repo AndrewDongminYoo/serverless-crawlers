@@ -1,13 +1,10 @@
 from bs4 import BeautifulSoup
-from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver import ChromeOptions
 import logging
-import os
 from datetime import datetime
 from common import as_chart_array
-from utils import date_to_string, roll, set_queries, css, nth, pair, USER_AGENT
+from driver import get_driver
+from utils import date_to_string, roll, set_queries, css, nth
+
 
 TODAY = datetime.today()
 TERM = 30
@@ -16,52 +13,6 @@ CIRCLE_URL = 'https://circlechart.kr'
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.setLevel(logging.INFO)
-
-
-def get_driver():
-    try:
-        paths = set(os.environ["PATH"].split(':'))
-        for (root, dirName, fileName) in os.walk("/"):
-            for f in fileName:
-                if "chrom" in f:
-                    paths.add(root)
-        driver_path = ChromeDriverManager(path='/opt/usr/bin/').install()
-        options = ChromeOptions()
-        arguments = [
-            # '--allow-running-insecure-content',
-            '--disable-dev-shm-usage',
-            # '--disable-extensions',
-            # '--disable-gpu',
-            # '--disable-infobars',
-            # '--disable-popup-blocking',
-            # '--disable-web-security',
-            # '--enable-logging',
-            '--headless',
-            # '--hide-scrollbars',
-            # '--ignore-certificate-errors',
-            '--no-sandbox',
-            # '--single-process',
-            # '--start-maximized',
-            pair('--data-path', '/tmp/data-path'),
-            pair('--disk-cache-dir', '/tmp/cache-dir'),
-            pair('--homedir', '/tmp'),
-            pair('--log-level', 0),
-            pair('--user-data-dir', '/tmp/user-data'),
-            pair('--v', 99),
-            pair('--window-size', '1280x1696'),
-            pair('user-agent', USER_AGENT)
-        ]
-        options.arguments.extend(arguments)
-        options.binary_location = driver_path
-        service = Service(executable_path=driver_path)
-        paths.add(options.binary_location)
-        os.environ["PATH"] = ":".join(paths)
-        log_path = '/tmp/chromedriver.log'
-        driver = Chrome(service=service, options=options, service_log_path=log_path)
-        return driver
-    except Exception as e:
-        logger.exception(e)
-        raise e
 
 
 def crawl_browser(period: str, chart_type: str, dt: datetime):
