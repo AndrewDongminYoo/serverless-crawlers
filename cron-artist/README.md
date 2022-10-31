@@ -27,7 +27,11 @@ cron(Minutes Hours Day-of-month Month Day-of-week Year)
 | Day-of-week  | 1-7 or SUN-SAT  | , - * ? / L # |
 | Year         |     192199      |    , - * /    |
 
-*매달 둘째주 목요일 오전 10:10*에 해당 달에 새로 공개된 데이터에 한해 크롤링이 실행될 수 있도록 반복 설정
+- 내용: 데이터 수집과 정제 기능을 AWS Lambda에 배포하고 주기적 동작 설정
+    - python을 활용 데이터 수집 및 정제 진행
+    - AWS Lambda로 배포하고, S3에서 직접 편집 가능한 entertainment.csv에서 주요 엔터사의 아티스트 리스트를 불러와 크롤링 (양식에 맞춰 추가 가능)
+    - 매달 월요일 오전 9시에 리스트 내의 아티스트들의 채널을 대상으로 유튜브 조회수 및 트위터 팔로워 수를 API fetching
+    - 가공된 데이터는 각각 S3버킷의 output 디렉토리 내에 youtube-yymmdd.xlsx, twitter-yymmdd.xlsx로 저장된다.
 
 ```yml
 functions:
@@ -36,7 +40,7 @@ functions:
     events:
       - eventBridge:
           schedule: cron(10 1 ? * 2#4 *)
-          # (10분 1시 ?일 매월 둘째주목요일 매년)
+          # (10분 1시 ?일 매월 둘째주목요일 매년)`
 ```
 
 AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions).
