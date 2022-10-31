@@ -1,17 +1,68 @@
-org: ydm2790
-app: scheduled-get-followers
 service: cron-artist
-
 frameworkVersion: '3'
-
+useDotenv: true
 
 provider:
   name: aws
+  region: ap-northeast-2
   runtime: python3.8
+  stage: dev
+  architecture: x86_64
+  stackName: crawl-ytb-twt
+  iam:
+    role: 'arn:aws:iam::554974515599:role/CloudWatch_Lambda_VPC_EFS'
+  environment:
+    API_KEY: AIzaSyCcFpomttHS3-_e_8I5TG8Mbs1P_CMwVvo
+    S3_BUCKET: entertainment-statistics
+    BEARER_TOKEN: ${env:BEARER_TOKEN}
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    pythonBin: python3
+    invalidateCaches: true
+    layer:
+      name: 'requirements'
+      description: 'Python requirements lambda layer'
+      compatibleRuntimes:
+        - 'python3.8'
+      licenseInfo: MIT
+      allowedAccounts:
+        - '*'
+    noDeploy:
+      - 'numpy'
+      - 'pandas'
+
+package:
+  individually: true
+  patterns:
+    - '!.idea'
+    - '!./node_modules/**'
+    - '!./venv'
+    - '!README.md'
+    - '!requirements.txt'
+    - '!*.json'
+    - '!.env'
+    - '!*.csv'
+    - '!*.xlsx'
+    - '!.gitignore'
 
 functions:
   cronHandler:
     handler: handler.run
+    layers:
+      - Ref: PythonRequirementsLambdaLayer
+      - 'arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1'
     events:
       # Invoke Lambda function every 2nd minute from Mon-Fri
-      - schedule: cron(0/2 * ? * MON-FRI *)
+      - schedule: cron(0 * ? * MON *)
+    timeout: 180
+    memorySize: 1024
+    ephemeralStorageSize: 1024
+    package:
+      patterns:
+        - 'handler.py'
+        - 'youtube.py'
+        - 'social_blade.py'
