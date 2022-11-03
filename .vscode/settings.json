@@ -15,6 +15,11 @@
     "dropna",
     "xlsxwriter",
     "aggfunc",
+    "numpy",
     "kpop",
+    "serverlessdeploymentbucket",
+    "wfzm",
+    "oqtv",
+    "Dotenv",
   ]
 }
