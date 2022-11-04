@@ -71,3 +71,7 @@ def fetch_api_data(mode: str):
     else:
         roll(TODAY, fetch_chart_api, "global", TERM, MONTH, 1)
         roll(TODAY, fetch_chart_api, "album", TERM, MONTH, 1)
+
+
+if __name__ == '__main__':
+    fetch_api_data("w")

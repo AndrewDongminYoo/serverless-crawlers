@@ -4,14 +4,15 @@ import logging
 from datetime import datetime
 from api import fetch_api_data
 from browser import crawl_browser_data
+from common import EFS_PATH, TMP_PATH
 from gaon_data import chart_processor
+from dotenv import load_dotenv
 
+load_dotenv()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 NOW = datetime.now()
 TIME_FMT = "%Y-%m-%dT%H:%M:%SZ"
-EFS_PATH = os.environ["EFS_PATH"]
-TMP_PATH = os.environ["TMP_PATH"]
 TAB = chr(0x09)
 
 
@@ -52,7 +53,8 @@ def delete():
             elif os.path.isdir(file_path):
                 os.rmdir(file_path)
         except Exception as e:
-            logger.exception('Failed to delete %s. Reason: %s' % (file_path, e))
+            logger.exception('Failed to delete %s. Reason: %s' %
+                             (file_path, e))
 
 
 def main():

@@ -1,34 +1,29 @@
 import csv
-import os
+from os.path import join as join_path, realpath
+from os import environ
+from xlsxwriter import Workbook
 from abc import ABC
 
 
-def check_is_first(path: str):
-    header = [
-        'month',
-        'link',
-        'image',
-        'album',
-        'artist',
-        'distributor',
-        'producer',
-        'ranking',
-        'rank_status',
-        'sales_volume',
-        'title',
-    ]
-    file = open(path, "w+", newline="")
-    writer = csv.writer(file, dialect="excel")
-    if len(file.readlines()) < 1:
-        writer.writerow(header)
-    return writer
+header = [
+    'month',
+    'link',
+    'image',
+    'album',
+    'artist',
+    'distributor',
+    'producer',
+    'ranking',
+    'rank_status',
+    'sales_volume',
+    'title',
+]
 
-
-TMP_PATH = os.environ["TMP_PATH"]
-GLOBAL = os.path.join(TMP_PATH, "global_kpop_chart.csv")
-ALBUMS = os.path.join(TMP_PATH, "album_chart.csv")
-global_writer = check_is_first(GLOBAL)
-albums_writer = check_is_first(ALBUMS)
+EFS_PATH = environ.get("EFS_PATH", "./data/")
+TMP_PATH = environ.get("TMP_PATH", "./data/")
+GLOBAL = realpath(join_path(TMP_PATH, "global_kpop_chart.csv"))
+ALBUMS = realpath(join_path(TMP_PATH, "album_chart.csv"))
+RESULT = realpath(join_path(EFS_PATH, "global_kpop_chart_cleanup.xlsx"))
 
 
 class Chart(ABC):
@@ -44,11 +39,19 @@ class Chart(ABC):
     sales_volume = None
     title = None
 
-    def to_csv(self):
-        writer = albums_writer
+    def __init__(self):
+        if self.__class__ is AlbumChart:
+            self.target_file = ALBUMS
         if self.__class__ is GlobalChart:
-            writer = global_writer
-        writer.writerow([
+            self.target_file = GLOBAL
+        self.file = open(self.target_file, mode="a+", encoding="utf-8", newline="")
+        self.first = len(open(self.target_file, mode="r").readlines()) == 0
+        self.writer = csv.writer(self.file, dialect="excel")
+        if self.first:
+            self.writer.writerow(header)
+
+    def to_csv(self):
+        self.writer.writerow([
             self.month,
             self.link,
             self.image,
@@ -61,11 +64,13 @@ class Chart(ABC):
             self.sales_volume,
             self.title,
         ])
+        self.file.close()
         return self.__dict__
 
 
 class GlobalChart(Chart):
     def __init__(self, data: dict, month, url):
+        super().__init__()
         self.month = month[2:]
         self.link = url
         self.image = "https://circlechart.kr/uploadDir/" + data['ALBUMIMG']
@@ -81,6 +86,7 @@ class GlobalChart(Chart):
 
 class AlbumChart(Chart):
     def __init__(self, data: dict, month, url):
+        super().__init__()
         self.month = month[2:]
         self.link = url
         self.image = "https://circlechart.kr" + data['FILE_NAME']
@@ -89,8 +95,10 @@ class AlbumChart(Chart):
         self.distributor = data['de_nm']
         # self.producer = data['de_nm']
         self.ranking = data['SERVICE_RANKING']  # 랭킹
-        self.rank_status = rank_to_string(data['RankStatus'], data['RankChange'])  # 전월대비 (1up)
-        self.sales_volume = data["Album_CNT"] + " / " + data["Total_CNT"]  # 앨범 판매량 / 전체 판매량
+        self.rank_status = rank_to_string(
+            data['RankStatus'], data['RankChange'])  # 전월대비 (1up)
+        self.sales_volume = data["Album_CNT"] + \
+            " / " + data["Total_CNT"]  # 앨범 판매량 / 전체 판매량
         # self.title = data['']
 
 
