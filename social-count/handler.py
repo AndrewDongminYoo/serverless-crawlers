@@ -12,42 +12,47 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 S3 = boto3.client('s3')
+TMP_PATH = os.environ.get("TMP_PATH", os.curdir)
+INPUT_DF = os.path.join(TMP_PATH, "entertainment.csv")
 
 
 def load_csv(use_cols=None):
     if not os.path.exists("entertainment.csv"):
         S3.download_file(
-            Bucket=os.environ["S3_BUCKET"],
+            Bucket=os.environ["AWS_S3_BUCKET"],
             Key="entertainment.csv",
-            Filename="/tmp/entertainment.csv")
-        logger.info(f'downloaded file from {os.environ["S3_BUCKET"]}/entertainment.csv to /tmp/ folder')
+            Filename=INPUT_DF)
+        logger.info(
+            f'downloaded file from {os.environ["AWS_S3_BUCKET"]}/entertainment.csv to /tmp/ folder')
     if use_cols:
-        return pd.read_csv("/tmp/entertainment.csv", encoding="utf-8", usecols=use_cols, dtype="str")
+        return pd.read_csv(INPUT_DF, encoding="utf-8", usecols=use_cols, dtype="str")
     else:
         use_cols = ["company", 'artist', 'YOUTUBE_URL', 'TWITTER_URL', 'bladeYoutube', 'bladeTwitter',
                     'TWITTER_ID', 'TWITTER_NAME']
-        return pd.read_csv("/tmp/entertainment.csv", encoding="utf-8", usecols=use_cols, dtype="str")
+        return pd.read_csv(INPUT_DF, encoding="utf-8", usecols=use_cols, dtype="str")
 
 
 def save_to_s3(table: pd.DataFrame, file_name):
     fmt = "%y%m%d"
     name, ext = file_name.rsplit(".", 1)
+    OUTPUT_DF = os.path.join(TMP_PATH, file_name)
     if ext == "csv":
-        table.to_csv(f"/tmp/{file_name}", encoding="utf-8", index=False)
+        table.to_csv(OUTPUT_DF, encoding="utf-8", index=False)
         S3.upload_file(
-            Bucket=os.environ["S3_BUCKET"],
+            Bucket=os.environ["AWS_S3_BUCKET"],
             Key=file_name,
-            Filename=f"/tmp/{file_name}")
+            Filename=OUTPUT_DF)
     elif ext == "xlsx":
         today = datetime.today().strftime(fmt)
         file_name = f"{name}_{today}.{ext}"
-        table.to_excel(f"/tmp/{file_name}", engine="xlsxwriter")
+        table.to_excel(OUTPUT_DF, engine="xlsxwriter")
         S3.upload_file(
-            Bucket=os.environ["S3_BUCKET"],
+            Bucket=os.environ["AWS_S3_BUCKET"],
             Key=f"output/{file_name}",
-            Filename=f"/tmp/{file_name}")
-    logger.info(f'uploaded file to {os.environ["S3_BUCKET"]}/output/{file_name} from /tmp/ folder')
-    os.remove(f"/tmp/{file_name}")
+            Filename=OUTPUT_DF)
+    logger.info(
+        f'uploaded file to {os.environ["AWS_S3_BUCKET"]}/output/{file_name} from /tmp/ folder')
+    os.remove(OUTPUT_DF)
 
 
 def fill_twitter_id():
@@ -92,16 +97,19 @@ def fill_youtube_statistics():
     df["y_subscribes"] = None
     df["y_views"] = None
     for i, artist in df.iterrows():
-        channel_id = artist["YOUTUBE_URL"].replace("https://www.youtube.com/channel/", "")
+        channel_id = artist["YOUTUBE_URL"].replace(
+            "https://www.youtube.com/channel/", "")
         data = youtube_query(channel_id, "list-channels")
         if not data["hiddenSubscriberCount"]:
             df.loc[i, "y_subscribes"] = large_num(data["subscriberCount"])
         df.loc[i, "viewCount"] = int(data["viewCount"])
     df = df[["company", "artist", "y_subscribes", "y_views"]]
-    index = pd.MultiIndex.from_frame(df[["company", "artist"]], names=("company", "artist"))
+    index = pd.MultiIndex.from_frame(
+        df[["company", "artist"]], names=("company", "artist"))
     df.set_index(index, inplace=True)
     df.drop(["company", "artist"], inplace=True, axis=1)
-    df = df.astype({"y_subscribes": 'string', "y_views": 'int64'}, errors='ignore')
+    df = df.astype({"y_subscribes": 'string',
+                   "y_views": 'int64'}, errors='ignore')
     save_to_s3(df, "youtube.xlsx")
 
 

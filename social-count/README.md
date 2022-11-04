@@ -4,9 +4,9 @@
 
 ## Schedule event type
 
-이 예에서는 rateHandler와 cronHandler라는 두 가지 함수를 정의하는데, 
-둘 다 특정 시간 또는 특정 간격으로 실행되도록 기능을 구성하는 데 사용되는 스케줄 유형의 
-이벤트에 의해 트리거됩니다. 
+이 예에서는 rateHandler와 cronHandler라는 두 가지 함수를 정의하는데,
+둘 다 특정 시간 또는 특정 간격으로 실행되도록 기능을 구성하는 데 사용되는 스케줄 유형의
+이벤트에 의해 트리거됩니다.
 스케줄 이벤트에 대한 자세한 내용은 서버리스 문서의 해당 섹션을 참조하십시오.
 [docs](https://serverless.com/framework/docs/providers/aws/events/schedule/).
 
@@ -50,6 +50,15 @@ AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/
 ### Deployment
 
 배포 순서
+
+```shell
+python3 -m pip install virtualenv
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+pip install boto3
+```
+
 ```shell
 touch .env
 ```
@@ -80,7 +89,7 @@ serverless deploy --verbose
     cronHandler: cron-artist-dev-cronHandler (4.3 kB)
   layers:
     pythonRequirements: arn:aws:lambda:ap-northeast-2:554974515599:layer:requirements:3
-  
+
   Stack Outputs:
     PythonRequirementsLambdaLayerS3Key: serverless/cron-artist/dev/1666938272692-2022-10-28T06:24:32.692Z/pythonRequirements.zip
     PythonRequirementsLambdaLayerQualifiedArn: arn:aws:lambda:ap-northeast-2:554974515599:layer:requirements:3
@@ -132,7 +141,7 @@ invoke local                    로컬 호출 함수를 로컬로 호출합니�
 
 ### Bundling dependencies
 
-Serverless Plugin 중 하나인 `serverless-python-requirements`를 사용했습니다. 
+Serverless Plugin 중 하나인 `serverless-python-requirements`를 사용했습니다.
 다음과 같은 명령어로 설치 가능합니다.
 
 ```bash

@@ -1,0 +1,9 @@
+.serverless/
+node_modules/
+venv/
+*.pyc
+*.pyo
+.idea/
+__pycache__/
+data/**.csv
+data/**.xlsx

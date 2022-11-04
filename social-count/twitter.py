@@ -4,7 +4,7 @@ from urllib.parse import quote
 from dotenv import load_dotenv
 
 load_dotenv()
-bearer_token = os.environ.get("BEARER_TOKEN")
+bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
 
 
 def create_url(query: str, service: str):

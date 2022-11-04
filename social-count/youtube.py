@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-DEVELOPER_KEY = os.environ["API_KEY"]
+DEVELOPER_KEY = os.environ["YOUTUBE_API_KEY"]
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 

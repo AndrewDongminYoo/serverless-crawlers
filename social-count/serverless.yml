@@ -12,9 +12,9 @@ provider:
   iam:
     role: 'arn:aws:iam::554974515599:role/CloudWatch_Lambda_VPC_EFS'
   environment:
-    API_KEY: ${env:API_KEY}
-    S3_BUCKET: entertainment-statistics
-    BEARER_TOKEN: ${env:BEARER_TOKEN}
+    YOUTUBE_API_KEY: ${env:YOUTUBE_API_KEY}
+    AWS_S3_BUCKET: entertainment-statistics
+    TWITTER_BEARER_TOKEN: ${env:TWITTER_BEARER_TOKEN}
 
 plugins:
   - serverless-python-requirements
