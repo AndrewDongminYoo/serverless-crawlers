@@ -278,5 +278,6 @@
         "punycode",
         "webidl",
         "xmlbuilder"
-    ]
+    ],
+    "git.ignoreLimitWarning": true
 }
