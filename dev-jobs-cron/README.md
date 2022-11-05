@@ -1,48 +1,12 @@
-<!--
-title: 'AWS Node Scheduled Cron example in NodeJS'
-description: 'This is an example of creating a function that runs as a cron job using the serverless ''schedule'' event.'
-layout: Doc
-framework: v3
-platform: AWS
-language: nodeJS
-priority: 1
-authorLink: 'https://github.com/0dj0bz'
-authorName: 'Rob Abbott'
-authorAvatar: 'https://avatars3.githubusercontent.com/u/5679763?v=4&s=140'
--->
-
-# Serverless Framework Node Scheduled Cron on AWS
-
-This template demonstrates how to develop and deploy a simple cron-like service running on AWS Lambda using the traditional Serverless Framework.
+이 템플릿은 기존의 서버리스 프레임워크를 사용하여 AWS Lambda에서 실행되는 간단한 cron 서비스를 개발하고 배포하는 방법을 보여줍니다.
 
 ## Schedule event type
 
-This examples defines two functions, `cron` and `secondCron`, both of which are triggered by an event of `schedule` type, which is used for configuring functions to be executed at specific time or in specific intervals. For detailed information about `schedule` event, please refer to corresponding section of Serverless [docs](https://serverless.com/framework/docs/providers/aws/events/schedule/).
-
-When defining `schedule` events, we need to use `rate` or `cron` expression syntax.
-
-### Rate expressions syntax
-
-```pseudo
-rate(value unit)
-```
-
-`value` - A positive number
-
-`unit` - The unit of time. ( minute | minutes | hour | hours | day | days )
-
-In below example, we use `rate` syntax to define `schedule` event that will trigger our `rateHandler` function every minute
-
-```yml
-functions:
-  rateHandler:
-    handler: handler.run
-    events:
-      - schedule: rate(1 minute)
-```
-
-Detailed information about rate expressions is available in official [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions).
-
+이 예에서는 rateHandler와 cronHandler라는 두 가지 함수를 정의하는데,
+둘 다 특정 시간 또는 특정 간격으로 실행되도록 기능을 구성하는 데 사용되는 스케줄 유형의
+이벤트에 의해 트리거됩니다.
+스케줄 이벤트에 대한 자세한 내용은 서버리스 문서의 해당 섹션을 참조하십시오.
+[docs](https://serverless.com/framework/docs/providers/aws/events/schedule/).
 
 ### Cron expressions syntax
 
@@ -50,72 +14,56 @@ Detailed information about rate expressions is available in official [AWS docs](
 cron(Minutes Hours Day-of-month Month Day-of-week Year)
 ```
 
-All fields are required and time zone is UTC only.
+모든 필드는 필수적이며 표준 시간대는 UTC를 기준으로 합니다. (KST+09:00)
 
-| Field         | Values         | Wildcards     |
-| ------------- |:--------------:|:-------------:|
-| Minutes       | 0-59           | , - * /       |
-| Hours         | 0-23           | , - * /       |
-| Day-of-month  | 1-31           | , - * ? / L W |
-| Month         | 1-12 or JAN-DEC| , - * /       |
-| Day-of-week   | 1-7 or SUN-SAT | , - * ? / L # |
-| Year          | 192199      | , - * /       |
-
-In below example, we use `cron` syntax to define `schedule` event that will trigger our `cronHandler` function every second minute every Monday through Friday
+| 필드           |      허용된 값      |     와일드카드     |
+|--------------|:---------------:|:-------------:|
+| Minutes      |      0-59       |    , - * /    |
+| Hours        |      0-23       |    , - * /    |
+| Day-of-month |      1-31       | , - * ? / L W |
+| Month        | 1-12 or JAN-DEC |    , - * /    |
+| Day-of-week  | 1-7 or SUN-SAT  | , - * ? / L # |
+| Year         |     192199      |    , - * /    |
 
 ```yml
 functions:
-  cronHandler:
+  job-collector:
     handler: handler.run
     events:
-      - schedule: cron(0/2 * ? * MON-FRI *)
+      # Invoke Lambda function every 2nd minute from Mon-Fri
+      - schedule: cron(0 * ? * MON-FRI *)
 ```
 
-Detailed information about cron expressions in available in official [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions).
+AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions).
+# notion-sdk-typescript-starter
 
+[Notion SDK](https://github.com/makenotion/notion-sdk-js)를 [TypeScript](https://www.typescriptlang.org/)로 작성했습니다.
 
-## Usage
+## Features
 
-### Deployment
+- [Prettier](https://prettier.io/) 프리티어 코드 포맷터를 사용했습니다.
+- 간단한 타입체크 워크플로우를 작성했습니다.
+- [Dotenv](https://www.npmjs.com/package/dotenv) 노션의 토큰과 데이터베이스 주소를 환경변수로 설정합니다.
+- [Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates)
+  디펜다봇을 설정했습니다.
+- 노션 API 사용은 다소 복잡합니다.
 
-This example is made to work with the Serverless Framework dashboard, which includes advanced features such as CI/CD, monitoring, metrics, etc.
+## What to do after duplicating
 
-In order to deploy with dashboard, you need to first login with:
+[노션 API 사이트](https://developers.notion.com/docs/getting-started)에서 API KEY를 발급받습니다.
+OAuth를 사용한 범용 API를 발급받아야 프라이빗한 노션 페이지를 조작할 수 있습니다.
+dotenv파일을 생성합니다. `touch .env`
+`echo "NOTION_TOKEN=[your token here]" > .env`.
+`echo "NOTION_DATABASE_ID=YOUR_DATABASE_URL" >> .env`
+노션 토큰과 데이터베이스 아이디를 셋팅합니다.
+`yarn install`.
 
-```
-serverless login
-```
-
-and then perform deployment with:
-
-```
-serverless deploy
-```
-
-After running deploy, you should see output similar to:
-
-```bash
-Deploying aws-node-scheduled-cron-project to stage dev (us-east-1)
-
-✔ Service deployed to stack aws-node-scheduled-cron-project-dev (205s)
-
-functions:
-  rateHandler: aws-node-scheduled-cron-project-dev-rateHandler (2.9 kB)
-  cronHandler: aws-node-scheduled-cron-project-dev-cronHandler (2.9 kB)
-```
-
-There is no additional step required. Your defined schedules becomes active right away after deployment.
-
-### Local invocation
-
-In order to test out your functions locally, you can invoke them with the following command:
-
-```
-serverless invoke local --function rateHandler
-```
-
-After invocation, you should see output similar to:
-
-```bash
-Your cron function "aws-node-scheduled-cron-dev-rateHandler" ran at Fri Mar 05 2021 15:14:39 GMT+0100 (Central European Standard Time)
-```
+## NPM Scripts
+`npm run tsc -w`
+타입스크립트 정의 중 중복되거나 잘못된 정의를 확인합니다.
+`npm run tslint '*.ts'`
+TS Lint를 작동합니다.
+`npm run ts-node handler.ts`
+TS NodeJS 명령어로 handler 파일을 실행합니다. 글로벌로 설치되어 있을 경우 `ts-node handler`로도 실행가능합니다.
+`npm run prettier --write *.ts`
+프리티어를 사용해 문서를 포맷합니다.
