@@ -96,6 +96,8 @@ export interface Params {
     job_sort:     string;
     locations:    string;
     years:        number;
+    limit?:       string;
+    offset?:      string;
 }
 
 export interface Transitional {

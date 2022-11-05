@@ -1,8 +1,6 @@
 export interface Job {
     status:          string;
     reward:          Reward;
-    is_like:         boolean;
-    is_bookmark:     boolean;
     company:         Company;
     title_img:       Img;
     compare_country: boolean;
@@ -10,14 +8,14 @@ export interface Job {
     like_count:      number;
     id:              number;
     logo_img:        Img;
-    address:         Address;
+    address:         AddressSimple;
     matching_score:  null;
     position:        string;
     score:           null;
     category_tags:   CategoryTag[];
 }
 
-export interface Address {
+export interface AddressSimple {
     country:  Country;
     location: Location;
 }

@@ -8,6 +8,14 @@ provider:
   name: aws
   runtime: nodejs14.x
 
+plugins:
+  - serverless-esbuild
+  - serverless-plugin-typescript
+
+custom:
+  serverlessPluginTypescript:
+    tsConfigFileLocation: './tsconfig.json'
+
 functions:
   job-collector:
     handler: handler.run

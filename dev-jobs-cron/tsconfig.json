@@ -8,6 +8,7 @@
         "outDir": ".build",
         "module": "CommonJS",
         "moduleResolution": "node",
+        "resolveJsonModule": true,
         "lib": [
             "es2015"
         ],
