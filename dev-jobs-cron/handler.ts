@@ -1,7 +1,7 @@
 'use strict';
 
 import { Job } from "./job.types";
-import { WantedResponse } from "./res.types";
+import { WantedResponse } from "./wanted.res.types";
 import axios, { AxiosResponse } from 'axios';
 import { Context, APIGatewayProxyCallback, APIGatewayEvent } from 'aws-lambda';
 
