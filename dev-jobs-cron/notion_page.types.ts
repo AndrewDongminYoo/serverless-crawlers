@@ -13,6 +13,7 @@ export interface PageStats {
     URL: { url: null | string }
     주요업무: { rich_text: RichText[] }
     회사타입: { multi_select: Select[] }
+    회사위치: { rich_text: RichText[] }
     포지션: { rich_text: RichText[] }
     우대사항: { rich_text: RichText[] }
     좋아요: { number: number | null }
@@ -21,26 +22,21 @@ export interface PageStats {
     썸네일: { url: null | string };
     혜택및복지: { rich_text: RichText[] }
     자격요건: { rich_text: RichText[] }
-    아이디: { number: number | null }
+    회사명: { rich_text: RichText[] }
     분야: { select: Select | null }
     응답률: { number: number | null }
-    회사명: { title: RichText[] }
-}
-
-export interface MultiSelect {
-    multi_select: Select[];
+    아이디: { title: RichText[] }
 }
 
 export interface Select {
     name: string;
-    color: string;
 }
 
 export interface RichText {
     text: Text;
     annotations: Annotations;
     plain_text: string;
-    href: null;
+    href: string | null;
 }
 
 export interface Annotations {
@@ -54,5 +50,5 @@ export interface Annotations {
 
 export interface Text {
     content: string;
-    link: null;
+    link: string | null;
 }
