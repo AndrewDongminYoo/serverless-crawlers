@@ -8,6 +8,8 @@ import { Job } from "./job.types";
 import { Params, Response } from './response.types';
 import { DescribeJob, JobDetail } from "./detail.types";
 import { WantedResponse } from "./wanted.res.types";
+import { PageStats } from './notion_page.types';
+import { writeNotion } from './notionhq';
 
 const baseURL = 'https://www.wanted.co.kr'
 
@@ -51,17 +53,8 @@ const getWantedResponse = async (params: Params) => {
         const nextParams = Object.assign(urlQuery) as Params
         const jobArray = wantedJob.data as Array<Job>
         jobArray.forEach(async (job: Job) => {
-            const { address, company, like_count, title_img, id } = job
-            const { name, industry_name, application_response_stats } = company
+            const { address, id } = job
             if (address.location == '서울') {
-                console.log(`아이디 : ${id}`)
-                console.log(`분야 : ${industry_name}`)
-                console.log(`회사명 : ${name}`)
-                console.log(`좋아요 : ${like_count}`)
-                console.log(`응답률 : ${application_response_stats.avg_rate}`)
-                console.log(`썸네일 : ${title_img.thumb}`)
-                console.log(`URL: ${baseURL}/api/v4/jobs/${String(id)}`)
-                console.log()
                 const init = {
                     url: `/api/v4/jobs/${id}`,
                     baseURL, headers
@@ -69,19 +62,31 @@ const getWantedResponse = async (params: Params) => {
                 await axios(init).then((res: AxiosResponse) => {
                     const response = res.data as JobDetail
                     const jobDetail = response.job as DescribeJob
-                    const { detail, skill_tags, company_tags, position } = jobDetail
+                    const { company } = job
+                    const { name, industry_name, application_response_stats } = company
+                    const { detail, skill_tags, company_tags, position, address } = jobDetail
                     const { requirements, main_tasks, intro, benefits, preferred_points } = detail
-                    const skills = skill_tags.map((skill)=>skill.title)
-                    const company_types = company_tags.map((tags)=>tags.title)
-                    console.log(`포지션 : ${position}`)
-                    console.log(`자격요건 : ${requirements}`)
-                    console.log(`주요업무 : ${main_tasks}`)
-                    console.log(`회사설명 : ${intro}`)
-                    console.log(`혜택및복지 : ${benefits}`)
-                    console.log(`우대사항 : ${preferred_points}`)
-                    console.log(`기술스택 : ${skills}`)
-                    console.log(`회사타입 : ${company_types}`)
-                    console.log()
+                    const skills = skill_tags.map((skill) => skill.title)
+                    const company_types = company_tags.map((tags) => tags.title)
+                    const full_address = address?.geo_location?.n_location?.address ?? address.full_location
+                    const newPage: PageStats = {
+                        "URL": { url: `${baseURL}/api/v4/jobs/${id}` },
+                        "주요업무": { rich_text: [] },
+                        "회사타입": { multi_select: [] },
+                        "포지션": { rich_text: [] },
+                        "우대사항": { rich_text: [] },
+                        "좋아요": { number: 0 },
+                        "기술스택": { multi_select: [] },
+                        "회사설명": { rich_text: [] },
+                        "혜택및복지": { rich_text: [] },
+                        "자격요건": { rich_text: [] },
+                        "아이디": { number: 0 },
+                        "분야": { select: { name: '', color: '', } },
+                        "응답률": { number: 0 },
+                        "회사명": { title: [] },
+                        "썸네일": { url: '' }
+                    }
+                    return writeNotion(newPage)
                 })
             }
         })
