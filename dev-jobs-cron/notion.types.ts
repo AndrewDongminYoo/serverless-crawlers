@@ -5,9 +5,15 @@ export interface Pages {
     properties: PageStats;
 }
 
-export interface Parent {
+export type Parent = {
     database_id: string;
-}
+} | {
+    page_id: string;
+} | {
+    block_id: string;
+} | {
+    workspace: true;
+};
 
 export interface PageStats {
     URL: { url: null | string }
@@ -26,6 +32,7 @@ export interface PageStats {
     분야: { select: Select | null }
     응답률: { number: number | null }
     아이디: { title: RichText[] }
+    사이트: { url: null | string }
 }
 
 export interface Select {

@@ -1,51 +1,41 @@
-import {
-    Client,
-    APIResponseError,
-    RequestTimeoutError,
-    UnknownHTTPResponseError
-} from "@notionhq/client";
+import { Client, APIResponseError } from "@notionhq/client";
+import { PageObjectResponse, QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
 import dotenv from "dotenv";
-import { PageStats } from "./notion_page.types";
+import { PageStats } from "./notion.types";
 
-dotenv.config();
+dotenv.config()
 const database_id = process.env.NOTION_DATABASE_ID ?? ''
 const notion = new Client({
     auth: process.env.NOTION_TOKEN,
 })
 
 export async function writeNotion(properties: PageStats) {
+    const equals = properties.아이디.title[0].text.content
     notion.databases.query({
         database_id,
-        filter: {
-            or: [{
-                type: 'title',
-                title: {
-                    equals: properties.아이디.title[0].text.content
-                },
-                property: '아이디',
-            },]
-        }
-    }).then((res)=>{
+        filter: { or: [{ type: 'title', title: { equals }, property: '아이디' }] }
+    }).then((res: Partial<QueryDatabaseResponse>) => {
         const { results } = res
-        if (!results.length) {
+        if (results && !results.length) {
             notion.pages.create({
                 parent: { database_id },
                 properties: properties as Record<keyof PageStats, any>,
-            }).catch((err) => {
-                if (err instanceof RequestTimeoutError) {
-                    console.error("RequestTimeoutError")
-                }
-                if (err instanceof UnknownHTTPResponseError) {
-                    console.error("UnknownHTTPResponseError")
-                }
+            })
+                .then((res: Partial<PageObjectResponse>) => console.info(`CREATED: ${res.url}`))
+            .catch((err) => {
                 if (err instanceof APIResponseError) {
-                    console.error(properties)
+                    console.error("CREATE FAILED!")
                 }
             })
-        } else {
-            console.log(results[0]['url'])
+        } else if (results) {
+            notion.pages.update({
+                page_id: results[0].id,
+                properties: properties as Record<keyof PageStats, any>,
+            })
+            .then((res: Partial<PageObjectResponse>) => console.info(`UPDATED: ${res.url}`))
+            .catch(() => console.error("UPDATE FAILED!"))
         }
     })
-    .catch((err)=>console.error(err))
+        .catch(() => console.error("FETCHING TO NOTION FAILED"))
 
 }

@@ -1,23 +1,38 @@
-'use strict';
+'use strict'
 const axios = require('axios');
 import { parse } from 'url';
 import { AxiosResponse } from "axios";
 import { Context, APIGatewayProxyCallback, APIGatewayEvent } from 'aws-lambda';
 import filters from './filters'
-import { Job } from "./job.types";
+import { Job, WantedResponse } from "./job.types";
 import { Params, Response } from './response.types';
 import { DescribeJob, JobDetail } from "./detail.types";
-import { WantedResponse } from "./wanted.res.types";
-import { PageStats } from './notion_page.types';
+import { PageStats } from './notion.types';
 import { writeNotion } from './notionhq';
 import { multiSelectArray, richTextArray, toSelect, toTitle } from './notion.utils';
 
 const baseURL = 'https://www.wanted.co.kr'
+const selected = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', '자바 개발자', 'Node.js 개발자', '파이썬 개발자', '크로스플랫폼 앱 개발자']
 
 export async function run(event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) {
-    const time = new Date();
-    console.log(`Your cron function "${context.functionName}" ran at ${time}`);
-    main();
+    const time = new Date()
+    console.info("EVENT\n" + JSON.stringify(event, null, 2))
+    console.info("CONTEXT\n" + JSON.stringify(context, null, 2))
+    console.info(`Your cron function "${context.functionName}" ran at ${time}`)
+    const tag_type_names: { [key: string]: number } = filters.positions
+    const tag_type_ids = Object.entries(tag_type_names).filter(([k, _]) => selected.includes(k)).map(v => v[1])
+    for (let tag_id of tag_type_ids) {
+        let start: Params = {
+            country: 'kr',
+            job_sort: 'job.popularity_order',
+            tag_type_ids: tag_id,
+            locations: 'seoul.all',
+            years: 0
+        }
+        while (start) {
+            start = await getWantedResponse(start)
+        }
+    }
 }
 
 const headers = {
@@ -25,7 +40,7 @@ const headers = {
     'accept-encoding': 'gzip, deflate, br',
     'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
     'cache-control': 'no-cache',
-    'referer': 'https://www.wanted.co.kr/wdlist/507',
+    'referer': `${baseURL}/wdlist/507`,
     'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"macOS"',
@@ -42,7 +57,7 @@ const getWantedResponse = async (params: Params) => {
     const init = {
         url: '/api/v4/jobs',
         baseURL, params, headers
-    };
+    }
     const parameters: Params = await axios(init).then((res: any) => {
         const response = res as Response
         const wantedJob: WantedResponse = response.data
@@ -57,7 +72,7 @@ const getWantedResponse = async (params: Params) => {
                 const init = {
                     url: `/api/v4/jobs/${id}`,
                     baseURL, headers
-                };
+                }
                 await axios(init).then((res: AxiosResponse) => {
                     const response = res.data as JobDetail
                     const jobDetail = response.job as DescribeJob
@@ -83,33 +98,14 @@ const getWantedResponse = async (params: Params) => {
                         "분야": { select: toSelect(industry_name) },
                         "응답률": { number: application_response_stats.avg_rate },
                         "회사명": richTextArray(name),
-                        "썸네일": { url: company_images[0].url }
+                        "썸네일": { url: company_images[0].url },
+                        "사이트": { url: `${baseURL}/wd/${id}`}
                     }
                     writeNotion(newPage)
-                }).catch((err: any)=>console.log(err))
+                }).catch((err: any)=>console.error(err))
             }
         })
         return nextParams
     })
     return parameters
 }
-
-const main = async () => {
-    const tag_type_names: { [key: string]: number } = filters.positions
-    const selected = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', '자바 개발자', 'Node.js 개발자', '파이썬 개발자', '크로스플랫폼 앱 개발자']
-    const tag_type_ids = Object.entries(tag_type_names).filter(([k, _]) => selected.includes(k)).map(v => v[1])
-    for (let tag_id of tag_type_ids) {
-        let start: Params = {
-            country: 'kr',
-            job_sort: 'job.popularity_order',
-            tag_type_ids: tag_id,
-            locations: 'seoul.all',
-            years: 0
-        }
-        while (start) {
-            start = await getWantedResponse(start)
-        }
-    }
-}
-
-main()

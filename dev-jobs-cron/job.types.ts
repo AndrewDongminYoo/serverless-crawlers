@@ -1,6 +1,17 @@
+export interface WantedResponse {
+    links: Links;
+    data: Job[];
+    is_callable_external_job: boolean;
+    is_score: boolean;
+}
+
+export interface Links {
+    prev: string;
+    next: string;
+}
+
 export interface Job {
     status:          string;
-    reward:          Reward;
     company:         Company;
     title_img:       Img;
     compare_country: boolean;
@@ -60,20 +71,6 @@ export enum Type {
 export interface Img {
     origin: string;
     thumb:  string;
-}
-
-export interface Reward {
-    formatted_total:       FormattedTotal;
-    formatted_recommender: FormattedRecommend;
-    formatted_recommendee: FormattedRecommend;
-}
-
-export enum FormattedRecommend {
-    The500000원 = "500,000원",
-}
-
-export enum FormattedTotal {
-    The1000000원 = "1,000,000원",
 }
 
 export enum Status {

@@ -1,5 +1,4 @@
-import { stringify } from 'querystring'
-import * as Notion from './notion_page.types'
+import * as Notion from './notion.types'
 
 export const list = (txt: string, separate: string|undefined) => {
     if (separate) {
