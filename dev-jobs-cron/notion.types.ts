@@ -25,14 +25,21 @@ export interface PageStats {
     좋아요: { number: number | null }
     기술스택: { multi_select: Select[] }
     회사설명: { rich_text: RichText[] }
-    썸네일: { url: null | string };
+    썸네일: { files: File[] };
     혜택및복지: { rich_text: RichText[] }
     자격요건: { rich_text: RichText[] }
     회사명: { rich_text: RichText[] }
     분야: { select: Select | null }
     응답률: { number: number | null }
     아이디: { title: RichText[] }
-    사이트: { url: null | string }
+}
+export interface File {
+    name:     string;
+    external: External;
+}
+
+export interface External {
+    url: string;
 }
 
 export interface Select {
@@ -57,5 +64,5 @@ export interface Annotations {
 
 export interface Text {
     content: string;
-    link: string | null;
+    link: { url: string } | null;
 }

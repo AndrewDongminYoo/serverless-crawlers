@@ -9,16 +9,18 @@ import { Params, Response } from './response.types';
 import { DescribeJob, JobDetail } from "./detail.types";
 import { PageStats } from './notion.types';
 import { writeNotion } from './notionhq';
-import { multiSelectArray, richTextArray, toSelect, toTitle } from './notion.utils';
+import { multiSelect, richText, toSelect, toTitle, toImage, toRichText } from './notion.utils';
 
 const baseURL = 'https://www.wanted.co.kr'
 const selected = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', '자바 개발자', 'Node.js 개발자', '파이썬 개발자', '크로스플랫폼 앱 개발자']
 
-export async function run(event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback) {
+export async function run(
+    // event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback
+) {
     const time = new Date()
-    console.info("EVENT\n" + JSON.stringify(event, null, 2))
-    console.info("CONTEXT\n" + JSON.stringify(context, null, 2))
-    console.info(`Your cron function "${context.functionName}" ran at ${time}`)
+    // console.info("EVENT\n" + JSON.stringify(event, null, 2))
+    // console.info("CONTEXT\n" + JSON.stringify(context, null, 2))
+    // console.info(`Your cron function "${context.functionName}" ran at ${time}`)
     const tag_type_names: { [key: string]: number } = filters.positions
     const tag_type_ids = Object.entries(tag_type_names).filter(([k, _]) => selected.includes(k)).map(v => v[1])
     for (let tag_id of tag_type_ids) {
@@ -82,27 +84,28 @@ const getWantedResponse = async (params: Params) => {
                     const skills = skill_tags.map((skill) => skill.title)
                     const company_types = company_tags.map((tags) => tags.title.replace(',', ''))
                     const full_address = address?.geo_location?.n_location?.address ?? address.full_location
+                    const API_URL = `${baseURL}/api/v4/jobs/${id}`
+                    const WEB_URL = `${baseURL}/wd/${id}`
                     const newPage: PageStats = {
-                        "URL": { url: `${baseURL}/api/v4/jobs/${id}` },
-                        "주요업무": richTextArray(main_tasks),
-                        "회사타입": multiSelectArray(company_types),
-                        "포지션": richTextArray(position),
-                        "회사위치": richTextArray(full_address),
-                        "우대사항": richTextArray(preferred_points),
+                        "URL": { url: API_URL },
+                        "주요업무": { rich_text: richText(main_tasks)},
+                        "회사타입": {multi_select: multiSelect(company_types) },
+                        "포지션": { rich_text: richText(position)},
+                        "회사위치": { rich_text: richText(full_address)},
+                        "우대사항": { rich_text: richText(preferred_points)},
                         "좋아요": { number: like_count },
-                        "기술스택": multiSelectArray(skills),
-                        "회사설명": richTextArray(intro),
-                        "혜택및복지": richTextArray(benefits),
-                        "자격요건": richTextArray(requirements),
-                        "아이디": toTitle(String(id)),
+                        "기술스택": { multi_select: multiSelect(skills)},
+                        "회사설명": { rich_text: richText(intro)},
+                        "혜택및복지": { rich_text: richText(benefits)},
+                        "자격요건": { rich_text: richText(requirements)},
+                        "아이디": { title: toTitle(String(id), WEB_URL) },
                         "분야": { select: toSelect(industry_name) },
                         "응답률": { number: application_response_stats.avg_rate },
-                        "회사명": richTextArray(name),
-                        "썸네일": { url: company_images[0].url },
-                        "사이트": { url: `${baseURL}/wd/${id}`}
+                        "회사명": { rich_text: toTitle(name, WEB_URL) },
+                        "썸네일": { files: company_images.map((img)=>toImage(img.url)) },
                     }
                     writeNotion(newPage)
-                }).catch((err: any)=>console.error(err))
+                }).catch((err: any) => console.error(err))
             }
         })
         return nextParams

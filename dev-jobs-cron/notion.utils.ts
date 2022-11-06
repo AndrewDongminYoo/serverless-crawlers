@@ -1,10 +1,10 @@
 import * as Notion from './notion.types'
 
-export const list = (txt: string, separate: string|undefined) => {
+export const list = (txt: string, separate: string | undefined) => {
     if (separate) {
         return String(txt).split(separate).map(t => t.trim())
     } else {
-        return String(txt).split(/\n+/).map(t=>t.trim())
+        return String(txt).split(/\n+/).map(t => t.trim())
     }
 }
 export const toRichText = (content: string, href: string | null | undefined, color: string | null | undefined): Notion.RichText => {
@@ -15,15 +15,14 @@ export const toRichText = (content: string, href: string | null | undefined, col
         href: href ?? null,
     }
 }
-export const richTextArray = (contents: string) => {
-    return {
-        rich_text: list(contents, undefined).map((txt)=>toRichText(txt, null, null))
-    }
+export const richText = (contents: string): Notion.RichText[] => {
+    return list(contents, undefined).map((txt) => toRichText(txt, null, null))
 }
-export const multiSelectArray = (contents: string[]) => {
-    return {
-        multi_select: contents.map((txt) => toSelect(txt))
-    }
+export const multiSelect = (contents: string[]): Notion.Select[] => {
+    return contents.map((txt) => toSelect(txt))
+}
+export const toTitle = (content: string, href: undefined | string): Notion.RichText[] => {
+    return [content].map((cnt) => toRichText(cnt, href, null))
 }
 export const toSelect = (name: string): Notion.Select => {
     return { name: name.replace(/,+/, '') }
@@ -39,13 +38,25 @@ export const toAnnotations = (color: string | null | undefined): Notion.Annotati
     }
 }
 export const toText = (content: string, href: string | null | undefined): Notion.Text => {
-    return {
-        content,
-        link: href ?? null,
+    if (href) {
+        return {
+            content,
+            link: {
+                url: href,
+            }
+        }
+    } else {
+        return {
+            content,
+            link: null
+        }
     }
 }
-export const toTitle = (content: string): { title: Notion.RichText[] } => {
+export const toImage = (src: string): Notion.File => {
     return {
-        title: [content].map((cnt)=>toRichText(cnt, null, null))
+        name: src,
+        external: {
+            url: src
+        }
     }
 }
