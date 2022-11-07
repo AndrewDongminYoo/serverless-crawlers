@@ -25,11 +25,11 @@ package:
     - "!node_modules/"
     - "!.env"
     - "!.env.sample"
-    - "!.gitignore"
     - "!README.md"
     - "!serverless.yml"
     - "!*.json"
     - "!yarn.lock"
+    - ".ts"
 
 custom:
   serverlessPluginTypescript:
@@ -44,6 +44,3 @@ functions:
     timeout: 180
     memorySize: 1024
     ephemeralStorageSize: 1024
-    package:
-      patterns:
-        - "./**.ts"
