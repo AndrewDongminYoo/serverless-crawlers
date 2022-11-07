@@ -4,7 +4,7 @@
         "strictNullChecks": true,
         "sourceMap": true,
         "allowJs": true,
-        "target": "ES5",
+        "target": "ES2015",
         "outDir": ".build",
         "module": "CommonJS",
         "moduleResolution": "node",

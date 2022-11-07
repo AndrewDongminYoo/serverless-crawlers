@@ -46,4 +46,4 @@ functions:
     ephemeralStorageSize: 1024
     package:
       patterns:
-        - "**.ts"
+        - "./**.ts"

@@ -1,8 +1,8 @@
 export interface WantedResponse {
-    links: Links;
-    data: Job[];
-    is_callable_external_job: boolean;
-    is_score: boolean;
+    links:                      Links;
+    data:                       Job[];
+    is_callable_external_job:   boolean;
+    is_score:                   boolean;
 }
 
 export interface Links {
@@ -55,7 +55,7 @@ export interface ApplicationResponseStats {
     avg_rate:       number;
     level:          Level;
     delayed_count:  number;
-    avg_day:        number | null;
+    avg_day?:       number;
     remained_count: number;
     type:           Type;
 }

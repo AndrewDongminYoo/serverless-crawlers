@@ -1,18 +1,18 @@
 'use strict'
 const axios = require('axios');
-import { parse } from 'url';
-import { AxiosResponse } from "axios";
+import { parse, UrlWithParsedQuery } from 'url';
 import { Context, APIGatewayProxyCallback, APIGatewayEvent } from 'aws-lambda';
-import filters from './filters'
+import filters, { Position } from './filters'
 import { Job, WantedResponse } from "./job.types";
 import { Params, Response } from './response.types';
 import { DescribeJob, JobDetail } from "./detail.types";
 import { PageStats } from './notion.types';
 import { writeNotion } from './notionhq';
-import { multiSelect, richText, toSelect, toTitle, toImage, toRichText } from './notion.utils';
+import { multiSelect, richText, toSelect, toTitle, thumbnails } from './notion.utils';
+import { ParsedUrlQuery } from 'querystring';
 
 const baseURL = 'https://www.wanted.co.kr'
-const selected = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', '자바 개발자', 'Node.js 개발자', '파이썬 개발자', '크로스플랫폼 앱 개발자']
+const selected: Position[] = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', '자바 개발자', 'Node.js 개발자', '파이썬 개발자', '크로스플랫폼 앱 개발자']
 
 export async function run(
     // event: APIGatewayEvent, context: Context, callback: APIGatewayProxyCallback
@@ -21,15 +21,18 @@ export async function run(
     // console.info("EVENT\n" + JSON.stringify(event, null, 2))
     // console.info("CONTEXT\n" + JSON.stringify(context, null, 2))
     // console.info(`Your cron function "${context.functionName}" ran at ${time}`)
-    const tag_type_names: { [key: string]: number } = filters.positions
-    const tag_type_ids = Object.entries(tag_type_names).filter(([k, _]) => selected.includes(k)).map(v => v[1])
+    const tag_type_names = filters.positions
+    const tag_type_ids = Object.entries(tag_type_names)
+        .filter(([k, _]) => selected.includes(k as Position))
+        .map(v => Number(v[1]))
     for (let tag_id of tag_type_ids) {
         let start: Params = {
+            // 검색 조건을  변경하려면 파라미터를 수정하세요.
             country: 'kr',
             job_sort: 'job.popularity_order',
             tag_type_ids: tag_id,
-            locations: 'seoul.all',
-            years: 0
+            locations: 'all',
+            years: '0'
         }
         while (start) {
             start = await getWantedResponse(start)
@@ -60,22 +63,22 @@ const getWantedResponse = async (params: Params) => {
         url: '/api/v4/jobs',
         baseURL, params, headers
     }
-    const parameters: Params = await axios(init).then((res: any) => {
-        const response = res as Response
-        const wantedJob: WantedResponse = response.data
+    const parameters: Params = await axios(init).then((res: Response) => {
+        const wantedJob= res.data as WantedResponse
         const links = wantedJob.links
         if (!links.next) process.exit(1)
-        const urlQuery = parse(links.next, true).query
+        const url: UrlWithParsedQuery = parse(links.next, true)
+        const urlQuery: ParsedUrlQuery = url.query
         const nextParams = Object.assign(urlQuery) as Params
         const jobArray = wantedJob.data as Array<Job>
         jobArray.forEach(async (job: Job) => {
-            const { address, id } = job
+            const { address, id, company } = job
             if (address.location == '서울') {
                 const init = {
                     url: `/api/v4/jobs/${id}`,
                     baseURL, headers
                 }
-                await axios(init).then((res: AxiosResponse) => {
+                await axios(init).then((res: Response) => {
                     const response = res.data as JobDetail
                     const jobDetail = response.job as DescribeJob
                     const { name, industry_name, application_response_stats } = job.company
@@ -102,10 +105,12 @@ const getWantedResponse = async (params: Params) => {
                         "분야": { select: toSelect(industry_name) },
                         "응답률": { number: application_response_stats.avg_rate },
                         "회사명": { rich_text: toTitle(name, WEB_URL) },
-                        "썸네일": { files: company_images.map((img)=>toImage(img.url)) },
+                        "썸네일": { files: thumbnails(company_images) },
                     }
                     writeNotion(newPage)
                 }).catch((err: any) => console.error(err))
+            } else {
+                console.log(`${company.name}'s LOCATION: ${address.location}`)
             }
         })
         return nextParams

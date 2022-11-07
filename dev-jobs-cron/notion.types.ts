@@ -22,15 +22,15 @@ export interface PageStats {
     회사위치: { rich_text: RichText[] }
     포지션: { rich_text: RichText[] }
     우대사항: { rich_text: RichText[] }
-    좋아요: { number: number | null }
+    좋아요: { number?: number }
     기술스택: { multi_select: Select[] }
     회사설명: { rich_text: RichText[] }
     썸네일: { files: File[] };
     혜택및복지: { rich_text: RichText[] }
     자격요건: { rich_text: RichText[] }
     회사명: { rich_text: RichText[] }
-    분야: { select: Select | null }
-    응답률: { number: number | null }
+    분야: { select?: Select }
+    응답률: { number?: number }
     아이디: { title: RichText[] }
 }
 export interface File {
@@ -50,7 +50,7 @@ export interface RichText {
     text: Text;
     annotations: Annotations;
     plain_text: string;
-    href: string | null;
+    href?: string;
 }
 
 export interface Annotations {
@@ -64,5 +64,5 @@ export interface Annotations {
 
 export interface Text {
     content: string;
-    link: { url: string } | null;
+    link?: { url: string };
 }
