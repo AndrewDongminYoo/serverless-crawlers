@@ -4,7 +4,7 @@ export const list = (txt: string, separate?: string) => {
     if (separate) {
         return String(txt).split(separate).map(t => t.trim())
     } else {
-        return String(txt).split(/\n+/).map(t => t.trim())
+        return String(txt).split(/[\n\.\-∙]+/).map(t => t.trim())
     }
 }
 export const toRichText = (content: string, href?: string, color?: string): Notion.RichText => {
@@ -52,15 +52,21 @@ export const toText = (content: string, href?: string): Notion.Text => {
         }
     }
 }
-export const toImage = (src: string): Notion.File => {
+export const toImage = (src: string, index: number, company_name: string): Notion.File => {
     return {
-        name: src,
+        name: `${company_name}_${index}`,
         external: {
             url: src
         }
     }
 }
 
-export const thumbnails = (company_images: { url: string }[]): Notion.File[] => {
-    return company_images.map((img) => toImage(img.url));
+export const thumbnails = (company_images: string[] | { url: string }[], com: string): Notion.File[] => {
+    return company_images.map((img, i: number) => {
+        if (typeof img == 'string') {
+            return toImage(img, i, com)
+        } else {
+            return toImage(img.url, i, com)
+        }
+    });
 }

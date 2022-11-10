@@ -45,7 +45,9 @@ export async function writeNotion(properties: PageStats) {
                 cover: { external: { url: coverURL } }
             })
                 .then((res: Partial<PageObjectResponse>) => console.info(`UPDATED: ${res.url}`))
-                .catch(() => console.error("UPDATE FAILED!"))
+                .catch((err) => {
+                    console.error("UPDATE FAILED!")
+})
         }
     })
         .catch(() => console.error("FETCHING TO NOTION FAILED"))
