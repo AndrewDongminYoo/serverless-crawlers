@@ -109,8 +109,9 @@ const shootRocketPunch = async (params: Params): Promise<true|void> => {
                 const jobs = $(el).find('.content > div.company-jobs-detail > .job-detail > div > a.job-title')
                 jobs.each((i: number, e: Element) => {
                     if (e.attribs.href) {
-                        const href = decodeURIComponent(e.attribs.href)
-                        jobDetail.채용.push(`${baseURL}${href}`)
+                        const link = new URL(e.attribs.href, baseURL)
+                        const href = decodeURIComponent(link.href)
+                        jobDetail.채용.push(href)
                     }
                 })
                 jobDetail.채용중 = jobDetail.채용.length

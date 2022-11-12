@@ -1,10 +1,11 @@
 'use strict'
 import * as Notion from './notion.types'
-import { URL } from 'url'
+import { URL, domainToUnicode } from 'url'
 
 export const removeQuery = (urlString: string): URL["href"] => {
     const preUrl = new URL(urlString)
-    return new URL(preUrl.pathname, preUrl.origin).href
+    const curUrl = new URL(preUrl.pathname, preUrl.origin)
+    return decodeURIComponent(curUrl.href)
 }
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
