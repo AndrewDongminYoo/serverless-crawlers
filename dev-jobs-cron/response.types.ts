@@ -2,7 +2,7 @@
 
 import { WantedResponse } from "./wanted.types";
 import { JobSort, Countries, Year } from "./wanted.filters"
-import { AxiosResponse } from 'axios'
+import { AxiosRequestHeaders, AxiosResponse } from 'axios'
 
 export type Response = AxiosResponse | AxiosResponse & {
     headers:            Headers;
@@ -32,4 +32,24 @@ export interface Params {
     hiring_types?:       string;
     location?:           string;
     page?:               string;
+}
+
+export type CustomHeader = Partial<AxiosRequestHeaders> & {
+    Accept:                         string;
+    Referer:                        string;
+    'Accept-Encoding':              string;
+    'Accept-Language':              string;
+    'Sec-Fetch-Dest':               string;
+    'Sec-Fetch-Mode':               string;
+    'Sec-Fetch-Site':               string;
+    'Sec-Fetch-User'?:              string;
+    'Sec-Ch-Ua':                    string;
+    'Sec-Ch-Ua-Mobile':             string;
+    'Sec-Ch-Ua-Platform':           string;
+    'Cache-Control'?:               string;
+    'Upgrade-Insecure-Requests'?:   string;
+    'User-Agent':                   string;
+    'Wanted-User-Agent'?:           string;
+    'Wanted-User-Country'?:         string;
+    'Wanted-User-Language'?:        string;
 }

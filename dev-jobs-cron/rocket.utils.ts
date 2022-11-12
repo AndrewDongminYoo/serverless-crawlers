@@ -3,7 +3,9 @@ import { JobDetail, ParsedText } from './rocket.types';
 import fs from 'fs'
 
 export const removeWhitespace = (str: string) => str.replace('\n', '').replace(/\s{2,}/, ' ').trim()
+
 const removeCom = (str: string) => str.replace(',', ' ').replace('/', ' ').replace(/\s{2,}/, ' ').trim()
+
 export const removeComma = (str: string[]) => {
     const newArray: string[] = [];
     str.forEach((value: string) => {
@@ -19,7 +21,9 @@ export const removeComma = (str: string[]) => {
     })
     return newArray
 }
+
 export const pickLongest = (str: string[]) => str.reduce((p, c) => p.length > c.length ? p : c, 'IT 컨텐츠')
+
 function findSubject(target: string, ...args: (string | RegExp)[]): [number, number] {
     let match: RegExpMatchArray | null = null
     for (let arg of args) {
@@ -35,6 +39,7 @@ function findSubject(target: string, ...args: (string | RegExp)[]): [number, num
     return [-1, 0]
 
 }
+
 export function parseText(longDocument: string): ParsedText {
     longDocument = longDocument.replace(/[^가-힣\w\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@#$%&\\=\('" \n]+/g, ' ').replace(/\s{2,}/g, ' ')
     longDocument = longDocument.replace(/(([\{\}\[\]\/?.,;:|\)*~`!^\-_+<>@#$%&\\=\('" ])\2{3,})/g, "$2").replace(/( -|- )/g, ' - ')
@@ -57,8 +62,8 @@ export function parseText(longDocument: string): ParsedText {
         우대사항,
     }
 }
+
 export function saveAllJSON(jobDetails: JobDetail[]) {
     fs.writeFileSync('./job-urls.json', JSON.stringify(jobDetails, null, 2));
-    console.debug('saved.')
-    throw Error();
+    console.debug("ROCKET PUNCH URLS SAVED.")
 }

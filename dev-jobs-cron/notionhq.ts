@@ -15,18 +15,18 @@ export async function writeNotion(properties: PageStats, platform: Platform) {
     await delay(400)
     const database_id = (
         platform === '원티드'
-         ? process.env.WANTED_NOTION_DB
-         : process.env.ROCKET_NOTION_DB
-        ) ?? ""
+            ? process.env.WANTED_NOTION_DB
+            : process.env.ROCKET_NOTION_DB
+    ) ?? ""
     const equals = properties.아이디.title[0].text.content
     const coverURL = properties.썸네일.files[0].external.url
-    notion.databases.query({
+    await notion.databases.query({
         database_id,
         filter: { or: [{ type: 'title', title: { equals }, property: '아이디' }] }
-    }).then((res: Partial<QueryDatabaseResponse>) => {
+    }).then(async (res: Partial<QueryDatabaseResponse>) => {
         const { results } = res
         if (results && !results.length) {
-            notion.pages.create({
+            await notion.pages.create({
                 parent: { database_id },
                 properties: properties as Record<keyof PageStats, any>,
                 cover: { external: { url: coverURL } }
@@ -37,7 +37,7 @@ export async function writeNotion(properties: PageStats, platform: Platform) {
                     })
         } else if (results && results.length) {
             // console.log(JSON.stringify(results[0]["properties"]["URL"], null, 2))
-            notion.pages.update({
+            await notion.pages.update({
                 page_id: results[0].id,
                 properties: properties as Record<keyof PageStats, any>,
                 cover: { external: { url: coverURL } }

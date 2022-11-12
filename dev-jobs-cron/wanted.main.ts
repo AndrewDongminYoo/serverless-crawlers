@@ -3,7 +3,7 @@
 import { parse, UrlWithParsedQuery } from 'url';
 import filters, { Position } from './wanted.filters'
 import { Job, WantedResponse, DescribeJob, JobDetail } from "./wanted.types";
-import { Params, Response } from './response.types';
+import { CustomHeader, Params, Response } from './response.types';
 import { PageStats, Platform } from './notion.types';
 import { writeNotion } from './notionhq';
 import { multiSelect, richText, toSelect, toTitle, thumbnails } from './notion.utils';
@@ -12,23 +12,25 @@ import Axios, { AxiosError } from 'axios'
 
 const baseURL = 'https://www.wanted.co.kr'
 const selected: Position[] = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', '자바 개발자', 'Node.js 개발자', '파이썬 개발자', '크로스플랫폼 앱 개발자']
-const headers = {
-    'accept': 'application/json, text/plain, */*',
-    'accept-encoding': 'gzip, deflate, br',
-    'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-    'cache-control': 'no-cache',
-    'referer': `${baseURL}/wdlist/507`,
-    'sec-ch-ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"macOS"',
-    'sec-fetch-dest': 'empty',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
-    'wanted-user-agent': 'user-web',
-    'wanted-user-country': 'KR',
-    'wanted-user-language': 'ko'
+
+const headers: CustomHeader = {
+    Accept: 'application/json, text/plain, */*',
+    Referer: `${baseURL}/wdlist/507`,
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Cache-Control': 'no-cache',
+    'Sec-Ch-Ua': '"Google Chrome";v="107", "Chromium";v="107", "Not=A?Brand";v="24"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"macOS"',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+    'Wanted-User-Agent': 'user-web',
+    'Wanted-User-Country': 'KR',
+    'Wanted-User-Language': 'ko'
 }
+
 const axios = Axios.create({
     baseURL,
     headers,
@@ -96,7 +98,8 @@ const getWantedResponse = async (params: Params) => {
         })
     return parameters
 }
-export const exploreWantedAPI = async () => {
+
+const exploreWantedAPI = async () => {
     console.debug("WANTED API FETCHING STARTED")
     const tag_type_names = filters.positions
     const tag_type_ids = Object.entries(tag_type_names)
@@ -116,3 +119,5 @@ export const exploreWantedAPI = async () => {
         }
     }
 }
+
+export default exploreWantedAPI
