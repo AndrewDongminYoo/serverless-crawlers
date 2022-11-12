@@ -1,4 +1,4 @@
-service: rocket-jobs
+service: dev-jobs-cron
 useDotenv: true
 frameworkVersion: "3"
 
@@ -10,7 +10,8 @@ provider:
   architecture: x86_64
   environment:
     NOTION_TOKEN: ${env:NOTION_TOKEN}
-    NOTION_DATABASE_ID: ${env:NOTION_DATABASE_ID}
+    ROCKET_NOTION_DB: ${env:ROCKET_NOTION_DB}
+    WANTED_NOTION_DB: ${env:WANTED_NOTION_DB}
 
 plugins:
   - serverless-plugin-typescript
@@ -29,7 +30,7 @@ package:
     - "!serverless.yml"
     - "!*.json"
     - "!yarn.lock"
-    - ".ts"
+    - "*.ts"
 
 custom:
   serverlessPluginTypescript:

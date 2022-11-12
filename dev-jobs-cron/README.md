@@ -54,7 +54,8 @@ AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/
 OAuth를 사용한 범용 API를 발급받아야 프라이빗한 노션 페이지를 조작할 수 있습니다.  
 dotenv파일을 생성합니다. `touch .env`  
 `echo "NOTION_TOKEN=[your token here]" > .env`.  
-`echo "NOTION_DATABASE_ID=YOUR_DATABASE_URL" >> .env`  
+`echo "WANTED_NOTION_DB=YOUR_DATABASE_URL" >> .env`  
+`echo "ROCKET_NOTION_DB=YOUR_DATABASE_URL" >> .env`  
 노션 토큰과 데이터베이스 아이디를 셋팅합니다.  
   
 ## NPM Scripts  
@@ -70,12 +71,13 @@ TS NodeJS 명령어로 handler 파일을 실행합니다. 글로벌로 설치되
   
 ## Wanted Crawler  
   
-Wanted의 채용정보 리스트 API와 상세정보 API를 사용했습니다.  
+Wanted/Rocket-Punch의 채용정보 리스트 API와 상세정보 API를 사용했습니다.  
 axios가 익숙해서 사용했습니다.  
 노션 페이지의 데이터베이스 형태는 다음과 같습니다. rich_text가 일반 텍스트 컬럼, multi_select가 다중 선택 컬럼입니다.  
   
 ```typescript  
 export interface PageStats {
+    플랫폼: '원티드'|'로켓펀치'
     URL: { url: null | string }
     주요업무: { rich_text: RichText[] }
     회사타입: { multi_select: Select[] }
