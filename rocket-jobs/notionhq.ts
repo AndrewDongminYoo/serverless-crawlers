@@ -1,4 +1,4 @@
-import { Client, APIResponseError } from "@notionhq/client";
+import { Client, NotionClientError } from "@notionhq/client";
 import { PageObjectResponse, QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
 import dotenv from "dotenv";
 import { PageStats } from "./notion.types";
@@ -14,8 +14,10 @@ export async function readNotion() {
         database_id,
         filter: { or: [{ type: 'title', title: { equals: '80486' }, property: '아이디' }] },
     })
-        .then((pages) => pages.results.forEach((page) => console.log(JSON.stringify(page, null, 2))))
-        .catch(() => console.error("READ NOTION DATABASE FAILED"))
+        .then((pages: QueryDatabaseResponse) => pages.results.forEach((page) => console.log(JSON.stringify(page, null, 2)))
+            , (error: NotionClientError) => {
+                console.error(`READ FAILED : "${error.message}"`)
+            })
 }
 
 export async function writeNotion(properties: PageStats) {
@@ -32,24 +34,28 @@ export async function writeNotion(properties: PageStats) {
                 properties: properties as Record<keyof PageStats, any>,
                 cover: { external: { url: coverURL } }
             })
-                .then((res: Partial<PageObjectResponse>) => console.info(`CREATED: ${res.url}`))
-                .catch((err) => {
-                    if (err instanceof APIResponseError) {
-                        console.error("CREATE FAILED!")
-                    }
-                })
+                .then((res: Partial<PageObjectResponse>) => console.info(`CREATED: ${res.url}`)
+                    , (error: NotionClientError) => {
+                        console.error(`CREATE FAILED: "${error.message}"`)
+                    })
         } else if (results) {
             notion.pages.update({
                 page_id: results[0].id,
                 properties: properties as Record<keyof PageStats, any>,
                 cover: { external: { url: coverURL } }
             })
-                .then((res: Partial<PageObjectResponse>) => console.info(`UPDATED: ${res.url}`))
-                .catch((err) => {
-                    console.error("UPDATE FAILED!")
-})
+                .then((res: Partial<PageObjectResponse>) => console.info(`UPDATED: ${res.url}`)
+                    , (error: NotionClientError) => {
+                        console.error(`UPDATE FAILED: "${error.message}"`)
+                        if (error.code === 'notionhq_client_request_timeout') {
+                            setTimeout(()=>{}, 1000)
+                        }
+                    })
+        }
+    }, async (error: NotionClientError) => {
+        console.error(`NOTION FAILED: "${error.message}"`)
+        if (error.code === 'rate_limited') {
+            setTimeout(()=>{}, 1000)
         }
     })
-        .catch(() => console.error("FETCHING TO NOTION FAILED"))
-
 }
