@@ -109,7 +109,7 @@ const shootRocketPunch = async (params: Params) => {
                     const $: CheerioAPI = load(div)
                     $("#company-images > div > div > div > div.company-image-box.image")
                         .each((i: number, img: Element) => {
-                            const src = $(img).attr("data-src")
+                            const src = $(img).attr("data-lazy-src")
                             src && jobDetail.이미지.push(src)
                         })
                 },
