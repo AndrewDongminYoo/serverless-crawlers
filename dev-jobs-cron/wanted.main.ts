@@ -6,7 +6,7 @@ import { Job, WantedResponse, DescribeJob, JobDetail } from "./wanted.types";
 import { CustomHeader, Params, Response } from './response.types';
 import { PageStats, Platform } from './notion.types';
 import { writeNotion } from './notionhq';
-import { multiSelect, richText, toSelect, toTitle, thumbnails } from './notion.utils';
+import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeCom } from './notion.utils';
 import { ParsedUrlQuery } from 'querystring';
 import Axios, { AxiosError } from 'axios'
 
@@ -38,8 +38,8 @@ const axios = Axios.create({
 })
 
 const getWantedResponse = async (params: Params) => {
-    const parameters: void | Params = await axios('/api/v4/jobs', { params })
-        .then((res: Response) => {
+    return await axios('/api/v4/jobs', { params })
+        .then(async (res: Response) => {
             const wantedJob = res.data as WantedResponse
             const links = wantedJob.links
             if (!links.next) return
@@ -50,14 +50,14 @@ const getWantedResponse = async (params: Params) => {
             jobArray.forEach(async (job: Job) => {
                 const { address, id, company } = job
                 if (address.location == '서울') {
-                    await axios(`/api/v4/jobs/${id}`).then((res: Response) => {
+                    await axios(`/api/v4/jobs/${id}`).then(async (res: Response) => {
                         const response = res.data as JobDetail
                         const jobDetail = response.job as DescribeJob
                         const { name, industry_name, application_response_stats } = job.company
                         const { detail, skill_tags, company_images, company_tags, position, address, like_count } = jobDetail
                         const { requirements, main_tasks, intro, benefits, preferred_points } = detail
                         const skills = skill_tags.map((skill) => skill.title)
-                        const company_types = company_tags.map((tags) => tags.title.replace(',', ''))
+                        const company_types = company_tags.map((tags) => tags.title)
                         const full_address = address?.geo_location?.n_location?.address ?? address.full_location
                         const API_URL = `${baseURL}/api/v4/jobs/${id}`
                         const WEB_URL = `${baseURL}/wd/${id}`
@@ -65,22 +65,22 @@ const getWantedResponse = async (params: Params) => {
                         const newPage: PageStats = {
                             "URL": { url: API_URL },
                             "주요업무": { rich_text: richText(main_tasks) },
-                            "회사타입": { multi_select: multiSelect(company_types) },
+                            "회사타입": { multi_select: multiSelect(removeComma(company_types)) },
                             "포지션": { rich_text: richText(position) },
                             "회사위치": { rich_text: richText(full_address) },
                             "우대사항": { rich_text: richText(preferred_points) },
                             "좋아요": { number: like_count },
-                            "기술스택": { multi_select: multiSelect(skills) },
+                            "기술스택": { multi_select: multiSelect(removeComma(skills)) },
                             "회사설명": { rich_text: richText(intro) },
                             "혜택및복지": { rich_text: richText(benefits) },
                             "자격요건": { rich_text: richText(requirements) },
                             "아이디": { title: toTitle(String(id), WEB_URL) },
-                            "분야": { select: toSelect(industry_name) },
+                            "분야": { select: toSelect(removeCom(industry_name)) },
                             "응답률": { number: application_response_stats.avg_rate },
                             "회사명": { rich_text: toTitle(name, WEB_URL) },
                             "썸네일": { files: thumbnails(company_images, name) },
                         }
-                        writeNotion(newPage, platform)
+                        await writeNotion(newPage, platform)
                     }, (error: any) => {
                         if (error instanceof AxiosError) {
                             console.error(`there is no more data "${error.request?.path}"`)
@@ -96,9 +96,7 @@ const getWantedResponse = async (params: Params) => {
                 console.error(`there is no more data "${error.request?.path}"`)
             }
         })
-    return parameters
 }
-
 const exploreWantedAPI = async () => {
     console.debug("WANTED API FETCHING STARTED")
     const tag_type_names = filters.positions

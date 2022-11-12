@@ -1,6 +1,24 @@
 'use strict'
 import * as Notion from './notion.types'
-import { URL, domainToUnicode } from 'url'
+import { URL } from 'url'
+
+export const removeCom = (str: string) => str.replace(',', ' ').replace('/', ' ').replace(/\s{2,}/, ' ').trim()
+
+export const removeComma = (str: string[]) => {
+    const newArray: string[] = [];
+    str.forEach((value: string) => {
+        if (!value.includes('(') && !value.includes(')')) {
+            if (value.includes(',')) {
+                value.split(',').forEach((v) => v && newArray.push(v.trim()))
+            } else if (value.includes('/')) {
+                value.split('/').forEach((v) => v && newArray.push(v.trim()))
+            } else {
+                value && newArray.push(removeCom(value))
+            }
+        }
+    })
+    return newArray
+}
 
 export const removeQuery = (urlString: string): URL["href"] => {
     const preUrl = new URL(urlString)

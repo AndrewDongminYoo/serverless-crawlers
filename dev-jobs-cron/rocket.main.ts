@@ -6,9 +6,9 @@ import fs from 'fs'
 import { load, CheerioAPI, Element } from 'cheerio';
 import { PageStats, Platform } from './notion.types';
 import { writeNotion } from './notionhq';
-import { multiSelect, richText, toSelect, toTitle, thumbnails, removeQuery } from './notion.utils';
+import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeQuery } from './notion.utils';
 import { URL } from 'url';
-import { parseText, pickLongest, removeComma, removeWhitespace, saveAllJSON, } from './rocket.utils';
+import { parseText, pickLongest, removeWhitespace, saveAllJSON, } from './rocket.utils';
 import { isNotionClientError } from '@notionhq/client';
 
 const baseURL = 'https://www.rocketpunch.com'
@@ -136,47 +136,48 @@ const iterateJobJSON = async () => {
 }
 
 async function getDetailOfJobs(href: string, job: JobDetail) {
-    await axios.get(href).then((response) => {
-        const html = response.data
-        const $ = load(html)
-        const 주요업무 = removeWhitespace($("div.duty.break > .full-text").text() ?? $("div.duty.break").text())
-        let 스택 = $("a.ui.circular.basic.label").map((i, el) => $(el).text()).toArray()
-        let 산업분야 = $(".job-company-areas > a").map((i, el) => $(el).text()).toArray()
-        스택 = removeComma(스택)
-        산업분야 = removeComma(산업분야)
-        const 복지혜택 = $(".ui.divided.company.info.items > .item > .content").text()
-        const 회사위치 = $(".office.item > .address").text()
-        const 채용상세 = $(".content.break > .full-text").text() ?? $(".content.break").text()
-        const { 우대사항, 담당업무, 자격요건 } = parseText(채용상세)
-        const 아이디 = href.split('/').filter((value) => value && !isNaN(Number(value))).pop() ?? '아이디'
-        const 포지션 = $("body > div.pusher > div.ui.vertical.center.aligned.detail.job-header.header.segment > div > div > h1").text()
-        const platform: Platform = "로켓펀치";
-        const newPage: PageStats = {
-            "URL": { url: href },
-            "주요업무": { rich_text: richText(주요업무) },
-            "회사타입": { multi_select: multiSelect(산업분야) },
-            "포지션": { rich_text: richText(포지션) },
-            "회사위치": { rich_text: richText(회사위치) },
-            "우대사항": { rich_text: richText(우대사항) },
-            "기술스택": { multi_select: multiSelect(스택) },
-            "회사설명": { rich_text: richText(담당업무) },
-            "혜택및복지": { rich_text: richText(복지혜택) },
-            "자격요건": { rich_text: richText(자격요건) },
-            "아이디": { title: toTitle(아이디, href) },
-            "분야": { select: toSelect(pickLongest(산업분야)) },
-            "응답률": { number: job.응답률 ? 90 : 69 },
-            "회사명": { rich_text: toTitle(job.회사명, new URL(job.사이트, baseURL).href) },
-            "썸네일": { files: thumbnails(job.이미지, job.회사명) },
-            "좋아요": { number: job.좋아요 }
-        }
-        writeNotion(newPage, platform)
-    }, (error) => {
-        if (isNotionClientError(error)) {
-            console.error(`Notion API Failed: "${error.message}"`)
-        } else if (error instanceof AxiosError) {
-            console.error(`there is no data "${error.request?.path}"`)
-        }
-    })
+    await axios.get(href)
+        .then(async (response) => {
+            const html = response.data
+            const $ = load(html)
+            const 주요업무 = removeWhitespace($("div.duty.break > .full-text").text() ?? $("div.duty.break").text())
+            let 스택 = $("a.ui.circular.basic.label").map((i, el) => $(el).text()).toArray()
+            let 산업분야 = $(".job-company-areas > a").map((i, el) => $(el).text()).toArray()
+            스택 = removeComma(스택)
+            산업분야 = removeComma(산업분야)
+            const 복지혜택 = $(".ui.divided.company.info.items > .item > .content").text()
+            const 회사위치 = $(".office.item > .address").text()
+            const 채용상세 = $(".content.break > .full-text").text() ?? $(".content.break").text()
+            const { 우대사항, 담당업무, 자격요건 } = parseText(채용상세)
+            const 아이디 = href.split('/').filter((value) => value && !isNaN(Number(value))).pop() ?? '아이디'
+            const 포지션 = $("body > div.pusher > div.ui.vertical.center.aligned.detail.job-header.header.segment > div > div > h1").text()
+            const platform: Platform = "로켓펀치";
+            const newPage: PageStats = {
+                "URL": { url: href },
+                "주요업무": { rich_text: richText(주요업무) },
+                "회사타입": { multi_select: multiSelect(산업분야) },
+                "포지션": { rich_text: richText(포지션) },
+                "회사위치": { rich_text: richText(회사위치) },
+                "우대사항": { rich_text: richText(우대사항) },
+                "기술스택": { multi_select: multiSelect(스택) },
+                "회사설명": { rich_text: richText(담당업무) },
+                "혜택및복지": { rich_text: richText(복지혜택) },
+                "자격요건": { rich_text: richText(자격요건) },
+                "아이디": { title: toTitle(아이디, href) },
+                "분야": { select: toSelect(pickLongest(산업분야)) },
+                "응답률": { number: job.응답률 ? 90 : 69 },
+                "회사명": { rich_text: toTitle(job.회사명, new URL(job.사이트, baseURL).href) },
+                "썸네일": { files: thumbnails(job.이미지, job.회사명) },
+                "좋아요": { number: job.좋아요 }
+            }
+            await writeNotion(newPage, platform)
+        }, (error) => {
+            if (isNotionClientError(error)) {
+                console.error(`Notion API Failed: "${error.message}"`)
+            } else if (error instanceof AxiosError) {
+                console.error(`there is no data "${error.request?.path}"`)
+            }
+        })
 }
 
 export default exploreRocketPunch

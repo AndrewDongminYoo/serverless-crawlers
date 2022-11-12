@@ -11,5 +11,6 @@ export async function run(
     context && console.info("CONTEXT\n" + JSON.stringify(context, null, 2))
     context && console.info(`Your cron function "${context.functionName}" ran at ${time}`)
     await exploreWantedAPI()
+    await new Promise(resolve => setTimeout(resolve, 10000))
     await exploreRocketPunch()
 }
