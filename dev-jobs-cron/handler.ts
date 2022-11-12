@@ -12,5 +12,7 @@ export async function run(
     context && console.info(`Your cron function "${context.functionName}" ran at ${time}`)
     await exploreWantedAPI()
     await exploreRocketPunch()
-        .catch(()=>iterateJobJSON())
+        .catch(()=>{
+            iterateJobJSON()
+        })
 }

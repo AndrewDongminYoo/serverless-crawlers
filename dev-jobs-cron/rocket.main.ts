@@ -9,6 +9,7 @@ import { writeNotion } from './notionhq';
 import { multiSelect, richText, toSelect, toTitle, thumbnails } from './notion.utils';
 import { URL } from 'url';
 import { parseText, pickLongest, removeComma, removeWhitespace, saveAllJSON, } from './rocket.utils';
+import { isNotionClientError } from '@notionhq/client';
 
 const baseURL = 'https://www.rocketpunch.com'
 
@@ -63,7 +64,7 @@ export const iterateJobJSON = async () => {
 }
 
 const shootRocketPunch = async (params: Params) => {
-    const init = { baseURL, params, headers }
+    const init = { params }
     await axios.get('/api/jobs/template', init).then(async (res: Response) => {
         const div = res.data.data.template
         const $: CheerioAPI = load(div)
@@ -74,7 +75,7 @@ const shootRocketPunch = async (params: Params) => {
             const title = $(el).find('.content > .company-name > a > h4').text().trim()
             const href = $(el).find(".logo.image > a").attr('href')?.replace('/jobs', '') ?? ''
             const likes = $(el).find(".content > .company-name > a.reference-count > span").text()
-            const thumbnail = $(el).find(".logo.image > a > div > img").attr()?.src
+            const thumbnail = $(el).find(".logo.image > a > div > img").attr("src")
             const jobDetail: JobDetail = {
                 아이디: el.attribs['data-company_id'],
                 사이트: href,
@@ -87,6 +88,35 @@ const shootRocketPunch = async (params: Params) => {
             }
             jobDetail.응답률 = $(el).find(".content > div.company-name > span > div").first().text() == '응답률 우수'
             thumbnail && jobDetail.이미지.push(thumbnail.replace('?s=100x100&t=inside', ''))
+            const headers = {
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                "accept-encoding": "gzip, deflate, br",
+                "accept-language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+                "cache-control": "max-age=0",
+                "sec-ch-ua": "\"Google Chrome\";v=\"107\", \"Chromium\";v=\"107\", \"Not=A?Brand\";v=\"24\"",
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": "\"macOS\"",
+                "sec-fetch-dest": "document",
+                "sec-fetch-mode": "navigate",
+                "sec-fetch-site": "none",
+                "sec-fetch-user": "?1",
+                "upgrade-insecure-requests": "1",
+                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
+            }
+            axios.get(href, { headers }).then(
+                (response: Response) => {
+                    const div = response.data
+                    const $: CheerioAPI = load(div)
+                    $("#company-images > div > div > div > div.company-image-box.image")
+                        .each((i: number, img: Element) => {
+                            const src = $(img).attr("data-src")
+                            src && jobDetail.이미지.push(src)
+                        })
+                },
+                (error: AxiosError) => {
+                    console.error(`can't fetch company page "${error.code}"`)
+                }
+            )
             const jobs = $(el).find('.content > div.company-jobs-detail > .job-detail > div > a.job-title')
             jobs.each((i: number, e: Element) => {
                 if (e.attribs.href) {
@@ -140,7 +170,9 @@ async function getDetailOfJobs(href: string, job: JobDetail) {
         }
         writeNotion(newPage, platform)
     }, (error) => {
-        if (error instanceof AxiosError) {
+        if (isNotionClientError(error)) {
+            console.error(`Notion API Failed: "${error.message}"`)
+        } else if (error instanceof AxiosError) {
             console.error(`there is no data "${error.request?.path}"`)
         }
     })
