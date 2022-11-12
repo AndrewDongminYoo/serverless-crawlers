@@ -2,7 +2,8 @@
 import { Client, NotionClientError } from "@notionhq/client";
 import { PageObjectResponse, QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
 import dotenv from "dotenv";
-import { PageStats } from "./notion.types";
+import { PageStats, Platform } from "./notion.types";
+import { delay } from "./notion.utils";
 
 dotenv.config()
 
@@ -10,9 +11,10 @@ const notion = new Client({
     auth: process.env.NOTION_TOKEN,
 })
 
-export async function writeNotion(properties: PageStats) {
+export async function writeNotion(properties: PageStats, platform: Platform) {
+    await delay(400)
     const database_id = (
-        properties.플랫폼 == '원티드'
+        platform === '원티드'
          ? process.env.WANTED_NOTION_DB
          : process.env.ROCKET_NOTION_DB
         ) ?? ""
@@ -33,7 +35,8 @@ export async function writeNotion(properties: PageStats) {
                     , (error: NotionClientError) => {
                         console.error(`CREATE FAILED: "${error.message}"`)
                     })
-        } else if (results) {
+        } else if (results && results.length) {
+            // console.log(JSON.stringify(results[0]["properties"]["URL"], null, 2))
             notion.pages.update({
                 page_id: results[0].id,
                 properties: properties as Record<keyof PageStats, any>,
@@ -42,15 +45,9 @@ export async function writeNotion(properties: PageStats) {
                 .then((res: Partial<PageObjectResponse>) => console.info(`UPDATED: ${res.url}`)
                     , (error: NotionClientError) => {
                         console.error(`UPDATE FAILED: "${error.message}"`)
-                        if (error.code === 'notionhq_client_request_timeout') {
-                            setTimeout(()=>{}, 1000)
-                        }
                     })
         }
-    }, async (error: NotionClientError) => {
+    }, (error: NotionClientError) => {
         console.error(`NOTION FAILED: "${error.message}"`)
-        if (error.code === 'rate_limited') {
-            setTimeout(()=>{}, 1000)
-        }
     })
 }

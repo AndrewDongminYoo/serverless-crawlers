@@ -4,7 +4,7 @@ import { parse, UrlWithParsedQuery } from 'url';
 import filters, { Position } from './wanted.filters'
 import { Job, WantedResponse, DescribeJob, JobDetail } from "./wanted.types";
 import { Params, Response } from './response.types';
-import { PageStats } from './notion.types';
+import { PageStats, Platform } from './notion.types';
 import { writeNotion } from './notionhq';
 import { multiSelect, richText, toSelect, toTitle, thumbnails } from './notion.utils';
 import { ParsedUrlQuery } from 'querystring';
@@ -40,7 +40,7 @@ const getWantedResponse = async (params: Params) => {
         .then((res: Response) => {
             const wantedJob = res.data as WantedResponse
             const links = wantedJob.links
-            if (!links.next) process.exit(1)
+            if (!links.next) return
             const url: UrlWithParsedQuery = parse(links.next, true)
             const urlQuery: ParsedUrlQuery = url.query
             const nextParams = Object.assign(urlQuery) as Params
@@ -59,8 +59,8 @@ const getWantedResponse = async (params: Params) => {
                         const full_address = address?.geo_location?.n_location?.address ?? address.full_location
                         const API_URL = `${baseURL}/api/v4/jobs/${id}`
                         const WEB_URL = `${baseURL}/wd/${id}`
+                        const platform: Platform = "원티드";
                         const newPage: PageStats = {
-                            "플랫폼": "원티드",
                             "URL": { url: API_URL },
                             "주요업무": { rich_text: richText(main_tasks) },
                             "회사타입": { multi_select: multiSelect(company_types) },
@@ -78,7 +78,7 @@ const getWantedResponse = async (params: Params) => {
                             "회사명": { rich_text: toTitle(name, WEB_URL) },
                             "썸네일": { files: thumbnails(company_images, name) },
                         }
-                        writeNotion(newPage)
+                        writeNotion(newPage, platform)
                     }, (error: any) => {
                         if (error instanceof AxiosError) {
                             console.error(`there is no more data "${error.request?.path}"`)
@@ -96,8 +96,8 @@ const getWantedResponse = async (params: Params) => {
         })
     return parameters
 }
-
 export const exploreWantedAPI = async () => {
+    console.debug("WANTED API FETCHING STARTED")
     const tag_type_names = filters.positions
     const tag_type_ids = Object.entries(tag_type_names)
         .filter(([k, _]) => selected.includes(k as Position))

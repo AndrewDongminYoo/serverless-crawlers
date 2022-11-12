@@ -14,5 +14,3 @@ export async function run(
     await exploreRocketPunch()
         .catch(()=>iterateJobJSON())
 }
-
-run()

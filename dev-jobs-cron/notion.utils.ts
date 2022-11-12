@@ -1,6 +1,8 @@
 'use strict'
 import * as Notion from './notion.types'
 
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
 const urlRegExp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
 
 export const list = (txt: string, separate?: string) => {

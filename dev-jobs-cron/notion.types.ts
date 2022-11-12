@@ -16,9 +16,10 @@ export type Parent = {
     workspace: true;
 };
 
+export type Platform = '원티드' | '로켓펀치';
+
 export interface PageStats {
-    플랫폼: '원티드' | '로켓펀치';
-    URL: { url: null | string };
+    URL: { url: string | null };
     주요업무: { rich_text: RichText[] };
     회사타입: { multi_select: Select[] };
     회사위치: { rich_text: RichText[] };
@@ -35,6 +36,7 @@ export interface PageStats {
     응답률: { number?: number };
     아이디: { title: RichText[] };
 };
+
 export interface File {
     name:     string;
     external: External;

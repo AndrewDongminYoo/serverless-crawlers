@@ -4,7 +4,7 @@ import { Params, Response } from './response.types';
 import { JobDetail } from './rocket.types'
 import fs from 'fs'
 import { load, CheerioAPI, Element } from 'cheerio';
-import { PageStats } from './notion.types';
+import { PageStats, Platform } from './notion.types';
 import { writeNotion } from './notionhq';
 import { multiSelect, richText, toSelect, toTitle, thumbnails } from './notion.utils';
 import { URL } from 'url';
@@ -36,6 +36,7 @@ const jobDetails: JobDetail[] = []
 const emptyQuery = '조건에 맞는 결과가 없습니다. 키워드를 바꿔서 검색해 보세요.검색 조건을 저장하면 나중에 추가된 검색 결과를 이메일로 받아볼 수 있습니다.'
 
 export const exploreRocketPunch = async () => {
+    console.debug("ROCKET PUNCH MAIN PAGE CRAWLING STARTED")
     let page = 1
     while (true) {
         let start: Params = {
@@ -51,6 +52,7 @@ export const exploreRocketPunch = async () => {
 }
 
 export const iterateJobJSON = async () => {
+    console.debug("ROCKET PUNCH DETAIL PAGE CRAWLING STARTED")
     const jobDetailJSON = JSON.parse(fs.readFileSync('./job-urls.json', { encoding: 'utf-8', flag: 'r' }))
     const jobs: JobDetail[] = jobDetailJSON as JobDetail[]
     for (let job of jobs) {
@@ -117,8 +119,8 @@ async function getDetailOfJobs(href: string, job: JobDetail) {
         const { 우대사항, 담당업무, 자격요건 } = parseText(채용상세)
         const 아이디 = href.split('/').filter((value) => value && !isNaN(Number(value))).pop() ?? '아이디'
         const 포지션 = $("body > div.pusher > div.ui.vertical.center.aligned.detail.job-header.header.segment > div > div > h1").text()
+        const platform: Platform = "로켓펀치";
         const newPage: PageStats = {
-            "플랫폼": "로켓펀치",
             "URL": { url: href },
             "주요업무": { rich_text: richText(주요업무) },
             "회사타입": { multi_select: multiSelect(산업분야) },
@@ -136,7 +138,7 @@ async function getDetailOfJobs(href: string, job: JobDetail) {
             "썸네일": { files: thumbnails(job.이미지, job.회사명) },
             "좋아요": { number: job.좋아요 }
         }
-        writeNotion(newPage)
+        writeNotion(newPage, platform)
     }, (error) => {
         if (error instanceof AxiosError) {
             console.error(`there is no data "${error.request?.path}"`)
