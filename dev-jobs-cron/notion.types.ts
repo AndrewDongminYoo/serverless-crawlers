@@ -37,14 +37,20 @@ export interface PageStats {
     아이디: { title: RichText[] };
 };
 
-export interface File {
-    name:     string;
-    external: External;
-};
-
-export interface External {
-    url: string;
-};
+export type File = ({
+    name: string;
+}) & ({
+    file: {
+        url: string;
+        expiry_time: string;
+    };
+    type: "file";
+} | {
+    external: {
+        url: string;
+    };
+    type: "external";
+})
 
 export interface Select {
     name: string;

@@ -1,6 +1,8 @@
 'use strict'
 import * as Notion from './notion.types'
 import { URL } from 'url'
+import { AxiosInstance } from 'axios'
+import fs from 'fs'
 
 export const removeCom = (str: string) => str.replace(',', ' ').replace('/', ' ').replace(/\s{2,}/, ' ').trim()
 
@@ -78,36 +80,56 @@ export const toAnnotations = (color?: string): Notion.Annotations => {
 }
 
 export const toText = (content: string, href?: string): Notion.Text => {
-    if (href) {
-        return {
-            content,
-            link: {
-                url: href,
-            }
-        }
-    } else {
-        return {
-            content,
-            link: undefined
-        }
+    return {
+        content,
+        link: typeof href == 'string' ? { url: href } : href
     }
 }
 
 export const toImage = (src: string, index: number, company_name: string): Notion.File => {
-    return {
-        name: `${company_name}_${index}`,
-        external: {
-            url: src
+    const type = src.startsWith("http") ? "external" : "file"
+    const name = `${company_name}_${index}`
+    const now = new Date()
+    now.setDate(now.getDate()+7)
+    if (type == 'external') {
+        return { type, name,
+            external: {
+                url: src
+            }
+        }
+    } else {
+        return { type, name,
+            file: {
+                url: src,
+                expiry_time: now.toISOString()
+            }
         }
     }
 }
 
 export const thumbnails = (company_images: string[] | { url: string }[], com: string): Notion.File[] => {
-    return company_images.map((img, i: number) => {
+    return company_images.map((img: string | { url: string }, i: number) => {
         if (typeof img == 'string') {
             return toImage(img, i, com)
         } else {
             return toImage(img.url, i, com)
         }
     });
+}
+
+async function downloadImage(axios: AxiosInstance, url: string) {
+    const filename = url.split('/').pop() as string
+    const responseType = 'stream'
+    return await axios.get(url, { responseType })
+        .then((response) => {
+            console.log(response.status)
+            if (response.status !== 200) Error('response error')
+            const contentType = response.headers["content-type"]
+            if (contentType && contentType.startsWith("image")) {
+                return url
+            }
+            const fileWriter = fs.createWriteStream(filename)
+            response.data.pipe(fileWriter)
+            return filename
+        })
 }

@@ -19,7 +19,8 @@ export async function writeNotion(properties: PageStats, platform: Platform) {
             : process.env.ROCKET_NOTION_DB
     ) ?? ""
     const equals = properties.아이디.title[0].text.content
-    const coverURL = properties.썸네일.files[0].external.url
+    const defaultImage = properties.썸네일.files[0]
+    const coverURL = defaultImage.type == 'external' ? defaultImage.external.url : defaultImage.file.url
     await notion.databases.query({
         database_id,
         filter: { or: [{ type: 'title', title: { equals }, property: '아이디' }] }
