@@ -1,8 +1,9 @@
 'use strict'
 import * as Notion from './notion.types'
 import { URL } from 'url'
-import { AxiosInstance } from 'axios'
 import fs from 'fs'
+import { axios } from './rocket.main'
+import { AxiosError } from 'axios'
 
 export const removeCom = (str: string) => str.replace(',', ' ').replace('/', ' ').replace(/\s{2,}/, ' ').trim()
 
@@ -117,19 +118,26 @@ export const thumbnails = (company_images: string[] | { url: string }[], com: st
     });
 }
 
-async function downloadImage(axios: AxiosInstance, url: string) {
-    const filename = url.split('/').pop() as string
+export async function downloadImage(url: string, company_name?: string, index?: number) {
+    let filename = removeQuery(url).split('/').pop() as string
+    let ext = filename.split('.').pop() as string
+    if (index) company_name = `${company_name}_${index}`
+    if (company_name) filename = `${company_name}.${ext}`
     const responseType = 'stream'
     return await axios.get(url, { responseType })
         .then((response) => {
-            console.log(response.status)
-            if (response.status !== 200) Error('response error')
             const contentType = response.headers["content-type"]
             if (contentType && contentType.startsWith("image")) {
+                console.log(`IMAGE URL: "${url}"`)
                 return url
             }
+            filename = `./images/${filename}`
             const fileWriter = fs.createWriteStream(filename)
             response.data.pipe(fileWriter)
+            console.log(`IMAGE URL: "${filename}"`)
             return filename
+        }, (reason: AxiosError)=>{
+            console.error(reason.message)
+            return url
         })
 }

@@ -15,7 +15,19 @@
         "lib": [
             "es2015"
         ],
-        "rootDir": "./"
+        "rootDir": "./",
+        // Emit sourcemaps
+        "declaration": true,
+        "declarationMap": true,
+        "inlineSources": true,
+        // Emit type definitions
+        "strict": true,
+        // Linter style rules
+        "noUnusedLocals": false, // Disabled because we use eslint for this.
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        // "noUncheckedIndexedAccess": true,
+        "noPropertyAccessFromIndexSignature": true
     },
     "exclude": [
         "node_modules"
@@ -23,5 +35,9 @@
     "types": [
         "node",
         "aws-sdk"
+    ],
+    "include": [
+        "*.ts",
+        "test/**.ts"
     ]
 }

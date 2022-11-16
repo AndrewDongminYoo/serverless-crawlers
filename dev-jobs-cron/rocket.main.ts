@@ -6,7 +6,7 @@ import fs from 'fs'
 import { load, CheerioAPI, Element } from 'cheerio';
 import { PageStats, Platform } from './notion.types';
 import { writeNotion } from './notionhq';
-import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeQuery } from './notion.utils';
+import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeQuery, downloadImage } from './notion.utils';
 import { URL } from 'url';
 import { parseText, pickLongest, removeWhitespace, saveAllJSON, } from './rocket.utils';
 import { isNotionClientError } from '@notionhq/client';
@@ -32,7 +32,8 @@ const emptyQuery = '조건에 맞는 결과가 없습니다. 키워드를 바꿔
 const axios = Axios.create({
     baseURL,
     headers,
-    timeout: 10000
+    timeout: 10000,
+    withCredentials: true,
 })
 
 const jobDetails: JobDetail[] = []
@@ -59,7 +60,7 @@ const collectInput = async () => {
     }
 }
 
-const shootRocketPunch = async (params: Params): Promise<true|void> => {
+const shootRocketPunch = async (params: Params): Promise<true | void> => {
     return await axios.get('/api/jobs/template', { params })
         .then(async (res: Response) => {
             const div = res.data.data.template
@@ -68,7 +69,8 @@ const shootRocketPunch = async (params: Params): Promise<true|void> => {
                 saveAllJSON(jobDetails);
                 return true
             }
-            $('.company-list > .company.item').each((i, el: Element) => {
+            const companyItems = $('.company-list > .company.item').toArray()
+            companyItems.forEach(async (el: Element, i) => {
                 const title = $(el).find('.content > .company-name > a > h4').text().trim()
                 const href = $(el).find(".logo.image > a").attr('href')?.replace('/jobs', '') ?? ''
                 const likes = $(el).find(".content > .company-name > a.reference-count > span").text()
@@ -92,24 +94,25 @@ const shootRocketPunch = async (params: Params): Promise<true|void> => {
                 headers["Sec-Fetch-Site"] = "none"
                 headers["Sec-Fetch-User"] = "?1"
                 headers["upgrade-insecure-requests"] = "1"
-                axios.get(href, { headers }).then(
+                await axios.get(href, { headers }).then(
                     (response: Response) => {
                         const div = response.data
                         const $: CheerioAPI = load(div)
-                        $("#company-images > div > div > div > div.company-image-box.image")
-                            .each((i: number, img: Element) => {
-                                const src = $(img).attr("data-lazy-src")
-                                src && jobDetail.이미지.push(removeQuery(src))
-                            })
+                        const imageBox = $("#company-images > div > div > div > div.company-image-box.image").toArray()
+                        imageBox.forEach(async (img: Element, i: number) => {
+                            const src = ($(img).attr("data-lazy-src") && $(img).attr("data-src")) ?? ''
+                            const imgUrl = await downloadImage(src, removeWhitespace(title), i)
+                            jobDetail.이미지.push(imgUrl)
+                        })
                     },
                     (error: AxiosError) => {
                         console.error(`can't fetch company page "${error.code}"`)
                     }
                 )
-                const jobs = $(el).find('.content > div.company-jobs-detail > .job-detail > div > a.job-title')
-                jobs.each((i: number, e: Element) => {
-                    if (e.attribs.href) {
-                        const link = new URL(e.attribs.href, baseURL)
+                const jobs = $(el).find('.content > div.company-jobs-detail > .job-detail > div > a.job-title').toArray()
+                jobs.forEach((e: Element, i: number) => {
+                    if (e.attribs['href']) {
+                        const link = new URL(e.attribs['href'], baseURL)
                         const href = decodeURIComponent(link.href)
                         jobDetail.채용.push(href)
                     }
@@ -117,11 +120,13 @@ const shootRocketPunch = async (params: Params): Promise<true|void> => {
                 jobDetail.채용중 = jobDetail.채용.length
                 jobDetails.push(jobDetail)
             })
+            return
         }, (error) => {
             if (error instanceof AxiosError) {
                 console.error("ROCKET PUNCH MAIN PAGE CRAWLING FINISHED")
             }
-        })
+        }
+        )
 }
 
 const iterateJobJSON = async () => {

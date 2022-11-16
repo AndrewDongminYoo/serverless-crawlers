@@ -34,7 +34,8 @@ const headers: CustomHeader = {
 const axios = Axios.create({
     baseURL,
     headers,
-    timeout: 10000
+    timeout: 10000,
+    withCredentials: true,
 })
 
 const getWantedResponse = async (params: Params) => {

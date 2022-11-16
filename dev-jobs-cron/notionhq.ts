@@ -8,15 +8,15 @@ import { delay } from "./notion.utils";
 dotenv.config()
 
 const notion = new Client({
-    auth: process.env.NOTION_TOKEN,
+    auth: process.env['NOTION_TOKEN'],
 })
 
 export async function writeNotion(properties: PageStats, platform: Platform) {
     await delay(400)
     const database_id = (
         platform === '원티드'
-            ? process.env.WANTED_NOTION_DB
-            : process.env.ROCKET_NOTION_DB
+            ? process.env['WANTED_NOTION_DB']
+            : process.env['ROCKET_NOTION_DB']
     ) ?? ""
     const equals = properties.아이디.title[0].text.content
     const defaultImage = properties.썸네일.files[0]
@@ -37,7 +37,6 @@ export async function writeNotion(properties: PageStats, platform: Platform) {
                         console.error(`CREATE FAILED: "${error.message}"`)
                     })
         } else if (results && results.length) {
-            // console.log(JSON.stringify(results[0]["properties"]["URL"], null, 2))
             await notion.pages.update({
                 page_id: results[0].id,
                 properties: properties as Record<keyof PageStats, any>,

@@ -2,7 +2,7 @@ import { Client } from "@notionhq/client"
 
 describe("Notion SDK Client", () => {
     it("Constructs without throwing", () => {
-        new Client({ auth: process.env.NOTION_TOKEN })
+        new Client({ auth: process.env['NOTION_TOKEN'] })
     })
 })
 
