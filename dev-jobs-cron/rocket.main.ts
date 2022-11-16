@@ -101,8 +101,8 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
                         const imageBox = $("#company-images > div > div > div > div.company-image-box.image").toArray()
                         imageBox.forEach(async (img: Element, i: number) => {
                             const src = ($(img).attr("data-lazy-src") && $(img).attr("data-src")) ?? ''
-                            const imgUrl = await downloadImage(src, removeWhitespace(title), i)
-                            jobDetail.이미지.push(imgUrl)
+                            const imgUrl = await downloadImage(axios, src, removeWhitespace(title), i)
+                            imgUrl && jobDetail.이미지.push(imgUrl)
                         })
                     },
                     (error: AxiosError) => {
@@ -183,6 +183,15 @@ async function getDetailOfJobs(href: string, job: JobDetail) {
                 console.error(`there is no data "${error.request?.path}"`)
             }
         })
+}
+
+const isURL = (urlString: string) => {
+    try {
+        const url = new URL(urlString)
+        return url.href === urlString
+    } catch (e) {
+        return false
+    }
 }
 
 export default exploreRocketPunch

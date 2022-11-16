@@ -1,9 +1,11 @@
 'use strict'
 import * as Notion from './notion.types'
 import { URL } from 'url'
+import { AxiosError, AxiosInstance } from 'axios'
+import AWS from 'aws-sdk'
 import fs from 'fs'
-import { axios } from './rocket.main'
-import { AxiosError } from 'axios'
+
+const s3 = new AWS.S3()
 
 export const removeCom = (str: string) => str.replace(',', ' ').replace('/', ' ').replace(/\s{2,}/, ' ').trim()
 
@@ -91,15 +93,17 @@ export const toImage = (src: string, index: number, company_name: string): Notio
     const type = src.startsWith("http") ? "external" : "file"
     const name = `${company_name}_${index}`
     const now = new Date()
-    now.setDate(now.getDate()+7)
+    now.setDate(now.getDate() + 7)
     if (type == 'external') {
-        return { type, name,
+        return {
+            type, name,
             external: {
                 url: src
             }
         }
     } else {
-        return { type, name,
+        return {
+            type, name,
             file: {
                 url: src,
                 expiry_time: now.toISOString()
@@ -118,7 +122,7 @@ export const thumbnails = (company_images: string[] | { url: string }[], com: st
     });
 }
 
-export async function downloadImage(url: string, company_name?: string, index?: number) {
+export async function downloadImage(axios: AxiosInstance, url: string, company_name?: string, index?: number) {
     let filename = removeQuery(url).split('/').pop() as string
     let ext = filename.split('.').pop() as string
     if (index) company_name = `${company_name}_${index}`
@@ -131,13 +135,27 @@ export async function downloadImage(url: string, company_name?: string, index?: 
                 console.log(`IMAGE URL: "${url}"`)
                 return url
             }
-            filename = `./images/${filename}`
-            const fileWriter = fs.createWriteStream(filename)
-            response.data.pipe(fileWriter)
-            console.log(`IMAGE URL: "${filename}"`)
-            return filename
-        }, (reason: AxiosError)=>{
-            console.error(reason.message)
-            return url
+            if (process.env["NODE_ENV"] === 'dev') {
+                filename = `./images/${filename}`
+                const fileWriter = fs.createWriteStream(filename)
+                response.data.pipe(fileWriter)
+                console.log(`IMAGE URL: "${filename}"`)
+                return filename
+            } else if (process.env["NODE_ENV"] === 'prod') {
+                let newLocation;
+                let Bucket = process.env["S3_IMAGE_BUCKET"] ?? ''
+                s3.upload({ Key: filename, Bucket }, (err, data) => {
+                    console.log(`Error: "${err}"`)
+                    console.log(`Location: "${data.Location}"`)
+                    console.log(`ETag: "${data.ETag}"`)
+                    console.log(`Bucket: "${data.Bucket}"`)
+                    console.log(`Key: "${data.Key}"`)
+                    newLocation = Location;
+                })
+                return newLocation;
+            } else return
+        }, (reason: AxiosError) => {
+            console.error(`reason.message: "${reason.message}"`)
         })
 }
+
