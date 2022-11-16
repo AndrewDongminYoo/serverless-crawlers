@@ -1,17 +1,18 @@
 
 'use strict'
 import { parse, UrlWithParsedQuery } from 'url';
-import filters, { Position } from './wanted.filters'
+import filters, { Position } from './wanted.filters';
 import { Job, WantedResponse, DescribeJob, JobDetail } from "./wanted.types";
 import { CustomHeader, Params, Response } from './response.types';
 import { PageStats, Platform } from './notion.types';
-import { writeNotion } from './notionhq';
+import writeNotion, { removeOldJobs } from './notionhq';
 import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeCom } from './notion.utils';
 import { ParsedUrlQuery } from 'querystring';
-import Axios, { AxiosError } from 'axios'
+import Axios, { AxiosError } from 'axios';
 
 const baseURL = 'https://www.wanted.co.kr'
 const selected: Position[] = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', '자바 개발자', 'Node.js 개발자', '파이썬 개발자', '크로스플랫폼 앱 개발자']
+const platform: Platform = "원티드";
 
 const headers: CustomHeader = {
     Accept: 'application/json, text/plain, */*',
@@ -62,7 +63,6 @@ const getWantedResponse = async (params: Params) => {
                         const full_address = address?.geo_location?.n_location?.address ?? address.full_location
                         const API_URL = `${baseURL}/api/v4/jobs/${id}`
                         const WEB_URL = `${baseURL}/wd/${id}`
-                        const platform: Platform = "원티드";
                         const newPage: PageStats = {
                             "URL": { url: API_URL },
                             "주요업무": { rich_text: richText(main_tasks) },
@@ -117,6 +117,7 @@ const exploreWantedAPI = async () => {
             start = await getWantedResponse(start)
         }
     }
+    removeOldJobs(platform)
 }
 
 export default exploreWantedAPI

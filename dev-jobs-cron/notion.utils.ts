@@ -1,16 +1,16 @@
 'use strict'
-import * as Notion from './notion.types'
-import { URL } from 'url'
-import { AxiosError, AxiosInstance } from 'axios'
-import AWS from 'aws-sdk'
-import fs from 'fs'
+import * as Notion from './notion.types';
+import { URL } from 'url';
+import { AxiosError, AxiosInstance } from 'axios';
+import AWS from 'aws-sdk';
+import fs from 'fs';
 
 const s3 = new AWS.S3()
 
 export const removeCom = (str: string) => str.replace(',', ' ').replace('/', ' ').replace(/\s{2,}/, ' ').trim()
 
 export const removeComma = (str: string[]) => {
-    const newArray: string[] = [];
+    const newArray: string[] = []
     str.forEach((value: string) => {
         if (!value.includes('(') && !value.includes(')')) {
             if (value.includes(',')) {
@@ -33,7 +33,7 @@ export const removeQuery = (urlString: string): URL["href"] => {
 
 export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-const urlRegExp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+const urlRegExp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
 
 export const list = (txt: string, separate?: string) => {
     if (separate) {
@@ -41,8 +41,8 @@ export const list = (txt: string, separate?: string) => {
     } else {
         const result: RegExpMatchArray | string[] = txt.match(/([^\n\t\r]){1,100}/g) ?? []
         if (result.length) return result
-        for (let i = 0; i < txt.length; i += 100) result.push(txt.slice(i, i + 100));
-        return result;
+        for (let i = 0; i < txt.length; i += 100) result.push(txt.slice(i, i + 100))
+        return result
     }
 }
 
@@ -119,7 +119,7 @@ export const thumbnails = (company_images: string[] | { url: string }[], com: st
         } else {
             return toImage(img.url, i, com)
         }
-    });
+    })
 }
 
 export async function downloadImage(axios: AxiosInstance, url: string, company_name?: string, index?: number) {
@@ -142,7 +142,7 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
                 console.log(`IMAGE URL: "${filename}"`)
                 return filename
             } else if (process.env["NODE_ENV"] === 'prod') {
-                let newLocation;
+                let newLocation
                 let Bucket = process.env["S3_IMAGE_BUCKET"] ?? ''
                 s3.upload({ Key: filename, Bucket }, (err, data) => {
                     console.log(`Error: "${err}"`)
@@ -150,9 +150,9 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
                     console.log(`ETag: "${data.ETag}"`)
                     console.log(`Bucket: "${data.Bucket}"`)
                     console.log(`Key: "${data.Key}"`)
-                    newLocation = Location;
+                    newLocation = Location
                 })
-                return newLocation;
+                return newLocation
             } else return
         }, (reason: AxiosError) => {
             console.error(`reason.message: "${reason.message}"`)

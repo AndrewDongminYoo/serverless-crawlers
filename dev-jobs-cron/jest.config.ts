@@ -59,4 +59,4 @@ const config: Config.InitialOptions = {
     watchman: defaults.watchman,
 };
 
-export default config;
+export default config

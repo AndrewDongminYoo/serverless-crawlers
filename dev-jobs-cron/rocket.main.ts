@@ -1,17 +1,18 @@
 'use strict'
-import Axios, { AxiosError } from 'axios'
+import Axios, { AxiosError } from 'axios';
 import { Params, Response, CustomHeader } from './response.types';
-import { JobDetail } from './rocket.types'
-import fs from 'fs'
+import { JobDetail } from './rocket.types';
+import fs from 'fs';
 import { load, CheerioAPI, Element } from 'cheerio';
 import { PageStats, Platform } from './notion.types';
-import { writeNotion } from './notionhq';
+import writeNotion, { removeOldJobs } from './notionhq';
 import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeQuery, downloadImage } from './notion.utils';
 import { URL } from 'url';
 import { parseText, pickLongest, removeWhitespace, saveAllJSON, } from './rocket.utils';
 import { isNotionClientError } from '@notionhq/client';
 
 const baseURL = 'https://www.rocketpunch.com'
+const platform: Platform = "로켓펀치"
 
 const headers: CustomHeader = {
     Accept: '*/*',
@@ -41,6 +42,7 @@ const jobDetails: JobDetail[] = []
 const exploreRocketPunch = async () => {
     await collectInput()
     await iterateJobJSON()
+    await removeOldJobs(platform)
 }
 
 const collectInput = async () => {
@@ -66,7 +68,7 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
             const div = res.data.data.template
             const $: CheerioAPI = load(div)
             if ($('.ui.job.items.segment.company-list > div:nth-child(3)').text() == emptyQuery) {
-                saveAllJSON(jobDetails);
+                saveAllJSON(jobDetails)
                 return true
             }
             const companyItems = $('.company-list > .company.item').toArray()
@@ -156,7 +158,6 @@ async function getDetailOfJobs(href: string, job: JobDetail) {
             const { 우대사항, 담당업무, 자격요건 } = parseText(채용상세)
             const 아이디 = href.split('/').filter((value) => value && !isNaN(Number(value))).pop() ?? '아이디'
             const 포지션 = $("body > div.pusher > div.ui.vertical.center.aligned.detail.job-header.header.segment > div > div > h1").text()
-            const platform: Platform = "로켓펀치";
             const newPage: PageStats = {
                 "URL": { url: href },
                 "주요업무": { rich_text: richText(주요업무) },

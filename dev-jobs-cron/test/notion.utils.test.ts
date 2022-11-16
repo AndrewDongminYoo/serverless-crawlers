@@ -14,21 +14,29 @@ import {
     removeQuery,
     removeComma,
     removeCom
-} from '../notion.utils'
-import fs from 'fs/promises'
+} from '../notion.utils';
+import fs from 'fs/promises';
+import Axios from 'axios';
+
+const axios = Axios.create({
+    baseURL: 'https://www.rocketpunch.com',
+    headers: Axios.defaults.headers,
+    timeout: 10000,
+    withCredentials: true,
+})
 
 test('External Hosted Image: Directly Upload to Notion', async () => {
     const external = 'https://image.rocketpunch.com/company/177305/tnmeta_logo_1662363701.jpg'
-    const href = await downloadImage(external)
+    const href = await downloadImage(axios, external)
     expect(href).toEqual(external)
-});
+})
 
 test('non-Notion-hosted Image: Download Base64 and Upload to S3', async () => {
     const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
-    await downloadImage(internal).then(filename=>{
-        expect(filename).toContain('캡처_1662365516.JPG');
-        fs.rm(filename);
-    });
+    await downloadImage(axios, internal).then(filename=>{
+        expect(filename).toContain('캡처_1662365516.JPG')
+        filename && fs.rm(filename)
+    })
 })
 // test('thumbnails', () => {
 //     expect(thumbnails(images))

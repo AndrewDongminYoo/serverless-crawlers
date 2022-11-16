@@ -1,6 +1,6 @@
 'use strict'
 import { JobDetail, ParsedText } from './rocket.types';
-import fs from 'fs'
+import fs from 'fs';
 
 export const removeWhitespace = (str: string) => str.replace('\n', '').replace(/\s{2,}/, ' ').trim()
 
@@ -46,6 +46,6 @@ export function parseText(longDocument: string): ParsedText {
 }
 
 export function saveAllJSON(jobDetails: JobDetail[]) {
-    fs.writeFileSync('./job-urls.json', JSON.stringify(jobDetails, null, 2));
+    fs.writeFileSync('./job-urls.json', JSON.stringify(jobDetails, null, 2))
     console.debug("ROCKET PUNCH URLS SAVED.")
 }
