@@ -1,9 +1,9 @@
 'use strict'
 import { Client, NotionClientError } from "@notionhq/client";
 import { PageObjectResponse, QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
-import dotenv from "dotenv";
 import { PageStats, Platform, 회사명 } from "./notion.types";
 import { delay } from "./notion.utils";
+import dotenv from "dotenv";
 
 dotenv.config()
 
@@ -40,7 +40,8 @@ async function writeNotion(properties: PageStats, platform: Platform) {
             await notion.pages.update({
                 page_id: results[0].id,
                 properties: properties as Record<keyof PageStats, any>,
-                cover: { external: { url: coverURL } }
+                cover: { external: { url: coverURL } },
+                archived: false,
             })
                 .then((res: Partial<PageObjectResponse>) => console.info(`UPDATED: ${res.url}`)
                     , (error: NotionClientError) => {
@@ -87,8 +88,9 @@ export async function removeOldJobs(platform: Platform) {
                 })
             })
         }
+        console.log(`All Expired Job Offer is Deleted.`)
     }, (reason: NotionClientError)=>{
-        console.log(`Notion Client Error: ${reason.message}`)
+        console.error(`Notion Client Error: ${reason.message}`)
     })
 }
 

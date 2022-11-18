@@ -60,6 +60,7 @@ const collectInput = async () => {
         page++
         if (stop) break
     }
+    console.debug("ROCKET PUNCH MAIN PAGE CRAWLING FINISHED")
 }
 
 const shootRocketPunch = async (params: Params): Promise<true | void> => {
@@ -125,7 +126,7 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
             return
         }, (error) => {
             if (error instanceof AxiosError) {
-                console.error("ROCKET PUNCH MAIN PAGE CRAWLING FINISHED")
+                console.error(`Rocket Punch Error: ${error.message}`)
             }
         }
         )
@@ -140,6 +141,7 @@ const iterateJobJSON = async () => {
             await getDetailOfJobs(href, job)
         }
     }
+    console.debug("ROCKET PUNCH DETAIL PAGE CRAWLING FINISHED")
 }
 
 async function getDetailOfJobs(href: string, job: JobDetail) {
@@ -184,15 +186,6 @@ async function getDetailOfJobs(href: string, job: JobDetail) {
                 console.error(`there is no data "${error.request?.path}"`)
             }
         })
-}
-
-const isURL = (urlString: string) => {
-    try {
-        const url = new URL(urlString)
-        return url.href === urlString
-    } catch (e) {
-        return false
-    }
 }
 
 export default exploreRocketPunch

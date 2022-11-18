@@ -118,6 +118,7 @@ const exploreWantedAPI = async () => {
         }
     }
     removeOldJobs(platform)
+    console.debug("WANTED API FETCHING FINISHED")
 }
 
 export default exploreWantedAPI

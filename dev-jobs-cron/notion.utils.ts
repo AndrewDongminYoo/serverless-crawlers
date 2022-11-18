@@ -1,9 +1,13 @@
 'use strict'
 import * as Notion from './notion.types';
 import { URL } from 'url';
-import { AxiosError, AxiosInstance } from 'axios';
+import { AxiosError, AxiosInstance, AxiosResponse, ResponseType } from 'axios';
 import AWS from 'aws-sdk';
 import fs from 'fs';
+import { Stream } from 'node:stream';
+import dotenv from "dotenv";
+
+dotenv.config()
 
 const s3 = new AWS.S3()
 
@@ -123,39 +127,39 @@ export const thumbnails = (company_images: string[] | { url: string }[], com: st
 }
 
 export async function downloadImage(axios: AxiosInstance, url: string, company_name?: string, index?: number) {
-    let filename = removeQuery(url).split('/').pop() as string
-    let ext = filename.split('.').pop() as string
-    if (index) company_name = `${company_name}_${index}`
-    if (company_name) filename = `${company_name}.${ext}`
-    const responseType = 'stream'
-    return await axios.get(url, { responseType })
-        .then((response) => {
+    const getFilename = (url: string) => {
+        let filename = removeQuery(url).split('/').pop() as string
+        let ext = filename.split('.').pop() as string
+        if (index) company_name = `${company_name}_${index}`
+        if (company_name) filename = `${company_name}.${ext}`
+        return filename
+    }
+    const responseType: ResponseType = 'stream'
+    return await axios.get<Stream, AxiosResponse<Stream>>(url, { responseType })
+        .then<string, string>(async (response: AxiosResponse<Stream>) => {
             const contentType = response.headers["content-type"]
             if (contentType && contentType.startsWith("image")) {
                 console.log(`IMAGE URL: "${url}"`)
                 return url
             }
             if (process.env["NODE_ENV"] === 'dev') {
-                filename = `./images/${filename}`
+                const filename = `./images/${getFilename(url) }`
                 const fileWriter = fs.createWriteStream(filename)
                 response.data.pipe(fileWriter)
                 console.log(`IMAGE URL: "${filename}"`)
                 return filename
             } else if (process.env["NODE_ENV"] === 'prod') {
-                let newLocation
+                const Key = getFilename(url)
                 let Bucket = process.env["S3_IMAGE_BUCKET"] ?? ''
-                s3.upload({ Key: filename, Bucket }, (err, data) => {
-                    console.log(`Error: "${err}"`)
-                    console.log(`Location: "${data.Location}"`)
-                    console.log(`ETag: "${data.ETag}"`)
-                    console.log(`Bucket: "${data.Bucket}"`)
-                    console.log(`Key: "${data.Key}"`)
-                    newLocation = Location
-                })
-                return newLocation
-            } else return
+                const uploaded = s3.upload({ Key, Bucket, Body: response.data });
+                const newLocation = (await uploaded.promise()).Location
+                console.log(`IMAGE URL: "${newLocation}"`)
+                return decodeURIComponent(newLocation)
+            }
+            return url
         }, (reason: AxiosError) => {
             console.error(`reason.message: "${reason.message}"`)
+            return url
         })
 }
 

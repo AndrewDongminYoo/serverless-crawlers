@@ -18,26 +18,42 @@ import {
 import fs from 'fs/promises';
 import Axios from 'axios';
 
-const axios = Axios.create({
-    baseURL: 'https://www.rocketpunch.com',
-    headers: Axios.defaults.headers,
-    timeout: 10000,
-    withCredentials: true,
-})
 
-test('External Hosted Image: Directly Upload to Notion', async () => {
-    const external = 'https://image.rocketpunch.com/company/177305/tnmeta_logo_1662363701.jpg'
-    const href = await downloadImage(axios, external)
-    expect(href).toEqual(external)
-})
 
-test('non-Notion-hosted Image: Download Base64 and Upload to S3', async () => {
-    const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
-    await downloadImage(axios, internal).then(filename=>{
+describe('download image function test', ()=>{
+    const axios = Axios.create({
+        baseURL: 'https://www.rocketpunch.com',
+        headers: Axios.defaults.headers,
+        timeout: 10000,
+        withCredentials: true,
+    })
+
+    test('External Hosted Image: Directly Upload to Notion', async () => {
+        const external = 'https://image.rocketpunch.com/company/177305/tnmeta_logo_1662363701.jpg'
+        const href = await downloadImage(axios, external)
+        expect(href).toEqual(external)
+    })
+
+    test('non-Notion-hosted Image: Download Base64', async () => {
+        process.env['NODE_ENV'] = 'dev'
+        const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
+        const filename = await downloadImage(axios, internal)
+        console.log(filename)
         expect(filename).toContain('캡처_1662365516.JPG')
-        filename && fs.rm(filename)
+        const exists = await fs.stat(filename).then(stat => stat.isFile())
+        exists && await fs.rm(filename)
+    })
+
+    test('non-Notion-hosted Image: Pipe Base64 to S3', async () => {
+        process.env['NODE_ENV'] = 'prod'
+        process.env["S3_IMAGE_BUCKET"] = "my-secret-bucket-1857"
+        const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
+        const filename = await downloadImage(axios, internal)
+        console.log(filename)
+        expect(filename).toContain('캡처_1662365516.JPG')
     })
 })
+
 // test('thumbnails', () => {
 //     expect(thumbnails(images))
 // })

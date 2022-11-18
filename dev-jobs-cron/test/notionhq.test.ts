@@ -1,4 +1,7 @@
 import { Client } from "@notionhq/client"
+import dotenv from "dotenv";
+
+dotenv.config()
 
 describe("Notion SDK Client", () => {
     it("Constructs without throwing", () => {
@@ -6,6 +9,31 @@ describe("Notion SDK Client", () => {
     })
 })
 
+describe("Notion Old Job Offers Delete", () => {
+    const notion = new Client({
+        auth: process.env['NOTION_TOKEN'],
+    })
+
+    test('list old pages', async () => {
+        const database_id = '원티드'
+        const lastWeek = new Date()
+        lastWeek.setDate(lastWeek.getDate() - 7)
+        const pages = await notion.databases.query({
+            database_id,
+            filter: {
+                or: [{
+                    last_edited_time: {
+                        before: lastWeek.toISOString(),
+                    },
+                    timestamp: "last_edited_time",
+                    type: "last_edited_time",
+                }],
+            }, archived: false
+        })
+        expect(pages).toHaveProperty('results');
+        expect(pages.results).toHaveLength(0);
+    });
+})
 
 // const seven = new Date()
 // seven.setDate(seven.getDate() + 7)
