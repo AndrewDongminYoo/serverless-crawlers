@@ -15,7 +15,7 @@ describe("Notion Old Job Offers Delete", () => {
     })
 
     test('list old pages', async () => {
-        const database_id = '원티드'
+        const database_id = process.env['WANTED_NOTION_DB'] as string
         const lastWeek = new Date()
         lastWeek.setDate(lastWeek.getDate() - 7)
         const pages = await notion.databases.query({
@@ -30,9 +30,9 @@ describe("Notion Old Job Offers Delete", () => {
                 }],
             }, archived: false
         })
-        expect(pages).toHaveProperty('results');
-        expect(pages.results).toHaveLength(0);
-    });
+        expect(pages).toHaveProperty('results')
+        expect(pages.results).toHaveLength(0)
+    })
 })
 
 // const seven = new Date()

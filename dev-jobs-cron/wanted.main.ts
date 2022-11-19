@@ -6,13 +6,13 @@ import { Job, WantedResponse, DescribeJob, JobDetail } from "./wanted.types";
 import { CustomHeader, Params, Response } from './response.types';
 import { PageStats, Platform } from './notion.types';
 import writeNotion, { removeOldJobs } from './notionhq';
-import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeCom } from './notion.utils';
+import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeCom, toURL, toNumber } from './notion.utils';
 import { ParsedUrlQuery } from 'querystring';
 import Axios, { AxiosError } from 'axios';
 
 const baseURL = 'https://www.wanted.co.kr'
 const selected: Position[] = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', '자바 개발자', 'Node.js 개발자', '파이썬 개발자', '크로스플랫폼 앱 개발자']
-const platform: Platform = "원티드";
+const platform: Platform = "원티드"
 
 const headers: CustomHeader = {
     Accept: 'application/json, text/plain, */*',
@@ -64,22 +64,22 @@ const getWantedResponse = async (params: Params) => {
                         const API_URL = `${baseURL}/api/v4/jobs/${id}`
                         const WEB_URL = `${baseURL}/wd/${id}`
                         const newPage: PageStats = {
-                            "URL": { url: API_URL },
-                            "주요업무": { rich_text: richText(main_tasks) },
-                            "회사타입": { multi_select: multiSelect(removeComma(company_types)) },
-                            "포지션": { rich_text: richText(position) },
-                            "회사위치": { rich_text: richText(full_address) },
-                            "우대사항": { rich_text: richText(preferred_points) },
-                            "좋아요": { number: like_count },
-                            "기술스택": { multi_select: multiSelect(removeComma(skills)) },
-                            "회사설명": { rich_text: richText(intro) },
-                            "혜택및복지": { rich_text: richText(benefits) },
-                            "자격요건": { rich_text: richText(requirements) },
-                            "아이디": { title: toTitle(String(id), WEB_URL) },
-                            "분야": { select: toSelect(removeCom(industry_name)) },
-                            "응답률": { number: application_response_stats.avg_rate },
-                            "회사명": { rich_text: toTitle(name, WEB_URL) },
-                            "썸네일": { files: thumbnails(company_images, name) },
+                            "URL": toURL(API_URL),
+                            "주요업무": richText(main_tasks),
+                            "회사타입": multiSelect(removeComma(company_types)),
+                            "포지션": richText(position),
+                            "회사위치": richText(full_address),
+                            "우대사항": richText(preferred_points),
+                            "좋아요": toNumber(like_count),
+                            "기술스택": multiSelect(removeComma(skills)),
+                            "회사설명": richText(intro),
+                            "혜택및복지": richText(benefits),
+                            "자격요건": richText(requirements),
+                            "아이디": toTitle(String(id), WEB_URL),
+                            "분야": toSelect(removeCom(industry_name)),
+                            "응답률": toNumber(application_response_stats.avg_rate),
+                            "회사명": richText(name, WEB_URL),
+                            "썸네일": thumbnails(company_images, name),
                         }
                         await writeNotion(newPage, platform)
                     }, (error: any) => {
@@ -121,4 +121,4 @@ const exploreWantedAPI = async () => {
     console.debug("WANTED API FETCHING FINISHED")
 }
 
-export default exploreWantedAPI
+export default exploreWantedAPI;

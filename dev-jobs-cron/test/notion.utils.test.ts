@@ -8,8 +8,6 @@ import {
     multiSelect,
     toTitle,
     toSelect,
-    toRichText,
-    list,
     delay,
     removeQuery,
     removeComma,
@@ -37,7 +35,7 @@ describe('download image function test', ()=>{
     test('non-Notion-hosted Image: Download Base64', async () => {
         process.env['NODE_ENV'] = 'dev'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
-        const filename = await downloadImage(axios, internal)
+        const filename = await downloadImage(axios, internal) as string
         console.log(filename)
         expect(filename).toContain('캡처_1662365516.JPG')
         const exists = await fs.stat(filename).then(stat => stat.isFile())

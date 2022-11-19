@@ -10,8 +10,8 @@
         "watch": "tsc -w",
         "lint": "tslint '*.ts'",
         "start": "ts-node -e \"require('./handler').run()\"",
-        "rocket-punch": "ts-node -e \"require('./handler').exploreRocketPunch()\"",
-        "wanted-crawl": "ts-node -e \"require('./handler').exploreWantedAPI()\"",
+        "rocket-punch": "ts-node -e \"require('./rocket.main').default()\"",
+        "wanted-crawl": "ts-node -e \"require('./wanted.main').default()\"",
         "typecheck": "tsc --noEmit",
         "build": "tsc",
         "format": "prettier --write *.ts"

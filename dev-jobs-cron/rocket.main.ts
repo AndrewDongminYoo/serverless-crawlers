@@ -6,7 +6,7 @@ import fs from 'fs';
 import { load, CheerioAPI, Element } from 'cheerio';
 import { PageStats, Platform } from './notion.types';
 import writeNotion, { removeOldJobs } from './notionhq';
-import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeQuery, downloadImage } from './notion.utils';
+import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeQuery, downloadImage, toURL, toNumber } from './notion.utils';
 import { URL } from 'url';
 import { parseText, pickLongest, removeWhitespace, saveAllJSON, } from './rocket.utils';
 import { isNotionClientError } from '@notionhq/client';
@@ -144,39 +144,37 @@ const iterateJobJSON = async () => {
     console.debug("ROCKET PUNCH DETAIL PAGE CRAWLING FINISHED")
 }
 
-async function getDetailOfJobs(href: string, job: JobDetail) {
-    await axios.get(href)
+async function getDetailOfJobs(url: string, job: JobDetail) {
+    await axios.get(url)
         .then(async (response) => {
             const html = response.data
             const $ = load(html)
             const 주요업무 = removeWhitespace($("div.duty.break > .full-text").text() ?? $("div.duty.break").text())
-            let 스택 = $("a.ui.circular.basic.label").map((i, el) => $(el).text()).toArray()
-            let 산업분야 = $(".job-company-areas > a").map((i, el) => $(el).text()).toArray()
-            스택 = removeComma(스택)
-            산업분야 = removeComma(산업분야)
+            const 스택 = removeComma($("a.ui.circular.basic.label").map((i, el) => $(el).text()).toArray())
+            const 산업분야 = removeComma($(".job-company-areas > a").map((i, el) => $(el).text()).toArray())
             const 복지혜택 = $(".ui.divided.company.info.items > .item > .content").text()
             const 회사위치 = $(".office.item > .address").text()
             const 채용상세 = $(".content.break > .full-text").text() ?? $(".content.break").text()
             const { 우대사항, 담당업무, 자격요건 } = parseText(채용상세)
-            const 아이디 = href.split('/').filter((value) => value && !isNaN(Number(value))).pop() ?? '아이디'
+            const 아이디 = url.split('/').filter((value) => value && !isNaN(Number(value))).pop() ?? '아이디'
             const 포지션 = $("body > div.pusher > div.ui.vertical.center.aligned.detail.job-header.header.segment > div > div > h1").text()
             const newPage: PageStats = {
-                "URL": { url: href },
-                "주요업무": { rich_text: richText(주요업무) },
-                "회사타입": { multi_select: multiSelect(산업분야) },
-                "포지션": { rich_text: richText(포지션) },
-                "회사위치": { rich_text: richText(회사위치) },
-                "우대사항": { rich_text: richText(우대사항) },
-                "기술스택": { multi_select: multiSelect(스택) },
-                "회사설명": { rich_text: richText(담당업무) },
-                "혜택및복지": { rich_text: richText(복지혜택) },
-                "자격요건": { rich_text: richText(자격요건) },
-                "아이디": { title: toTitle(아이디, href) },
-                "분야": { select: toSelect(pickLongest(산업분야)) },
-                "응답률": { number: job.응답률 ? 90 : 69 },
-                "회사명": { rich_text: toTitle(job.회사명, new URL(job.사이트, baseURL).href) },
-                "썸네일": { files: thumbnails(job.이미지, job.회사명) },
-                "좋아요": { number: job.좋아요 }
+                "URL": toURL(url),
+                "주요업무": richText(주요업무),
+                "회사타입": multiSelect(산업분야),
+                "포지션": richText(포지션),
+                "회사위치": richText(회사위치),
+                "우대사항": richText(우대사항),
+                "기술스택": multiSelect(스택),
+                "회사설명": richText(담당업무),
+                "혜택및복지": richText(복지혜택),
+                "자격요건": richText(자격요건),
+                "아이디": toTitle(아이디, url),
+                "분야": toSelect(pickLongest(산업분야)),
+                "응답률": toNumber(job.응답률 ? 90 : 69),
+                "회사명": richText(job.회사명, url),
+                "썸네일": thumbnails(job.이미지, job.회사명),
+                "좋아요": toNumber(job.좋아요)
             }
             await writeNotion(newPage, platform)
         }, (error) => {
@@ -188,4 +186,4 @@ async function getDetailOfJobs(href: string, job: JobDetail) {
         })
 }
 
-export default exploreRocketPunch
+export default exploreRocketPunch;

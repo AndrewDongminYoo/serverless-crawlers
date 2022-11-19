@@ -57,6 +57,6 @@ const config: Config.InitialOptions = {
     useStderr: defaults.useStderr,
     watch: defaults.watch,
     watchman: defaults.watchman,
-};
+}
 
-export default config
+export default config;

@@ -1,19 +1,17 @@
 'use strict'
-import * as Notion from './notion.types';
-import { URL } from 'url';
+import { NotionText, NotionFile, NotionSelect, NotionTitle, RichText, MultiSelect, SelectRequest, Numeric, NotionURL } from './notion.types'
+import { Annotations, ArrayElement, SelectColor, AnnotationColor, TextRichTextItem } from './notion.types'
 import { AxiosError, AxiosInstance, AxiosResponse, ResponseType } from 'axios';
-import AWS from 'aws-sdk';
+import S3 from 'aws-sdk/clients/s3';
 import fs from 'fs';
 import { Stream } from 'node:stream';
 import dotenv from "dotenv";
 
 dotenv.config()
 
-const s3 = new AWS.S3()
+export const removeCom = (str: string): string => str.replace(',', ' ').replace('/', ' ').replace(/\s{2,}/, ' ').trim()
 
-export const removeCom = (str: string) => str.replace(',', ' ').replace('/', ' ').replace(/\s{2,}/, ' ').trim()
-
-export const removeComma = (str: string[]) => {
+export const removeComma = (str: string[]): string[] => {
     const newArray: string[] = []
     str.forEach((value: string) => {
         if (!value.includes('(') && !value.includes(')')) {
@@ -35,11 +33,13 @@ export const removeQuery = (urlString: string): URL["href"] => {
     return decodeURIComponent(curUrl.href)
 }
 
-export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+export const delay = (ms: number): Promise<never> => new Promise(resolve => setTimeout(resolve, ms))
+
+export const isEmpty = (thing?: any[]): boolean => !thing || (thing &&!thing.length)
 
 const urlRegExp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
 
-export const list = (txt: string, separate?: string) => {
+const list = (txt: string, separate?: string) => {
     if (separate) {
         return txt.split(separate).map(t => t && t.trim())
     } else {
@@ -50,32 +50,53 @@ export const list = (txt: string, separate?: string) => {
     }
 }
 
-export const toRichText = (content: string, href?: string, color?: string): Notion.RichText => {
-    return {
-        text: toText(content, href),
+export const toNumber = (number: number): Numeric => {
+    return { number };
+}
+
+export const toURL = (urlString: string): NotionURL => {
+    const url = new URL(urlString).href;
+    return { url }
+}
+
+const toRichText = (content: string, href?: string | null, color?: AnnotationColor): TextRichTextItem => {
+    const rich_text: TextRichTextItem = {
+        text: toText(content, href ?? null),
         annotations: toAnnotations(color),
         plain_text: content,
-        href: href ?? content.match(urlRegExp)?.[0],
+        href: href ?? content.match(urlRegExp)?.[0] ?? null,
     }
+    return rich_text
 }
 
-export const richText = (contents: string): Notion.RichText[] => {
-    return list(contents, undefined).map((txt) => toRichText(txt))
+export const richText = (contents: string, href?: string | null): RichText => {
+    const rich_text = list(contents, undefined).map((txt) => {
+        if (!href) href = txt.match(urlRegExp)?.[0] ?? null
+        return toRichText(txt, href)
+    })
+    return { rich_text }
 }
 
-export const multiSelect = (contents: string[]): Notion.Select[] => {
-    return contents.map((txt) => toSelect(txt))
+export const multiSelect = (contents: string[]): MultiSelect => {
+    const multi_select: SelectRequest[] = []
+    contents.forEach((txt) => {
+        const select = toSelect(txt)
+        multi_select.push(select.select)
+    })
+    return { multi_select }
 }
 
-export const toTitle = (content: string, href?: string): Notion.RichText[] => {
-    return [content].map((cnt) => toRichText(cnt, href))
+export const toTitle = (content: string, href?: string): NotionTitle => {
+    const title: TextRichTextItem[] = [content].map((cnt) => toRichText(cnt, href ?? ''))
+    return { title: title }
 }
 
-export const toSelect = (name: string): Notion.Select => {
-    return { name: name.replace(/,+/, '') }
+export const toSelect = (name: string, color?: SelectColor): NotionSelect => {
+    const select = { name: name.replace(/,+/, ''), color }
+    return { select }
 }
 
-export const toAnnotations = (color?: string): Notion.Annotations => {
+export const toAnnotations = (color?: AnnotationColor): Annotations => {
     return {
         bold: false,
         italic: false,
@@ -86,28 +107,28 @@ export const toAnnotations = (color?: string): Notion.Annotations => {
     }
 }
 
-export const toText = (content: string, href?: string): Notion.Text => {
+export const toText = (content: string, href: string | null): NotionText => {
     return {
         content,
-        link: typeof href == 'string' ? { url: href } : href
+        link: href !== null ? { url: href } : href
     }
 }
 
-export const toImage = (src: string, index: number, company_name: string): Notion.File => {
-    const type = src.startsWith("http") ? "external" : "file"
+export const toImage = (src: string, index: number, company_name: string): ArrayElement<NotionFile["files"]> => {
     const name = `${company_name}_${index}`
     const now = new Date()
     now.setDate(now.getDate() + 7)
+    const type = src.startsWith("http") ? "external" : "file"
     if (type == 'external') {
         return {
-            type, name,
+            name, type,
             external: {
                 url: src
             }
         }
     } else {
         return {
-            type, name,
+            name, type,
             file: {
                 url: src,
                 expiry_time: now.toISOString()
@@ -116,14 +137,15 @@ export const toImage = (src: string, index: number, company_name: string): Notio
     }
 }
 
-export const thumbnails = (company_images: string[] | { url: string }[], com: string): Notion.File[] => {
-    return company_images.map((img: string | { url: string }, i: number) => {
+export const thumbnails = (company_images: (string | { url: string })[], com: string): NotionFile => {
+    const files = company_images.map((img, i: number) => {
         if (typeof img == 'string') {
             return toImage(img, i, com)
         } else {
             return toImage(img.url, i, com)
         }
     })
+    return { files }
 }
 
 export async function downloadImage(axios: AxiosInstance, url: string, company_name?: string, index?: number) {
@@ -136,7 +158,7 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
     }
     const responseType: ResponseType = 'stream'
     return await axios.get<Stream, AxiosResponse<Stream>>(url, { responseType })
-        .then<string, string>(async (response: AxiosResponse<Stream>) => {
+        .then<string, void>(async (response: AxiosResponse<Stream>) => {
             const contentType = response.headers["content-type"]
             if (contentType && contentType.startsWith("image")) {
                 console.log(`IMAGE URL: "${url}"`)
@@ -151,7 +173,8 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
             } else if (process.env["NODE_ENV"] === 'prod') {
                 const Key = getFilename(url)
                 let Bucket = process.env["S3_IMAGE_BUCKET"] ?? ''
-                const uploaded = s3.upload({ Key, Bucket, Body: response.data });
+                const s3: S3 = new S3()
+                const uploaded = s3.upload({ Key, Bucket, Body: response.data })
                 const newLocation = (await uploaded.promise()).Location
                 console.log(`IMAGE URL: "${newLocation}"`)
                 return decodeURIComponent(newLocation)
@@ -159,7 +182,6 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
             return url
         }, (reason: AxiosError) => {
             console.error(`reason.message: "${reason.message}"`)
-            return url
         })
 }
 

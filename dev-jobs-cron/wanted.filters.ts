@@ -9,27 +9,27 @@ export interface Filters {
     sub_tags?:          Option[];
     languages:          Record<Language, number>;
     positions:          Record<Position, number>;
-}
+};
 
 interface CompanyTag {
     key:                string;
     display:            string;
     sub_tags:           Option[];
-}
+};
 
 export type Countries = Option & {
     key:        "all" | "tw" | "sg" | "jp" | "kr" | "others"
     display:    "전세계" | "대만" | "싱가폴" | "일본" | "한국" | "기타"
-}
+};
 
 interface Option {
     key:        string;
     display:    string;
     locations?: Option[];
     districts?: Option[];
-}
+};
 
-export type JobSort = "company.response_rate_order" | "job.latest_order" | "job.compensation_order" | "job.popularity_order"
+export type JobSort = "company.response_rate_order" | "job.latest_order" | "job.compensation_order" | "job.popularity_order";
 
 const job_sort: Record<string, JobSort> = {
     "응답률순": "company.response_rate_order",
@@ -1928,7 +1928,7 @@ export type Position =
     'VR 엔지니어' |
     'BI 엔지니어' |
     '루비온레일즈 개발자' |
-    'CIO,Chief Information Officer'
+    'CIO,Chief Information Officer';
 
 export type Language = 'Python' | 'Spring Framework' |
     'AWS' | 'Git' |
@@ -1939,7 +1939,7 @@ export type Language = 'Python' | 'Spring Framework' |
     'Swift' | 'C / C++' |
     'PHP' | 'Docker' |
     'React' | 'Github' |
-    'JPA' | 'C++'
+    'JPA' | 'C++';
 
 const languages: Record<Language, number> = {
     "Python": 1554,
@@ -2015,4 +2015,4 @@ const filters: Filters = {
     positions
 }
 
-export default filters
+export default filters;
