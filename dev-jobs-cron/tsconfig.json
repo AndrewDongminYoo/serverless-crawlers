@@ -23,11 +23,12 @@
         // Emit type definitions
         "strict": true,
         // Linter style rules
-        "noUnusedLocals": false, // Disabled because we use eslint for this.
+        "noUnusedLocals": true, // Disabled because we use eslint for this.
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         // "noUncheckedIndexedAccess": true,
-        "noPropertyAccessFromIndexSignature": true
+        "noPropertyAccessFromIndexSignature": true,
+        "noImplicitAny": true,
     },
     "exclude": [
         "node_modules"

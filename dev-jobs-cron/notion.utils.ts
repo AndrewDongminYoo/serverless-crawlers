@@ -1,11 +1,11 @@
-'use strict'
-import { NotionText, NotionFile, NotionSelect, NotionTitle, RichText, MultiSelect, SelectRequest, Numeric, NotionURL } from './notion.types'
-import { Annotations, ArrayElement, SelectColor, AnnotationColor, TextRichTextItem } from './notion.types'
+import { AnnotationColor, Annotations, ArrayElement, SelectColor, TextRichTextItem } from './notion.types'
 import { AxiosError, AxiosInstance, AxiosResponse, ResponseType } from 'axios';
+import { MultiSelect, NotionFile, NotionSelect, NotionText, NotionTitle, NotionURL, Numeric, RichText, SelectRequest } from './notion.types'
+import { PassThrough, Stream } from 'node:stream';
 import S3 from 'aws-sdk/clients/s3';
-import fs from 'fs';
-import { Stream } from 'node:stream';
+import { assert } from 'console';
 import dotenv from "dotenv";
+import fs from 'fs';
 
 dotenv.config()
 
@@ -35,9 +35,9 @@ export const removeQuery = (urlString: string): URL["href"] => {
 
 export const delay = (ms: number): Promise<never> => new Promise(resolve => setTimeout(resolve, ms))
 
-export const isEmpty = (thing?: any[]): boolean => !thing || (thing &&!thing.length)
+export const isEmpty = (thing?: unknown[]): boolean => !thing || (thing && !thing.length)
 
-const urlRegExp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig
+const urlRegExp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/ig
 
 const list = (txt: string, separate?: string) => {
     if (separate) {
@@ -59,9 +59,9 @@ export const toURL = (urlString: string): NotionURL => {
     return { url }
 }
 
-const toRichText = (content: string, href?: string | null, color?: AnnotationColor): TextRichTextItem => {
+const toRichText = (content: string, href: string | null, color?: AnnotationColor): TextRichTextItem => {
     const rich_text: TextRichTextItem = {
-        text: toText(content, href ?? null),
+        text: toText(content, href),
         annotations: toAnnotations(color),
         plain_text: content,
         href: href ?? content.match(urlRegExp)?.[0] ?? null,
@@ -88,7 +88,7 @@ export const multiSelect = (contents: string[]): MultiSelect => {
 
 export const toTitle = (content: string, href?: string): NotionTitle => {
     const title: TextRichTextItem[] = [content].map((cnt) => toRichText(cnt, href ?? ''))
-    return { title: title }
+    return { title }
 }
 
 export const toSelect = (name: string, color?: SelectColor): NotionSelect => {
@@ -114,35 +114,19 @@ export const toText = (content: string, href: string | null): NotionText => {
     }
 }
 
-export const toImage = (src: string, index: number, company_name: string): ArrayElement<NotionFile["files"]> => {
+export const toImage = (url: string, index: number, company_name: string): ArrayElement<NotionFile["files"]> => {
     const name = `${company_name}_${index}`
-    const now = new Date()
-    now.setDate(now.getDate() + 7)
-    const type = src.startsWith("http") ? "external" : "file"
-    if (type == 'external') {
-        return {
-            name, type,
-            external: {
-                url: src
-            }
-        }
-    } else {
-        return {
-            name, type,
-            file: {
-                url: src,
-                expiry_time: now.toISOString()
-            }
-        }
-    }
+    const type = 'external'
+    return { name, type, external: { url } }
 }
 
-export const thumbnails = (company_images: (string | { url: string })[], com: string): NotionFile => {
+export const thumbnails = (company_images: (string | { url: string })[], company_name: string): NotionFile => {
     const files = company_images.map((img, i: number) => {
-        if (typeof img == 'string') {
-            return toImage(img, i, com)
+        if (typeof img == 'object' && 'url' in img) {
+            return toImage(img.url, i, company_name)
         } else {
-            return toImage(img.url, i, com)
+            assert(typeof img == 'string')
+            return toImage(img, i, company_name)
         }
     })
     return { files }
@@ -152,36 +136,59 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
     const getFilename = (url: string) => {
         let filename = removeQuery(url).split('/').pop() as string
         let ext = filename.split('.').pop() as string
+        ext = ext.toLowerCase()
         if (index) company_name = `${company_name}_${index}`
         if (company_name) filename = `${company_name}.${ext}`
-        return filename
+        return { filename, ext }
     }
     const responseType: ResponseType = 'stream'
     return await axios.get<Stream, AxiosResponse<Stream>>(url, { responseType })
-        .then<string, void>(async (response: AxiosResponse<Stream>) => {
+        .then(async (response: AxiosResponse<Stream>) => {
             const contentType = response.headers["content-type"]
+            const stream: Stream = response.data
+            const { filename: Key, ext: Extension } = getFilename(url)
+            const filename = `./images/${Key}`
             if (contentType && contentType.startsWith("image")) {
-                console.log(`IMAGE URL: "${url}"`)
-                return url
+                const decodedUrl = decodeURIComponent(url)
+                console.log(`IMAGE URL: "${decodedUrl}"`)
+                return decodedUrl
             }
-            if (process.env["NODE_ENV"] === 'dev') {
-                const filename = `./images/${getFilename(url) }`
-                const fileWriter = fs.createWriteStream(filename)
-                response.data.pipe(fileWriter)
-                console.log(`IMAGE URL: "${filename}"`)
-                return filename
-            } else if (process.env["NODE_ENV"] === 'prod') {
-                const Key = getFilename(url)
-                let Bucket = process.env["S3_IMAGE_BUCKET"] ?? ''
-                const s3: S3 = new S3()
-                const uploaded = s3.upload({ Key, Bucket, Body: response.data })
-                const newLocation = (await uploaded.promise()).Location
-                console.log(`IMAGE URL: "${newLocation}"`)
-                return decodeURIComponent(newLocation)
+            switch (process.env["NODE_ENV"]) {
+                case ('dev'): {
+                    // static 다운로드
+                    const fileWriter = fs.createWriteStream(filename)
+                    stream.pipe(fileWriter)
+                    const filePath = decodeURIComponent(filename)
+                    console.log(`IMAGE URL: "${filePath}"`)
+                    return filePath
+                }
+                case ('prod'): {
+                    // S3 업로드
+                    const Bucket = process.env["S3_IMAGE_BUCKET"] ?? ''
+                    const s3: S3 = new S3()
+                    const uploaded = s3.upload({ Key, Bucket, Body: stream, ACL: "public-read" })
+                    const location = (await uploaded.promise()).Location
+                    const newLocation = decodeURIComponent(location)
+                    console.log(`IMAGE URL: "${newLocation}"`)
+                    return newLocation
+                }
+                case ('test'): {
+                    // base64 문자열 변환
+                    const encoding = 'base64'
+                    const chunks = new PassThrough({ encoding })
+                    stream.pipe(chunks)
+                    let Content = '';
+                    for await (const chunk of chunks) {
+                        Content += chunk;
+                    }
+                    const base64String = `data:image/${Extension};base64,${Content}`
+                    return base64String
+                }
+                default:
+                    return
             }
-            return url
         }, (reason: AxiosError) => {
-            console.error(`reason.message: "${reason.message}"`)
+            console.error(`download ${company_name} image failed: "${reason.message}"`)
         })
 }
 

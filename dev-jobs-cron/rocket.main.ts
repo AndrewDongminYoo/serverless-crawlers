@@ -1,15 +1,16 @@
-'use strict'
 import Axios, { AxiosError } from 'axios';
-import { Params, Response, CustomHeader } from './response.types';
-import { JobDetail } from './rocket.types';
-import fs from 'fs';
-import { load, CheerioAPI, Element } from 'cheerio';
+import { CheerioAPI, Element, load } from 'cheerio';
+import { CustomHeader, Params, Response } from './response.types';
 import { PageStats, Platform } from './notion.types';
-import writeNotion, { removeOldJobs } from './notionhq';
-import { multiSelect, richText, toSelect, toTitle, thumbnails, removeComma, removeQuery, downloadImage, toURL, toNumber } from './notion.utils';
+import { downloadImage, isEmpty, multiSelect, removeComma, richText, thumbnails, toNumber, toSelect, toTitle, toURL } from './notion.utils';
+import { parseText, pickLongest, removeWhitespace, saveAllJSON } from './rocket.utils';
+import { JobDetail } from './rocket.types';
 import { URL } from 'url';
-import { parseText, pickLongest, removeWhitespace, saveAllJSON, } from './rocket.utils';
+import fs from 'fs';
 import { isNotionClientError } from '@notionhq/client';
+import { removeOldJobs } from './notionhq';
+import { stringify } from 'querystring'
+import writeNotion from './notionhq';
 
 const baseURL = 'https://www.rocketpunch.com'
 const platform: Platform = "로켓펀치"
@@ -33,11 +34,11 @@ const emptyQuery = '조건에 맞는 결과가 없습니다. 키워드를 바꿔
 const axios = Axios.create({
     baseURL,
     headers,
-    timeout: 10000,
+    timeout: 20000,
     withCredentials: true,
 })
 
-const jobDetails: JobDetail[] = []
+let jobDetails: JobDetail[] = []
 
 const exploreRocketPunch = async () => {
     await collectInput()
@@ -48,17 +49,17 @@ const exploreRocketPunch = async () => {
 const collectInput = async () => {
     console.debug("ROCKET PUNCH MAIN PAGE CRAWLING STARTED")
     let page = 1
-    while (true) {
-        let start: Params = {
+    let stop = false
+    while (!stop) {
+        const start: Params = {
             // 검색 조건을  변경하려면 파라미터를 수정하세요.
             job: '1', // SW개발자
             hiring_types: '0', // 풀타임
             location: '서울특별시',
             page: String(page),
         }
-        const stop = await shootRocketPunch(start)
+        stop = await shootRocketPunch(start) as boolean
         page++
-        if (stop) break
     }
     console.debug("ROCKET PUNCH MAIN PAGE CRAWLING FINISHED")
 }
@@ -73,15 +74,17 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
                 return true
             }
             const companyItems = $('.company-list > .company.item').toArray()
-            companyItems.forEach(async (el: Element, i) => {
+            if (isEmpty(companyItems)) return
+            companyItems.forEach(async (el: Element) => {
                 const title = $(el).find('.content > .company-name > a > h4').text().trim()
+                const company_name = removeWhitespace(title)
                 const href = $(el).find(".logo.image > a").attr('href')?.replace('/jobs', '') ?? ''
                 const likes = $(el).find(".content > .company-name > a.reference-count > span").text()
                 const thumbnail = $(el).find(".logo.image > a > div > img").attr("src")
                 const jobDetail: JobDetail = {
                     아이디: el.attribs['data-company_id'],
                     사이트: href,
-                    회사명: removeWhitespace(title),
+                    회사명: company_name,
                     채용: [],
                     채용중: 0,
                     좋아요: Number(likes),
@@ -89,7 +92,7 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
                     응답률: false,
                 }
                 jobDetail.응답률 = $(el).find(".content > div.company-name > span > div").first().text() == '응답률 우수'
-                thumbnail && jobDetail.이미지.push(removeQuery(thumbnail))
+                thumbnail && jobDetail.이미지.push(thumbnail)
                 headers.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
                 headers["Cache-Control"] = "max-age=0"
                 headers["Sec-Fetch-Dest"] = "document"
@@ -102,18 +105,24 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
                         const div = response.data
                         const $: CheerioAPI = load(div)
                         const imageBox = $("#company-images > div > div > div > div.company-image-box.image").toArray()
+                        if (isEmpty(imageBox)) return
                         imageBox.forEach(async (img: Element, i: number) => {
-                            const src = ($(img).attr("data-lazy-src") && $(img).attr("data-src")) ?? ''
-                            const imgUrl = await downloadImage(axios, src, removeWhitespace(title), i)
-                            imgUrl && jobDetail.이미지.push(imgUrl)
+                            const src = $(img).attr("data-lazy-src") ?? $(img).attr("data-src")
+                            if (src) {
+                                const imgUrl = await downloadImage(axios, src, company_name, i)
+                                imgUrl && jobDetail.이미지.push(imgUrl)
+                            }
                         })
                     },
                     (error: AxiosError) => {
-                        console.error(`can't fetch company page "${error.code}"`)
+                        if (error.code?.startsWith('ECONN')) {
+                            console.error(`⌦ can't fetch ${company_name} company page "${error.message}"`)
+                        }
                     }
                 )
                 const jobs = $(el).find('.content > div.company-jobs-detail > .job-detail > div > a.job-title').toArray()
-                jobs.forEach((e: Element, i: number) => {
+                if (isEmpty(jobs)) return
+                jobs.forEach((e: Element, _i: number) => {
                     if (e.attribs['href']) {
                         const link = new URL(e.attribs['href'], baseURL)
                         const href = decodeURIComponent(link.href)
@@ -124,20 +133,22 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
                 jobDetails.push(jobDetail)
             })
             return
-        }, (error) => {
-            if (error instanceof AxiosError) {
-                console.error(`Rocket Punch Error: ${error.message}`)
-            }
-        }
-        )
+        }, (error: AxiosError) => {
+            console.error(`Rocket Punch Error:\n ${JSON.stringify(error, null, 2)}`)
+            const u = new URL('/api/jobs/template')
+            u.search = stringify({...params})
+            console.debug(u)
+        })
 }
 
 const iterateJobJSON = async () => {
     console.debug("ROCKET PUNCH DETAIL PAGE CRAWLING STARTED")
-    const jobDetailJSON = JSON.parse(fs.readFileSync('./job-urls.json', { encoding: 'utf-8', flag: 'r' }))
-    const jobs: JobDetail[] = jobDetailJSON as JobDetail[]
-    for (let job of jobs) {
-        for (let href of job.채용) {
+    if (jobDetails.length === 0) {
+        const jobDetailJSON = JSON.parse(fs.readFileSync('./job-urls.json', { encoding: 'utf-8', flag: 'r' }))
+        jobDetails = jobDetailJSON as JobDetail[]
+    }
+    for (const job of jobDetails) {
+        for (const href of job.채용) {
             await getDetailOfJobs(href, job)
         }
     }
@@ -150,8 +161,8 @@ async function getDetailOfJobs(url: string, job: JobDetail) {
             const html = response.data
             const $ = load(html)
             const 주요업무 = removeWhitespace($("div.duty.break > .full-text").text() ?? $("div.duty.break").text())
-            const 스택 = removeComma($("a.ui.circular.basic.label").map((i, el) => $(el).text()).toArray())
-            const 산업분야 = removeComma($(".job-company-areas > a").map((i, el) => $(el).text()).toArray())
+            const 스택 = removeComma($("a.ui.circular.basic.label").map((_i, el) => $(el).text()).toArray())
+            const 산업분야 = removeComma($(".job-company-areas > a").map((_i, el) => $(el).text()).toArray())
             const 복지혜택 = $(".ui.divided.company.info.items > .item > .content").text()
             const 회사위치 = $(".office.item > .address").text()
             const 채용상세 = $(".content.break > .full-text").text() ?? $(".content.break").text()
@@ -181,7 +192,7 @@ async function getDetailOfJobs(url: string, job: JobDetail) {
             if (isNotionClientError(error)) {
                 console.error(`Notion API Failed: "${error.message}"`)
             } else if (error instanceof AxiosError) {
-                console.error(`there is no data "${error.request?.path}"`)
+                console.error(`there is no data "${url}"`)
             }
         })
 }

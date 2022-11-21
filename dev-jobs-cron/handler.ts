@@ -1,5 +1,4 @@
-'use strict'
-import { Context, APIGatewayEvent } from 'aws-lambda';
+import { APIGatewayEvent, Context } from 'aws-lambda';
 import exploreRocketPunch from './rocket.main';
 import exploreWantedAPI from './wanted.main';
 

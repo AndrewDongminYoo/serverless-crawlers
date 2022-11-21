@@ -1,29 +1,27 @@
-import {
-    downloadImage,
-    thumbnails,
-    toImage,
-    toText,
-    toAnnotations,
-    richText,
-    multiSelect,
-    toTitle,
-    toSelect,
-    delay,
-    removeQuery,
-    removeComma,
-    removeCom
-} from '../notion.utils';
-import fs from 'fs/promises';
 import Axios from 'axios';
+import { downloadImage } from '../notion.utils';
+import fs from 'fs';
+import path from 'path';
 
 
-
-describe('download image function test', ()=>{
+describe('download image function test', () => {
     const axios = Axios.create({
         baseURL: 'https://www.rocketpunch.com',
         headers: Axios.defaults.headers,
         timeout: 10000,
         withCredentials: true,
+    })
+
+    afterEach(() => {
+        const clearDirectory = function (directoryPath: string) {
+            if (fs.existsSync(directoryPath)) {
+                fs.readdirSync(directoryPath).forEach((file) => {
+                    const curPath = path.join(directoryPath, file);
+                    fs.lstatSync(curPath).isDirectory() ? clearDirectory(curPath) : fs.unlinkSync(curPath)
+                });
+            }
+        };
+        clearDirectory("images")
     })
 
     test('External Hosted Image: Directly Upload to Notion', async () => {
@@ -32,14 +30,12 @@ describe('download image function test', ()=>{
         expect(href).toEqual(external)
     })
 
-    test('non-Notion-hosted Image: Download Base64', async () => {
+    test('non-Notion-hosted Image: Download image', async () => {
         process.env['NODE_ENV'] = 'dev'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
         const filename = await downloadImage(axios, internal) as string
         console.log(filename)
         expect(filename).toContain('캡처_1662365516.JPG')
-        const exists = await fs.stat(filename).then(stat => stat.isFile())
-        exists && await fs.rm(filename)
     })
 
     test('non-Notion-hosted Image: Pipe Base64 to S3', async () => {
@@ -49,6 +45,20 @@ describe('download image function test', ()=>{
         const filename = await downloadImage(axios, internal)
         console.log(filename)
         expect(filename).toContain('캡처_1662365516.JPG')
+    })
+
+    test('non-Notion-hosted Image: Convert to Base64 String', async () => {
+        process.env['NODE_ENV'] = 'test'
+        const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
+        const filename = await downloadImage(axios, internal)
+        expect(filename).toContain('data:image/jpg;base64,')
+    })
+
+    test('non-Notion-hosted Image: ignore image', async () => {
+        process.env['NODE_ENV'] = 'none'
+        const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
+        const filename = await downloadImage(axios, internal)
+        expect(filename).toBeUndefined()
     })
 })
 

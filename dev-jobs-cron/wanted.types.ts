@@ -1,15 +1,14 @@
-'use strict';
 export interface WantedResponse {
     links:                      Links;
     data:                       Job[];
     is_callable_external_job:   boolean;
     is_score:                   boolean;
-};
+}
 
 export interface Links {
     prev:       string;
     next:       string;
-};
+}
 
 export interface Job {
     status:          string;
@@ -25,32 +24,32 @@ export interface Job {
     position:        string;
     score:           null;
     category_tags:   CategoryTag[];
-};
+}
 
 export interface AddressSimple {
     country:        Country;
     location:       Location;
-};
+}
 
 export enum Country {
     한국 = "한국",
-};
+}
 
 export enum Location {
     서울 = "서울",
-};
+}
 
 export interface CategoryTag {
     parent_id:  number;
     id:         number;
-};
+}
 
 export interface Company {
     id:                         number;
     industry_name:              string;
     application_response_stats: ApplicationResponseStats;
     name:                       string;
-};
+}
 
 export interface ApplicationResponseStats {
     avg_rate:       number;
@@ -59,33 +58,33 @@ export interface ApplicationResponseStats {
     avg_day?:       number;
     remained_count: number;
     type:           Type;
-};
+}
 
 export enum Level {
     VeryHigh = "very_high",
-};
+}
 
 export enum Type {
     AppliedReplyDone = "applied_reply_done",
-};
+}
 
 export interface Img {
     origin:         string;
     thumb:          string;
-};
+}
 
 export enum Status {
     Active = "active",
-};
+}
 
 export interface Links {
     prev:       string;
     next:       string;
-};
+}
 
 export interface JobDetail {
     job:        DescribeJob;
-};
+}
 
 export interface DescribeJob {
     address:                Address;
@@ -101,7 +100,7 @@ export interface DescribeJob {
     title_img:              Img;
     position:               string;
     category_tags:          CategoryTag[];
-};
+}
 
 export interface Address {
     country:            string;
@@ -109,36 +108,36 @@ export interface Address {
     geo_location:       GeoLocation;
     location:           string;
     country_code:       string;
-};
+}
 
 export interface GeoLocation {
     n_location:         NLocation;
     location:           AddressDetail;
     location_type:      string;
     bounds:             null;
-};
+}
 
 export interface AddressDetail {
     lat:            number;
     lng:            number;
-};
+}
 
 export interface NLocation {
     lat:            number;
     lng:            number;
     address:        string;
-};
+}
 
 export interface CompanyImage {
     url:            string;
     id:             number;
-};
+}
 
 export interface Tag {
     title:          string;
     id:             number;
     kind_title:     string;
-};
+}
 
 export interface Detail {
     requirements:           string;
@@ -146,4 +145,4 @@ export interface Detail {
     intro:                  string;
     benefits:               string;
     preferred_points:       string;
-};
+}

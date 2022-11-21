@@ -1,7 +1,6 @@
-'use strict'
 import { Client, NotionClientError } from "@notionhq/client";
-import { PageObjectResponse, QueryDatabaseResponse, TextRichTextItemResponse } from "@notionhq/client/build/src/api-endpoints";
-import { Prop, PageStats, Platform, RichText } from "./notion.types";
+import { PageObjectResponse, QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
+import { PageStats, Platform, Prop, RichText } from "./notion.types";
 import { delay, isEmpty } from "./notion.utils";
 import dotenv from "dotenv";
 
@@ -29,7 +28,7 @@ async function writeNotion(properties: PageStats, platform: Platform) {
         if (isEmpty(results)) {
             await notion.pages.create({
                 parent: { database_id },
-                properties: properties as Record<Prop, any>,
+                properties: properties as Record<Prop, never>,
                 cover: { external: { url: coverURL } }
             })
                 .then((res: Partial<PageObjectResponse>) => console.info(`CREATED: ${res.url}`)
@@ -37,10 +36,9 @@ async function writeNotion(properties: PageStats, platform: Platform) {
                         console.error(`CREATE FAILED: "${error.message}"`)
                     })
         } else if (results && results.length) {
-            const props = results[0].properties as Record<Prop, any>
             await notion.pages.update({
                 page_id: results[0].id,
-                properties: properties as Record<Prop, any>,
+                properties: properties as Record<Prop, never>,
                 cover: { external: { url: coverURL } },
                 archived: false,
             })
