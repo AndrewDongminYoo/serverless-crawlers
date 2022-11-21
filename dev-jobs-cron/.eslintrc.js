@@ -20,11 +20,20 @@ module.exports = {
                 args: "all",
                 argsIgnorePattern: "^_",
                 // Allow assertion types.
-                varsIgnorePattern: "^_assert",
+                varsIgnorePattern: "^_",
                 caughtErrors: "none",
                 ignoreRestSiblings: true,
             },
         ],
         "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
+        "sort-imports": [
+            "error", {
+                "ignoreCase": false,
+                "ignoreDeclarationSort": false,
+                "ignoreMemberSort": false,
+                "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
+                "allowSeparatedGroups": false
+            }
+        ],
     },
 }
