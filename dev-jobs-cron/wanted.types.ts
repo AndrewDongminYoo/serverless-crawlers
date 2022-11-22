@@ -1,3 +1,5 @@
+import { Countries, Location } from "./wanted.filters";
+
 export interface WantedResponse {
     links:                      Links;
     data:                       Job[];
@@ -5,70 +7,51 @@ export interface WantedResponse {
     is_score:                   boolean;
 }
 
-export interface Links {
+interface Links {
     prev:       string;
     next:       string;
 }
 
 export interface Job {
-    status:          string;
+    status:          Status;
     company:         Company;
     title_img:       Img;
+    logo_img:        Img;
     compare_country: boolean;
     due_time:        string;
     like_count:      number;
     id:              number;
-    logo_img:        Img;
     address:         AddressSimple;
-    matching_score:  null;
-    position:        string;
-    score:           null;
     category_tags:   CategoryTag[];
 }
 
-export interface AddressSimple {
-    country:        Country;
-    location:       Location;
+interface AddressSimple {
+    country:        Countries["display"];
+    location:       Location["display"];
 }
 
-export enum Country {
-    한국 = "한국",
+interface CategoryTag {
+    parent_id:      number;
+    id:             number;
 }
 
-export enum Location {
-    서울 = "서울",
-}
-
-export interface CategoryTag {
-    parent_id:  number;
-    id:         number;
-}
-
-export interface Company {
+interface Company {
     id:                         number;
     industry_name:              string;
     application_response_stats: ApplicationResponseStats;
     name:                       string;
 }
 
-export interface ApplicationResponseStats {
+interface ApplicationResponseStats {
     avg_rate:       number;
-    level:          Level;
+    level:          "very_high";
     delayed_count:  number;
     avg_day?:       number;
     remained_count: number;
-    type:           Type;
+    type:           "applied_reply_done";
 }
 
-export enum Level {
-    VeryHigh = "very_high",
-}
-
-export enum Type {
-    AppliedReplyDone = "applied_reply_done",
-}
-
-export interface Img {
+interface Img {
     origin:         string;
     thumb:          string;
 }
@@ -77,12 +60,7 @@ export enum Status {
     Active = "active",
 }
 
-export interface Links {
-    prev:       string;
-    next:       string;
-}
-
-export interface JobDetail {
+export interface WantedJob {
     job:        DescribeJob;
 }
 
@@ -102,7 +80,7 @@ export interface DescribeJob {
     category_tags:          CategoryTag[];
 }
 
-export interface Address {
+interface Address {
     country:            string;
     full_location:      string;
     geo_location:       GeoLocation;
@@ -110,36 +88,36 @@ export interface Address {
     country_code:       string;
 }
 
-export interface GeoLocation {
+interface GeoLocation {
     n_location:         NLocation;
     location:           AddressDetail;
     location_type:      string;
     bounds:             null;
 }
 
-export interface AddressDetail {
+interface AddressDetail {
     lat:            number;
     lng:            number;
 }
 
-export interface NLocation {
+interface NLocation {
     lat:            number;
     lng:            number;
     address:        string;
 }
 
-export interface CompanyImage {
+interface CompanyImage {
     url:            string;
     id:             number;
 }
 
-export interface Tag {
+interface Tag {
     title:          string;
     id:             number;
     kind_title:     string;
 }
 
-export interface Detail {
+interface Detail {
     requirements:           string;
     main_tasks:             string;
     intro:                  string;

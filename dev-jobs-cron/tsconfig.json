@@ -26,7 +26,7 @@
         "noUnusedLocals": true, // Disabled because we use eslint for this.
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        // "noUncheckedIndexedAccess": true,
+        "noUncheckedIndexedAccess": false,
         "noPropertyAccessFromIndexSignature": true,
         "noImplicitAny": true,
     },

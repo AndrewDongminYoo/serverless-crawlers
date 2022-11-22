@@ -1,18 +1,18 @@
 import Axios, { AxiosError } from 'axios';
 import { CheerioAPI, Element, load } from 'cheerio';
-import { CustomHeader, Params, Response } from './response.types';
+import { CustomHeader, Response } from './response.types';
 import { PageStats, Platform } from './notion.types';
+import { URL, URLSearchParams } from 'url';
 import { downloadImage, isEmpty, multiSelect, removeComma, richText, thumbnails, toNumber, toSelect, toTitle, toURL } from './notion.utils';
 import { parseText, pickLongest, removeWhitespace, saveAllJSON } from './rocket.utils';
-import { JobDetail } from './rocket.types';
-import { URL } from 'url';
+import { RocketJobDetail } from './rocket.types';
 import fs from 'fs';
 import { isNotionClientError } from '@notionhq/client';
 import { removeOldJobs } from './notionhq';
-import { stringify } from 'querystring'
 import writeNotion from './notionhq';
 
 const baseURL = 'https://www.rocketpunch.com'
+const templateURL = "/api/jobs/template"
 const platform: Platform = "로켓펀치"
 
 const headers: CustomHeader = {
@@ -38,35 +38,35 @@ const axios = Axios.create({
     withCredentials: true,
 })
 
-let jobDetails: JobDetail[] = []
+let jobDetails: RocketJobDetail[] = []
 
 const exploreRocketPunch = async () => {
-    await collectInput()
-    await iterateJobJSON()
+    await (async () => console.debug("ROCKET PUNCH MAIN PAGE CRAWLING STARTED"))()
+    await collectInput().finally(()=>console.debug("ROCKET PUNCH MAIN PAGE CRAWLING FINISHED"))
+    await (async () => console.debug("ROCKET PUNCH DETAIL PAGE CRAWLING STARTED"))()
+    await iterateJobJSON().finally(() => console.debug("ROCKET PUNCH DETAIL PAGE CRAWLING FINISHED"))
     await removeOldJobs(platform)
 }
 
 const collectInput = async () => {
-    console.debug("ROCKET PUNCH MAIN PAGE CRAWLING STARTED")
     let page = 1
     let stop = false
     while (!stop) {
-        const start: Params = {
+        const start = new URLSearchParams({
             // 검색 조건을  변경하려면 파라미터를 수정하세요.
             job: '1', // SW개발자
             hiring_types: '0', // 풀타임
             location: '서울특별시',
             page: String(page),
-        }
+        })
         stop = await shootRocketPunch(start) as boolean
         page++
     }
-    console.debug("ROCKET PUNCH MAIN PAGE CRAWLING FINISHED")
 }
 
-const shootRocketPunch = async (params: Params): Promise<true | void> => {
-    return await axios.get('/api/jobs/template', { params })
-        .then(async (res: Response) => {
+const shootRocketPunch = async (params: URLSearchParams): Promise<true | void> => {
+    return await axios.get(templateURL, { params })
+        .then(async (res: Response<"Rocket">) => {
             const div = res.data.data.template
             const $: CheerioAPI = load(div)
             if ($('.ui.job.items.segment.company-list > div:nth-child(3)').text() == emptyQuery) {
@@ -81,8 +81,8 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
                 const href = $(el).find(".logo.image > a").attr('href')?.replace('/jobs', '') ?? ''
                 const likes = $(el).find(".content > .company-name > a.reference-count > span").text()
                 const thumbnail = $(el).find(".logo.image > a > div > img").attr("src")
-                const jobDetail: JobDetail = {
-                    아이디: el.attribs['data-company_id'],
+                const jobDetail: RocketJobDetail = {
+                    아이디: el.attribs['data-company_id'] ?? '',
                     사이트: href,
                     회사명: company_name,
                     채용: [],
@@ -101,17 +101,16 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
                 headers["Sec-Fetch-User"] = "?1"
                 headers["upgrade-insecure-requests"] = "1"
                 await axios.get(href, { headers }).then(
-                    (response: Response) => {
+                    (response: Response<"HTML">) => {
                         const div = response.data
                         const $: CheerioAPI = load(div)
                         const imageBox = $("#company-images > div > div > div > div.company-image-box.image").toArray()
                         if (isEmpty(imageBox)) return
                         imageBox.forEach(async (img: Element, i: number) => {
                             const src = $(img).attr("data-lazy-src") ?? $(img).attr("data-src")
-                            if (src) {
-                                const imgUrl = await downloadImage(axios, src, company_name, i)
+                            src && await downloadImage(axios, src, company_name, i).then((imgUrl)=>{
                                 imgUrl && jobDetail.이미지.push(imgUrl)
-                            }
+                            })
                         })
                     },
                     (error: AxiosError) => {
@@ -134,30 +133,31 @@ const shootRocketPunch = async (params: Params): Promise<true | void> => {
             })
             return
         }, (error: AxiosError) => {
-            console.error(`Rocket Punch Error:\n ${JSON.stringify(error, null, 2)}`)
-            const u = new URL('/api/jobs/template')
-            u.search = stringify({...params})
-            console.debug(u)
+            if (error.status == 500) {
+                console.warn("It Seems Rocket Punch Server's Error")
+                return
+            }
+            const link = new URL(templateURL, baseURL)
+            link.search = params.toString()
+            console.error(`Rocket Punch Error: \n${link} \n${error.message}`)
         })
 }
 
 const iterateJobJSON = async () => {
-    console.debug("ROCKET PUNCH DETAIL PAGE CRAWLING STARTED")
     if (jobDetails.length === 0) {
         const jobDetailJSON = JSON.parse(fs.readFileSync('./job-urls.json', { encoding: 'utf-8', flag: 'r' }))
-        jobDetails = jobDetailJSON as JobDetail[]
+        jobDetails = jobDetailJSON as RocketJobDetail[]
     }
     for (const job of jobDetails) {
         for (const href of job.채용) {
             await getDetailOfJobs(href, job)
         }
     }
-    console.debug("ROCKET PUNCH DETAIL PAGE CRAWLING FINISHED")
 }
 
-async function getDetailOfJobs(url: string, job: JobDetail) {
+async function getDetailOfJobs(url: string, job: RocketJobDetail) {
     await axios.get(url)
-        .then(async (response) => {
+        .then(async (response: Response<"HTML">) => {
             const html = response.data
             const $ = load(html)
             const 주요업무 = removeWhitespace($("div.duty.break > .full-text").text() ?? $("div.duty.break").text())
@@ -192,7 +192,7 @@ async function getDetailOfJobs(url: string, job: JobDetail) {
             if (isNotionClientError(error)) {
                 console.error(`Notion API Failed: "${error.message}"`)
             } else if (error instanceof AxiosError) {
-                console.error(`there is no data "${url}"`)
+                console.error(`There is no data from "${url}"`)
             }
         })
 }

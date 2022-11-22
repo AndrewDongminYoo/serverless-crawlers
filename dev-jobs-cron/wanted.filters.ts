@@ -1,33 +1,31 @@
 export interface Filters {
     job_sort:           Record<string, JobSort>;
     company_tags:       CompanyTag[];
-    employee_count:     Option[];
+    employee_count:     Tags[];
     years:              Record<Year, string>
     countries:          Countries[];
-    sub_tags?:          Option[];
+    sub_tags?:          Tags[];
     languages:          Record<Language, number>;
     positions:          Record<Position, number>;
 }
 
-interface CompanyTag {
-    key:                string;
-    display:            string;
-    sub_tags:           Option[];
+interface Tags {
+    key:        string;
+    display:    string;
+}
+
+type CompanyTag = Tags & {
+    sub_tags:     Tags[];
+}
+
+export type Location = Tags & {
+    districts?:        Location[];
 }
 
 export type Countries = {
-    key:        "all" | "tw" | "sg" | "jp" | "kr" | "others"
-    display:    "전세계" | "대만" | "싱가폴" | "일본" | "한국" | "기타"
-    locations:  Countries[];
-} | {
-    key:        string;
-    display:    string;
-    districts?: Countries[];
-}
-
-interface Option {
-    key:        string;
-    display:    string;
+    key:        "all" | "kr" | "tw" | "sg" | "jp" | "others"
+    display:    "전세계" | "한국" | "대만" | "싱가폴" | "일본" | "기타"
+    locations:  Location[];
 }
 
 export type JobSort = "company.response_rate_order" | "job.latest_order" | "job.compensation_order" | "job.popularity_order";
@@ -509,7 +507,8 @@ const company_tags: CompanyTag[] = [
         ]
     }
 ]
-const employee_count: Option[] = [
+
+const employee_count: Tags[] = [
     {
         "display": "전체",
         "key": "all"
@@ -551,6 +550,7 @@ const employee_count: Option[] = [
         "key": "10001~"
     }
 ]
+
 const TEN = ['-1', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] as const
 
 export type Year = typeof TEN[number]
@@ -1894,119 +1894,113 @@ const countries: Countries[] = [
 ]
 
 export type Position =
-    '개발 전체' |
-    '웹 개발자' |
-    '서버 개발자' |
-    '소프트웨어 엔지니어' |
-    '프론트엔드 개발자' |
-    '자바 개발자' |
-    '안드로이드 개발자' |
-    'C,C++ 개발자' |
-    '데이터 엔지니어' |
-    'Node.js 개발자' |
-    'iOS 개발자' |
-    '파이썬 개발자' |
-    'DevOps / 시스템 관리자' |
-    '시스템,네트워크 관리자' |
-    '머신러닝 엔지니어' |
-    '개발 매니저' |
-    '기술지원' |
-    '빅데이터 엔지니어' |
-    'QA,테스트 엔지니어' |
-    '데이터 사이언티스트' |
-    '보안 엔지니어' |
-    '프로덕트 매니저' |
-    '블록체인 플랫폼 엔지니어' |
-    '임베디드 개발자' |
-    'PHP 개발자' |
-    '하드웨어 엔지니어' |
-    '.NET 개발자' |
-    '웹 퍼블리셔' |
-    'DBA' |
-    '크로스플랫폼 앱 개발자' |
-    '영상,음성 엔지니어' |
-    '그래픽스 엔지니어' |
-    'ERP전문가' |
-    'CTO,Chief Technology Officer' |
-    'VR 엔지니어' |
-    'BI 엔지니어' |
-    '루비온레일즈 개발자' |
-    'CIO,Chief Information Officer';
+    "개발 전체" |
+    ".NET 개발자" | "BI 엔지니어" | "C,C++ 개발자" |
+    "CIO,Chief Information Officer" |
+    "CTO,Chief Technology Officer" |
+    "DBA" | "DevOps / 시스템 관리자" | "ERP전문가" |
+    "Node.js 개발자" | "PHP 개발자" |
+    "QA,테스트 엔지니어" | "VR 엔지니어" |
+    "iOS 개발자" |
+    "개발 매니저" |
+    "그래픽스 엔지니어" |
+    "기술지원" |
+    "데이터 사이언티스트" |
+    "데이터 엔지니어" |
+    "루비온레일즈 개발자" |
+    "머신러닝 엔지니어" |
+    "보안 엔지니어" |
+    "블록체인 플랫폼 엔지니어" |
+    "빅데이터 엔지니어" |
+    "서버 개발자" |
+    "소프트웨어 엔지니어" |
+    "시스템,네트워크 관리자" |
+    "안드로이드 개발자" |
+    "영상,음성 엔지니어" |
+    "웹 개발자" |
+    "웹 퍼블리셔" |
+    "임베디드 개발자" |
+    "자바 개발자" |
+    "크로스플랫폼 앱 개발자" |
+    "파이썬 개발자" |
+    "프로덕트 매니저" |
+    "프론트엔드 개발자" |
+    "하드웨어 엔지니어";
 
 export type Language =
-    'Python' | 'Spring Framework' |
-    'AWS' | 'Git' |
-    'iOS' | 'HTML' |
-    'JavaScript' | 'MySQL' |
-    'SQL' | 'Linux' |
-    'Android' | 'Kotlin' |
-    'Swift' | 'C / C++' |
-    'PHP' | 'Docker' |
-    'React' | 'Github' |
-    'JPA' | 'C++';
-
-const languages: Record<Language, number> = {
-    "Python": 1554,
-    "Spring Framework": 3078,
-    "AWS": 1698,
-    "Git": 1411,
-    "iOS": 1457,
-    "HTML": 1539,
-    "JavaScript": 1541,
-    "MySQL": 1464,
-    "SQL": 1562,
-    "Linux": 1459,
-    "Android": 1438,
-    "Kotlin": 1544,
-    "Swift": 1563,
-    "C / C++": 1530,
-    "PHP": 1552,
-    "Docker": 2217,
-    "React": 1469,
-    "Github": 1412,
-    "JPA": 3451,
-    "C++": 1786
-}
+    "AWS" | "Android" |
+    "C / C++" | "C++" |
+    "Docker" | "Git" |
+    "Github" | "HTML" |
+    "JPA" | "JavaScript" |
+    "Kotlin" | "Linux" |
+    "MySQL" | "PHP" |
+    "Python" | "React" |
+    "SQL" | "Spring Framework" |
+    "Swift" | "iOS";
 
 const positions: Record<Position, number> = {
     "개발 전체": 518,
-    "웹 개발자": 873,
-    "서버 개발자": 872,
-    "소프트웨어 엔지니어": 10110,
-    "프론트엔드 개발자": 669,
-    "자바 개발자": 660,
-    "안드로이드 개발자": 677,
-    "C,C++ 개발자": 900,
     "데이터 엔지니어": 655,
-    "Node.js 개발자": 895,
-    "iOS 개발자": 678,
-    "파이썬 개발자": 899,
-    "DevOps / 시스템 관리자": 674,
-    "시스템,네트워크 관리자": 665,
-    "머신러닝 엔지니어": 1634,
-    "개발 매니저": 877,
-    "기술지원": 1026,
-    "빅데이터 엔지니어": 1025,
-    "QA,테스트 엔지니어": 676,
-    "데이터 사이언티스트": 1024,
-    "보안 엔지니어": 671,
-    "프로덕트 매니저": 876,
-    "블록체인 플랫폼 엔지니어": 1027,
     "임베디드 개발자": 658,
-    "PHP 개발자": 893,
-    "하드웨어 엔지니어": 672,
+    "자바 개발자": 660,
     ".NET 개발자": 661,
-    "웹 퍼블리셔": 939,
-    "DBA": 10231,
-    "크로스플랫폼 앱 개발자": 10111,
+    "시스템,네트워크 관리자": 665,
+    "프론트엔드 개발자": 669,
+    "보안 엔지니어": 671,
+    "하드웨어 엔지니어": 672,
+    "DevOps / 시스템 관리자": 674,
+    "QA,테스트 엔지니어": 676,
+    "안드로이드 개발자": 677,
+    "iOS 개발자": 678,
+    "CIO,Chief Information Officer": 793,
+    "CTO,Chief Technology Officer": 795,
+    "서버 개발자": 872,
+    "웹 개발자": 873,
+    "프로덕트 매니저": 876,
+    "개발 매니저": 877,
+    "PHP 개발자": 893,
+    "루비온레일즈 개발자": 894,
+    "Node.js 개발자": 895,
     "영상,음성 엔지니어": 896,
     "그래픽스 엔지니어": 898,
-    "ERP전문가": 10230,
-    "CTO,Chief Technology Officer": 795,
+    "파이썬 개발자": 899,
+    "C,C++ 개발자": 900,
+    "웹 퍼블리셔": 939,
+    "데이터 사이언티스트": 1024,
+    "빅데이터 엔지니어": 1025,
+    "기술지원": 1026,
+    "블록체인 플랫폼 엔지니어": 1027,
+    "머신러닝 엔지니어": 1634,
+    "소프트웨어 엔지니어": 10110,
+    "크로스플랫폼 앱 개발자": 10111,
     "VR 엔지니어": 10112,
     "BI 엔지니어": 1022,
-    "루비온레일즈 개발자": 894,
-    "CIO,Chief Information Officer": 793
+    "ERP전문가": 10230,
+    "DBA": 10231,
+}
+
+const languages: Record<Language, number> = {
+    "Git":                  1411,
+    "Github":               1412,
+    "Android":              1438,
+    "iOS":                  1457,
+    "Linux":                1459,
+    "MySQL":                1464,
+    "React":                1469,
+    "C / C++":              1530,
+    "HTML":                 1539,
+    "JavaScript":           1541,
+    "Kotlin":               1544,
+    "PHP":                  1552,
+    "Python":               1554,
+    "SQL":                  1562,
+    "Swift":                1563,
+    "AWS":                  1698,
+    "C++":                  1786,
+    "Docker":               2217,
+    "Spring Framework":     3078,
+    "JPA":                  3451
 }
 
 const filters: Filters = {

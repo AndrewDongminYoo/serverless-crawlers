@@ -1,11 +1,11 @@
 import Axios, { AxiosError } from 'axios';
 import { CustomHeader, Params, Response } from './response.types';
-import { DescribeJob, Job, JobDetail, WantedResponse } from "./wanted.types";
 import { PageStats, Platform } from './notion.types';
 import { UrlWithParsedQuery, parse } from 'url';
 import filters, { Position } from './wanted.filters';
 import { multiSelect, removeCom, removeComma, richText, thumbnails, toNumber, toSelect, toTitle, toURL } from './notion.utils';
 import writeNotion, { removeOldJobs } from './notionhq';
+import { Job } from "./wanted.types";
 import { ParsedUrlQuery } from 'querystring';
 
 const baseURL = 'https://www.wanted.co.kr'
@@ -39,8 +39,8 @@ const axios = Axios.create({
 
 const getWantedResponse = async (params: Params) => {
     return await axios('/api/v4/jobs', { params })
-        .then(async (res: Response) => {
-            const wantedJob = res.data as WantedResponse
+        .then(async (res: Response<"Wanted">) => {
+            const wantedJob = res.data
             const links = wantedJob.links
             if (!links.next) return
             const url: UrlWithParsedQuery = parse(links.next, true)
@@ -49,9 +49,9 @@ const getWantedResponse = async (params: Params) => {
             const jobArray = wantedJob.data as Array<Job>
             jobArray.forEach(async (job: Job) => {
                 const jobID = job.id
-                await axios(`/api/v4/jobs/${jobID}`).then(async (res: Response) => {
-                    const response = res.data as JobDetail
-                    const jobDetail = response.job as DescribeJob
+                await axios(`/api/v4/jobs/${jobID}`).then(async (res: Response<"Detail">) => {
+                    const response = res.data
+                    const jobDetail = response.job
                     const { name, industry_name, application_response_stats } = job.company
                     const { detail, skill_tags, company_images, company_tags, position, address, like_count } = jobDetail
                     const { requirements, main_tasks, intro, benefits, preferred_points } = detail
@@ -92,9 +92,7 @@ const getWantedResponse = async (params: Params) => {
 const exploreWantedAPI = async () => {
     console.debug("WANTED API FETCHING STARTED")
     const tag_type_names = filters.positions
-    const tag_type_ids = Object.entries(tag_type_names)
-        .filter(([k, _]) => selected.includes(k as Position))
-        .map(v => Number(v[1]))
+    const tag_type_ids = selected.map((v) => tag_type_names[v])
     for (const tag_id of tag_type_ids) {
         let start: void | Params = {
             // 검색 조건을  변경하려면 파라미터를 수정하세요.

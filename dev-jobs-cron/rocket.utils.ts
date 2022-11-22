@@ -1,4 +1,4 @@
-import { JobDetail, ParsedText } from './rocket.types';
+import { ParsedText, RocketJobDetail } from './rocket.types';
 import fs from 'fs';
 
 export const removeWhitespace = (str: string) => str.replace('\n', '').replace(/\s{2,}/, ' ').trim()
@@ -6,8 +6,8 @@ export const removeWhitespace = (str: string) => str.replace('\n', '').replace(/
 export const pickLongest = (str: string[]) => str.reduce((p, c) => p.length > c.length ? p : c, 'IT 컨텐츠')
 
 function findSubject(target: string, ...args: string[]): [number, number] {
-    let match: RegExpMatchArray | null = null
-    for (const arg of args.map(RegExp)) {
+    let match: RegExpMatchArray | null
+    for (const arg of args.map(((a)=> RegExp(a)))) {
         match = target.match(arg)
         if (match && match.index) {
             return [match.index, match[0].length]
@@ -42,7 +42,7 @@ export function parseText(longDocument: string): ParsedText {
     }
 }
 
-export function saveAllJSON(jobDetails: JobDetail[]) {
+export function saveAllJSON(jobDetails: RocketJobDetail[]) {
     fs.writeFileSync('./job-urls.json', JSON.stringify(jobDetails, null, 2))
     console.debug("ROCKET PUNCH URLS SAVED.")
 }
