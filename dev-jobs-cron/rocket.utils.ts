@@ -1,5 +1,11 @@
-import { ParsedText, RocketJobDetail } from './rocket.types';
+import { RocketJobDetail } from './rocket.types';
 import fs from 'fs';
+
+interface ParsedText {
+    담당업무:          string;
+    자격요건:          string;
+    우대사항:          string;
+}
 
 export const removeWhitespace = (str: string) => str.replace('\n', '').replace(/\s{2,}/, ' ').trim()
 
