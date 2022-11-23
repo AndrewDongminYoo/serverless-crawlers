@@ -1,7 +1,6 @@
 import { AxiosRequestHeaders, AxiosResponse } from 'axios';
-import { Countries, JobSort, Location, Year } from "./wanted.filters";
+import { Countries, JobSort, Location, WantedJobDetail, WantedResponse, Year } from "./wanted.types";
 import { HTMLString, RocketResponse } from './rocket.types';
-import { WantedJob as WantedJobDetail, WantedResponse } from "./wanted.types";
 
 type Method =
     | 'get' | 'GET'

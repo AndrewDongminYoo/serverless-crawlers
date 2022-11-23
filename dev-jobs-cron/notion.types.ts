@@ -1,11 +1,14 @@
+import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+
 declare type noColor = "default";
 
-export interface Pages {
+export type Pages = PageObjectResponse & {
     parent:         Parent;
     properties:     PageStats;
+    id:             string;
 }
 
-export type Parent = {
+type Parent = {
     database_id:    string;
 } | {
     page_id:        string;
@@ -102,11 +105,6 @@ export declare type TextRichTextItem = {
 /** TypeScript Type Def Utils */
 
 type Request<T> = Extract<PageProperties, { type?: T }>;
-
-export type Removed<T, Drop = "remove"> = T extends object ? {
-    [K in Exclude<keyof T, Drop>]: Removed<T[K], Drop>;
-} : T;
-
 
 export type ArrayElement<ArrayType extends readonly unknown[]> =
     ArrayType extends readonly (infer ElementType)[] ? ElementType : never;

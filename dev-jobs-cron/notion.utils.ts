@@ -122,10 +122,10 @@ export const toImage = (url: string, index: number, company_name: string): Array
 
 export const thumbnails = (company_images: (string | { url: string })[], company_name: string): NotionFile => {
     const files = company_images.map((img, i: number) => {
-        if (typeof img == 'object' && 'url' in img) {
+        if (typeof img === 'object' && 'url' in img) {
             return toImage(img.url, i, company_name)
         } else {
-            assert(typeof img == 'string')
+            assert(typeof img === 'string')
             return toImage(img, i, company_name)
         }
     })

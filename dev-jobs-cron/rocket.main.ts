@@ -59,22 +59,22 @@ const collectInput = async () => {
             location: '서울특별시',
             page: String(page),
         })
-        stop = await shootRocketPunch(start) as boolean
+        stop = await shootRocketPunch(start)
         page++
     }
 }
 
-const shootRocketPunch = async (params: URLSearchParams): Promise<true | void> => {
+const shootRocketPunch = async (params: URLSearchParams): Promise<boolean> => {
     return await axios.get(templateURL, { params })
         .then(async (res: Response<"Rocket">) => {
             const div = res.data.data.template
             const $: CheerioAPI = load(div)
-            if ($('.ui.job.items.segment.company-list > div:nth-child(3)').text() == emptyQuery) {
+            if ($('.ui.job.items.segment.company-list > div:nth-child(3)').text() === emptyQuery) {
                 saveAllJSON(jobDetails)
                 return true
             }
             const companyItems = $('.company-list > .company.item').toArray()
-            if (isEmpty(companyItems)) return
+            if (isEmpty(companyItems)) return false
             companyItems.forEach(async (el: Element) => {
                 const title = $(el).find('.content > .company-name > a > h4').text().trim()
                 const company_name = removeWhitespace(title)
@@ -88,12 +88,11 @@ const shootRocketPunch = async (params: URLSearchParams): Promise<true | void> =
                     채용: [],
                     채용중: 0,
                     좋아요: Number(likes),
-                    이미지: [],
+                    이미지: thumbnail ? [thumbnail] : [],
                     응답률: false,
                 }
-                jobDetail.응답률 = $(el).find(".content > div.company-name > span > div").first().text() == '응답률 우수'
-                thumbnail && jobDetail.이미지.push(thumbnail)
-                headers.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+                jobDetail.응답률 =
+                    ($(el).find(".content > div.company-name > span > div").text() === '응답률 우수')
                 headers["Cache-Control"] = "max-age=0"
                 headers["Sec-Fetch-Dest"] = "document"
                 headers["Sec-Fetch-Mode"] = "navigate"
@@ -119,8 +118,10 @@ const shootRocketPunch = async (params: URLSearchParams): Promise<true | void> =
                         }
                     }
                 )
-                const jobs = $(el).find('.content > div.company-jobs-detail > .job-detail > div > a.job-title').toArray()
-                if (isEmpty(jobs)) return
+                const jobs = $(el)
+                    .find('.content > div.company-jobs-detail > .job-detail > div > a.job-title')
+                    .toArray()
+                if (isEmpty(jobs)) return el
                 jobs.forEach((e: Element, _i: number) => {
                     if (e.attribs['href']) {
                         const link = new URL(e.attribs['href'], baseURL)
@@ -130,16 +131,18 @@ const shootRocketPunch = async (params: URLSearchParams): Promise<true | void> =
                 })
                 jobDetail.채용중 = jobDetail.채용.length
                 jobDetails.push(jobDetail)
-            })
-            return
-        }, (error: AxiosError) => {
-            if (error.status == 500) {
-                console.warn("It Seems Rocket Punch Server's Error")
                 return
+            })
+            return false
+        }, (error: AxiosError) => {
+            if (error.status === 500) {
+                console.warn("It Seems Rocket Punch Server's Error")
+                return true
             }
             const link = new URL(templateURL, baseURL)
             link.search = params.toString()
             console.error(`Rocket Punch Error: \n${link} \n${error.message}`)
+            return false
         })
 }
 

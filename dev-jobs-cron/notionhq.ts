@@ -1,6 +1,6 @@
 import { Client, NotionClientError } from "@notionhq/client";
 import { PageObjectResponse, QueryDatabaseResponse } from "@notionhq/client/build/src/api-endpoints";
-import { PageStats, Platform, Prop, RichText } from "./notion.types";
+import { PageStats, Pages, Platform, Prop, RichText } from "./notion.types";
 import { delay, isEmpty } from "./notion.utils";
 import dotenv from "dotenv";
 
@@ -24,7 +24,7 @@ async function writeNotion(properties: PageStats, platform: Platform) {
         database_id,
         filter: { or: [{ type: 'title', title: { equals }, property: '아이디' }] }
     }).then(async (res: QueryDatabaseResponse) => {
-        const results = res.results as Pick<PageObjectResponse, "properties" | "id">[]
+        const results = res.results as Pages[]
         if (isEmpty(results)) {
             await notion.pages.create({
                 parent: { database_id },
@@ -75,12 +75,12 @@ export async function removeOldJobs(platform: Platform) {
             }],
         }, archived: false
     }).then((value: QueryDatabaseResponse) => {
-        const results = value.results as Pick<PageObjectResponse, "properties" | "id">[]
+        const results = value.results as Pages[]
         if (isEmpty(results)) {
             console.log(`No Data is Expired`)
         } else if (results && results.length) {
             results.forEach((page) => {
-                const TITLE: RichText = page.properties["회사명"] as RichText
+                const TITLE: RichText = page.properties["회사명"]
                 const { plain_text, href } = TITLE.rich_text[0]
                 console.log(JSON.stringify(TITLE))
                 console.log(`archived: ${plain_text} ("${href}")`)
