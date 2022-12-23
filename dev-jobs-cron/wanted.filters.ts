@@ -1,4 +1,4 @@
-import { CompanyTag, Countries, Filters, JobSort, Language, Position, Tags, Year } from "./wanted.types"
+import { CompanyFilter, Countries, Filters, JobSort, Language, Position, Tags, Year } from "./wanted.types"
 
 const job_sort: Record<string, JobSort> = {
     "응답률순": "company.response_rate_order",
@@ -7,472 +7,472 @@ const job_sort: Record<string, JobSort> = {
     "인기순": "job.popularity_order"
 }
 
-const company_tags: CompanyTag[] = [
+const company_tags: CompanyFilter[] = [
     {
-        "key": "10158",
+        "key": 10158,
         "display": "업계연봉수준",
         "sub_tags": [
             {
                 "display": "연봉업계평균이상",
-                "key": "10021"
+                "key": 10021
             },
             {
                 "display": "연봉상위1%",
-                "key": "10022"
+                "key": 10022
             },
             {
                 "display": "연봉상위2~5%",
-                "key": "10023"
+                "key": 10023
             },
             {
                 "display": "연봉상위6~10%",
-                "key": "10024"
+                "key": 10024
             },
             {
                 "display": "연봉상위11~20%",
-                "key": "10025"
+                "key": 10025
             }
         ]
     },
     {
-        "key": "10159",
+        "key": 10159,
         "display": "투자",
         "sub_tags": [
             {
                 "display": "누적투자100억이상",
-                "key": "10052"
+                "key": 10052
             }
         ]
     },
     {
-        "key": "10160",
+        "key": 10160,
         "display": "인원성장률",
         "sub_tags": [
             {
                 "display": "인원성장",
-                "key": "10026"
+                "key": 10026
             },
             {
                 "display": "인원급성장",
-                "key": "10027"
+                "key": 10027
             }
         ]
     },
     {
-        "key": "10161",
+        "key": 10161,
         "display": "퇴사율",
         "sub_tags": [
             {
                 "display": "퇴사율5%이하",
-                "key": "10036"
+                "key": 10036
             },
             {
                 "display": "퇴사율 6~10%",
-                "key": "10037"
+                "key": 10037
             }
         ]
     },
     {
-        "key": "10162",
+        "key": 10162,
         "display": "인원수",
         "sub_tags": [
             {
                 "display": "50명이하",
-                "key": "10028"
+                "key": 10028
             },
             {
                 "display": "51~300명",
-                "key": "10029"
+                "key": 10029
             },
             {
                 "display": "301~1,000명",
-                "key": "10030"
+                "key": 10030
             },
             {
                 "display": "1,001~10,000명",
-                "key": "10031"
+                "key": 10031
             },
             {
                 "display": "10,001명이상",
-                "key": "10032"
+                "key": 10032
             }
         ]
     },
     {
-        "key": "10163",
+        "key": 10163,
         "display": "업력",
         "sub_tags": [
             {
                 "display": "설립3년이하",
-                "key": "10033"
+                "key": 10033
             },
             {
                 "display": "설립4~9년",
-                "key": "10034"
+                "key": 10034
             },
             {
                 "display": "설립10년이상",
-                "key": "10035"
+                "key": 10035
             }
         ]
     },
     {
-        "key": "10164",
+        "key": 10164,
         "display": "근무·휴가",
         "sub_tags": [
             {
                 "display": "야근없음",
-                "key": "9984"
+                "key": 9984
             },
             {
                 "display": "유연근무",
-                "key": "9986"
+                "key": 9986
             },
             {
                 "display": "주35시간",
-                "key": "10041"
+                "key": 10041
             },
             {
                 "display": "주4일근무",
-                "key": "10047"
+                "key": 10047
             },
             {
                 "display": "육아휴직",
-                "key": "10044"
+                "key": 10044
             },
             {
                 "display": "출산휴가",
-                "key": "10045"
+                "key": 10045
             },
             {
                 "display": "리프레시휴가",
-                "key": "10019"
+                "key": 10019
             }
         ]
     },
     {
-        "key": "9948",
+        "key": 9948,
         "display": "보상",
         "sub_tags": [
             {
                 "display": "성과급",
-                "key": "9992"
+                "key": 9992
             },
             {
                 "display": "상여금",
-                "key": "9994"
+                "key": 9994
             },
             {
                 "display": "연말보너스",
-                "key": "10048"
+                "key": 10048
             },
             {
                 "display": "스톡옵션",
-                "key": "9993"
+                "key": 9993
             }
         ]
     },
     {
-        "key": "9947",
+        "key": 9947,
         "display": "기업문화",
         "sub_tags": [
             {
                 "display": "수평적조직",
-                "key": "9987"
+                "key": 9987
             },
             {
                 "display": "스타트업",
-                "key": "9989"
+                "key": 9989
             },
             {
                 "display": "자율복장",
-                "key": "10043"
+                "key": 10043
             },
             {
                 "display": "워크샵",
-                "key": "10049"
+                "key": 10049
             },
             {
                 "display": "반려동물",
-                "key": "9988"
+                "key": 9988
             }
         ]
     },
     {
-        "key": "10165",
+        "key": 10165,
         "display": "식사·간식",
         "sub_tags": [
             {
                 "display": "조식제공",
-                "key": "9997"
+                "key": 9997
             },
             {
                 "display": "중식제공",
-                "key": "10039"
+                "key": 10039
             },
             {
                 "display": "석식제공",
-                "key": "9996"
+                "key": 9996
             },
             {
                 "display": "시리얼",
-                "key": "9998"
+                "key": 9998
             },
             {
                 "display": "식비",
-                "key": "9999"
+                "key": 9999
             },
             {
                 "display": "음료",
-                "key": "9964"
+                "key": 9964
             },
             {
                 "display": "맥주",
-                "key": "9962"
+                "key": 9962
             },
             {
                 "display": "커피",
-                "key": "9963"
+                "key": 9963
             },
             {
                 "display": "와인",
-                "key": "9965"
+                "key": 9965
             },
             {
                 "display": "샐러드",
-                "key": "9966"
+                "key": 9966
             },
             {
                 "display": "과일",
-                "key": "9967"
+                "key": 9967
             },
             {
                 "display": "간식",
-                "key": "9968"
+                "key": 9968
             }
         ]
     },
     {
-        "key": "9954",
+        "key": 9954,
         "display": "편의시설",
         "sub_tags": [
             {
                 "display": "사내카페",
-                "key": "9961"
+                "key": 9961
             },
             {
                 "display": "사내식당",
-                "key": "9995"
+                "key": 9995
             },
             {
                 "display": "주차",
-                "key": "10050"
+                "key": 10050
             },
             {
                 "display": "수면실",
-                "key": "10014"
+                "key": 10014
             },
             {
                 "display": "휴게실",
-                "key": "10015"
+                "key": 10015
             },
             {
                 "display": "헬스장",
-                "key": "10016"
+                "key": 10016
             },
             {
                 "display": "위워크",
-                "key": "10013"
+                "key": 10013
             },
             {
                 "display": "수유실",
-                "key": "10018"
+                "key": 10018
             },
             {
                 "display": "안마의자",
-                "key": "10017"
+                "key": 10017
             }
         ]
     },
     {
-        "key": "9941",
+        "key": 9941,
         "display": "가족",
         "sub_tags": [
             {
                 "display": "어린이집",
-                "key": "9959"
+                "key": 9959
             },
             {
                 "display": "보육시설",
-                "key": "9960"
+                "key": 9960
             },
             {
                 "display": "생일선물",
-                "key": "9957"
+                "key": 9957
             },
             {
                 "display": "결혼기념일",
-                "key": "9958"
+                "key": 9958
             },
             {
                 "display": "대출지원",
-                "key": "10038"
+                "key": 10038
             }
         ]
     },
     {
-        "key": "9945",
+        "key": 9945,
         "display": "출퇴근",
         "sub_tags": [
             {
                 "display": "택시비",
-                "key": "9980"
+                "key": 9980
             },
             {
                 "display": "차량지원",
-                "key": "9981"
+                "key": 9981
             },
             {
                 "display": "원격근무",
-                "key": "9983"
+                "key": 9983
             },
             {
                 "display": "셔틀버스",
-                "key": "10040"
+                "key": 10040
             },
             {
                 "display": "기숙사",
-                "key": "10008"
+                "key": 10008
             },
             {
                 "display": "사택",
-                "key": "10046"
+                "key": 10046
             },
             {
                 "display": "재택근무",
-                "key": "9982"
+                "key": 9982
             }
         ]
     },
     {
-        "key": "10166",
+        "key": 10166,
         "display": "건강·여가",
         "sub_tags": [
             {
                 "display": "건강검진",
-                "key": "9969"
+                "key": 9969
             },
             {
                 "display": "단체보험",
-                "key": "9971"
+                "key": 9971
             },
             {
                 "display": "의료비",
-                "key": "9970"
+                "key": 9970
             },
             {
                 "display": "운동비",
-                "key": "10002"
+                "key": 10002
             },
             {
                 "display": "문화비",
-                "key": "10003"
+                "key": 10003
             },
             {
                 "display": "동호회",
-                "key": "10000"
+                "key": 10000
             },
             {
                 "display": "복지포인트",
-                "key": "10001"
+                "key": 10001
             }
         ]
     },
     {
-        "key": "9944",
+        "key": 9944,
         "display": "교육",
         "sub_tags": [
             {
                 "display": "교육비",
-                "key": "9975"
+                "key": 9975
             },
             {
                 "display": "직무교육",
-                "key": "9979"
+                "key": 9979
             },
             {
                 "display": "세미나참가비",
-                "key": "9976"
+                "key": 9976
             },
             {
                 "display": "컨퍼런스참가비",
-                "key": "9977"
+                "key": 9977
             },
             {
                 "display": "자기계발",
-                "key": "9973"
+                "key": 9973
             },
             {
                 "display": "도서구매비",
-                "key": "9972"
+                "key": 9972
             },
             {
                 "display": "스터디지원",
-                "key": "9978"
+                "key": 9978
             },
             {
                 "display": "어학교육",
-                "key": "9974"
+                "key": 9974
             },
             {
                 "display": "해외연수",
-                "key": "10051"
+                "key": 10051
             }
         ]
     },
     {
-        "key": "9956",
+        "key": 9956,
         "display": "기타",
         "sub_tags": [
             {
                 "display": "산업기능요원",
-                "key": "9990"
+                "key": 9990
             },
             {
                 "display": "전문연구요원",
-                "key": "9991"
+                "key": 9991
             },
             {
                 "display": "인공지능",
-                "key": "10011"
+                "key": 10011
             },
             {
                 "display": "IoT",
-                "key": "10012"
+                "key": 10012
             },
             {
                 "display": "핀테크",
-                "key": "10009"
+                "key": 10009
             },
             {
                 "display": "푸드테크",
-                "key": "10010"
+                "key": 10010
             },
             {
                 "display": "Macbook",
-                "key": "10004"
+                "key": 10004
             },
             {
                 "display": "iMac",
-                "key": "10005"
+                "key": 10005
             },
             {
                 "display": "노트북",
-                "key": "10006"
+                "key": 10006
             },
             {
                 "display": "통신비",
-                "key": "10007"
+                "key": 10007
             }
         ]
     }
@@ -521,19 +521,19 @@ const employee_count: Tags[] = [
     }
 ]
 
-const years: Record<Year, string> = {
-    '-1': '전체',
-    '0': '신입',
-    '1': '1년',
-    '2': '2년',
-    '3': '3년',
-    '4': '4년',
-    '5': '5년',
-    '6': '6년',
-    '7': '7년',
-    '8': '8년',
-    '9': '9년',
-    '10': '10년 이상',
+const years: Record<string, Year> = {
+    "전체": -1 ,
+    "신입": 0 ,
+    "1년": 1 ,
+    "2년": 2 ,
+    "3년": 3 ,
+    "4년": 4 ,
+    "5년": 5 ,
+    "6년": 6 ,
+    "7년": 7 ,
+    "8년": 8 ,
+    "9년": 9 ,
+    "10년 이상": 10 ,
 }
 
 const countries: Countries[] = [

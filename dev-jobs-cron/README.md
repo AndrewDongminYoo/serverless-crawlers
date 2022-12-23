@@ -46,28 +46,45 @@ AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/
 - [Dotenv](https://www.npmjs.com/package/dotenv) 노션의 토큰과 데이터베이스 주소를 환경변수로 설정합니다.  
 - [Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates)  
   디펜다봇을 설정했습니다.  
-- 노션 API 사용은 다소 복잡합니다.  
+- 데이터베이스나 디스플레이 측면에서 Notion API를 사용해 번거로움을 줄였습니다.  
   
 ## What to do after duplicating  
   
 [노션 API 사이트](https://developers.notion.com/docs/getting-started)에서 API KEY를 발급받습니다.  
 OAuth를 사용한 범용 API를 발급받아야 프라이빗한 노션 페이지를 조작할 수 있습니다.  
 dotenv파일을 생성합니다. `touch .env`  
-`echo "NOTION_TOKEN=[your token here]" > .env`.  
-`echo "WANTED_NOTION_DB=YOUR_DATABASE_URL" >> .env`  
-`echo "ROCKET_NOTION_DB=YOUR_DATABASE_URL" >> .env`  
+
+```dotenv
+NOTION_TOKEN=https://www.notion.so/my-integrations
+ROCKET_NOTION_DB=YOUR_DATABASE_URL
+WANTED_NOTION_DB=YOUR_DATABASE_URL
+NODE_ENV=
+S3_IMAGE_BUCKET=
+``` 
 노션 토큰과 데이터베이스 아이디를 셋팅합니다.  
   
 ## NPM Scripts  
-`yarn install`  
-`npm run tsc -w`  
-타입스크립트 정의 중 중복되거나 잘못된 정의를 확인합니다.  
-`npm run tslint '*.ts'`  
+`npm test`
+TS Jest를 작동합니다.  
+`npm run tslint`
 TS Lint를 작동합니다.  
-`npm run ts-node handler.ts`  
-TS NodeJS 명령어로 handler 파일을 실행합니다. 글로벌로 설치되어 있을 경우 `ts-node handler`로도 실행가능합니다.  
-`npm run prettier --write *.ts`  
-프리티어를 사용해 문서를 포맷합니다.  
+`>>> Tried to lint handler.ts but found no valid, enabled rules for this file type and file path in the resolved configuration.`
+`npm run lint`
+ESLint를 작동합니다. 콘솔 출력은 없습니다.  
+`npm start`
+TS NodeJS 명령어로 handler 파일의 run을 실행합니다.  
+`npm run rocket-punch`
+TS NodeJS 명령어로 rocket.main 파일을 실행합니다.  
+`npm run wanted-crawl`
+TS NodeJS 명령어로 wanted.main 파일을 실행합니다.  
+`npm run typecheck`
+타입 정의 중 중복되거나 잘못된 정의를 확인합니다. 1회성입니다.
+`npm run watch`
+타입 정의 중 중복되거나 잘못된 정의를 확인합니다. 실시간으로 파일 변화를 감지합니다.  
+`npm run build`
+타입 정의 중 중복되거나 잘못된 정의를 확인, ES스크립트로 컴파일합니다.  
+`npm run format`
+프리티어 코드 포매터를 실행합니다.
   
 ## Wanted Crawler  
   
@@ -75,28 +92,58 @@ Wanted/Rocket-Punch의 채용정보 리스트 API와 상세정보 API를 사용�
 axios가 익숙해서 사용했습니다.  
 노션 페이지의 데이터베이스 형태는 다음과 같습니다. rich_text가 일반 텍스트 컬럼, multi_select가 다중 선택 컬럼입니다.  
   
-```typescript  
-export interface PageStats {
-    플랫폼: '원티드'|'로켓펀치'
-    URL: { url: null | string }
-    주요업무: { rich_text: RichText[] }
-    회사타입: { multi_select: Select[] }
-    회사위치: { rich_text: RichText[] }
-    포지션: { rich_text: RichText[] }
-    우대사항: { rich_text: RichText[] }
-    좋아요: { number?: number }
-    기술스택: { multi_select: Select[] }
-    회사설명: { rich_text: RichText[] }
-    썸네일: { files: File[] };
-    혜택및복지: { rich_text: RichText[] }
-    자격요건: { rich_text: RichText[] }
-    회사명: { rich_text: RichText[] }
-    분야: { select?: Select }
-    응답률: { number?: number }
-    아이디: { title: RichText[] }
-} 
+```typescript 
+type PageProperties = {
+    type?:          "title";
+    title:          TextRichTextItem[];
+} | {
+    type?:          "rich_text";
+    rich_text:      TextRichTextItem[];
+} | {
+    type?:          "number";
+    number:         number | null;
+} | {
+    type?:          "url";
+    url:            string | null;
+} | {
+    type?:          "select";
+    select:         SelectRequest;
+} | {
+    type?:          "multi_select";
+    multi_select:   SelectRequest[];
+} | {
+    type?:          "email";
+    email:          string | null;
+} | {
+    type?:          "phone_number";
+    phone_number:   string | null;
+} | {
+    type?:          "checkbox";
+    checkbox:       boolean;
+} | {
+    type?:                  "files";
+    files:                  ({
+        type?:              "file";
+        file: {
+            url:            string;
+            expiry_time?:   string;
+        };
+        name:               string;
+                            } | {
+        type?:              "external";
+        external: {
+            url:            string;
+        };
+        name:               string;
+                            })[];
+} | {
+    type?:          "text";
+    content:        string;
+    link:           { url: string; } | null;
+};
 ```  
   
 <img src="../doc/Screenshot%202022-11-05%20at%2010.21.32%20PM.png" />  
 
-[결과물 노션 페이지](https://donminzzi.notion.site/771c884efa8e404dbd193364a5172a2b?v=4272ea0005b74ebb8dcc38f14180c57f). 
+[원티드 스크랩 노션 페이지](https://donminzzi.notion.site/771c884efa8e404dbd193364a5172a2b?v=4272ea0005b74ebb8dcc38f14180c57f). 
+[로켓펀치 스크랩 노션 페이지](https://donminzzi.notion.site/e76272fe72fb41bbbc998fc377ad0046?v=c071410b1dc14b0ba4fa7188ed527514). 

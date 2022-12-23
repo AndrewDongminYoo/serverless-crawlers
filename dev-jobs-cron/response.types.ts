@@ -1,5 +1,5 @@
 import { AxiosRequestHeaders, AxiosResponse } from 'axios';
-import { Countries, JobSort, Location, WantedJobDetail, WantedResponse, Year } from "./wanted.types";
+import { Countries, JobSort, LocationFilter, WantedJobDetail, WantedResponse, Year } from "./wanted.types";
 import { HTMLString, RocketResponse } from './rocket.types';
 
 type Method =
@@ -18,7 +18,7 @@ export type Params = {
     country?:            Countries["key"];  // 국가
     tag_type_ids?:       number;            // 태그 타입
     job_sort?:           JobSort            // 정렬 순서
-    locations?:          Location["key"];   // 위치
+    locations?:          LocationFilter["key"];   // 위치
     years?:              Year;              // 경력
     limit?:              string;            // 페이지네이션 리밋
     offset?:             string;            // 페이지네이션 오프셋
