@@ -9,6 +9,6 @@ const config: Config.InitialOptions = {
         "\\.[jt]sx?$": "ts-jest",
     },
     transformIgnorePatterns: ["ts-jest"],
-}
+};
 
 export default config;

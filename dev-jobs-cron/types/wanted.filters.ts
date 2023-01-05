@@ -1,11 +1,11 @@
-import { CompanyFilter, Countries, Filters, JobSort, Language, Position, Tags, Year } from "./wanted.types"
+import { CompanyFilter, Countries, Filters, JobSort, Language, Position, Tags, Year } from "./wanted.types";
 
 const job_sort: Record<string, JobSort> = {
     "응답률순": "company.response_rate_order",
     "최신순": "job.latest_order",
     "보상금순": "job.compensation_order",
     "인기순": "job.popularity_order"
-}
+};
 
 const company_tags: CompanyFilter[] = [
     {
@@ -476,7 +476,7 @@ const company_tags: CompanyFilter[] = [
             }
         ]
     }
-]
+];
 
 const employee_count: Tags[] = [
     {
@@ -519,22 +519,22 @@ const employee_count: Tags[] = [
         "display": "10001명 이상",
         "key": "10001~"
     }
-]
+];
 
 const years: Record<string, Year> = {
-    "전체": -1 ,
-    "신입": 0 ,
-    "1년": 1 ,
-    "2년": 2 ,
-    "3년": 3 ,
-    "4년": 4 ,
-    "5년": 5 ,
-    "6년": 6 ,
-    "7년": 7 ,
-    "8년": 8 ,
-    "9년": 9 ,
-    "10년 이상": 10 ,
-}
+    "전체": -1,
+    "신입": 0,
+    "1년": 1,
+    "2년": 2,
+    "3년": 3,
+    "4년": 4,
+    "5년": 5,
+    "6년": 6,
+    "7년": 7,
+    "8년": 8,
+    "9년": 9,
+    "10년 이상": 10,
+};
 
 const countries: Countries[] = [
     {
@@ -1857,7 +1857,7 @@ const countries: Countries[] = [
         "key": "others",
         "locations": []
     }
-]
+];
 
 const positions: Record<Position, number> = {
     "개발 전체": 518,
@@ -1898,7 +1898,7 @@ const positions: Record<Position, number> = {
     "BI 엔지니어": 1022,
     "ERP전문가": 10230,
     "DBA": 10231,
-}
+};
 
 const languages: Record<Language, number> = {
     "Git":                  1411,
@@ -1921,7 +1921,7 @@ const languages: Record<Language, number> = {
     "Docker":               2217,
     "Spring Framework":     3078,
     "JPA":                  3451
-}
+};
 
 const filters: Filters = {
     job_sort,
@@ -1931,6 +1931,6 @@ const filters: Filters = {
     countries,
     languages,
     positions
-}
+};
 
 export default filters;

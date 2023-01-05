@@ -35,10 +35,13 @@
     ],
     "types": [
         "node",
-        "aws-sdk"
+        "aws-sdk",
+        "notionhq",
+        "axios"
     ],
     "include": [
         "*.ts",
-        "test/**.ts"
+        "test/**.ts",
+        "types/**.ts"
     ]
 }

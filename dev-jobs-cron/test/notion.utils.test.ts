@@ -21,7 +21,7 @@ describe('download image function test', () => {
                 });
             }
         };
-        clearDirectory("images")
+        clearDirectory('images')
     })
 
     test('External Hosted Image: Directly Upload to Notion', async () => {
@@ -34,16 +34,16 @@ describe('download image function test', () => {
         process.env['NODE_ENV'] = 'dev'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
         const filename = await downloadImage(axios, internal) as string
-        console.log(filename)
+        console.debug(filename)
         expect(filename).toContain('캡처_1662365516.JPG')
     })
 
     test('non-Notion-hosted Image: Pipe Base64 to S3', async () => {
         process.env['NODE_ENV'] = 'prod'
-        process.env["S3_IMAGE_BUCKET"] = "my-secret-bucket-1857"
+        process.env['S3_IMAGE_BUCKET'] = 'my-secret-bucket-1857'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
         const filename = await downloadImage(axios, internal)
-        console.log(filename)
+        console.debug(filename)
         expect(filename).toContain('캡처_1662365516.JPG')
     })
 
