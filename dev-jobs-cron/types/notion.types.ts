@@ -1,8 +1,6 @@
-import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
+declare type noColor = 'default';
 
-declare type noColor = "default";
-
-export type Pages = PageObjectResponse & {
+export type Pages = {
     parent:         Parent;
     properties:     PageStats;
     id:             string;
@@ -28,7 +26,7 @@ export type SelectRequest = {
     name:       string;
     id?:        string;
     color?:     noColor | SelectColor;
-};
+      };
 
 export type Annotations = {
     bold:           boolean;
@@ -39,58 +37,57 @@ export type Annotations = {
     color:          noColor | AnnotationColor;
 };
 
-
 type PageProperties = {
-    type?:          "title";
+    type?:          'title';
     title:          TextRichTextItem[];
 } | {
-    type?:          "rich_text";
+    type?:          'rich_text';
     rich_text:      TextRichTextItem[];
 } | {
-    type?:          "number";
+    type?:          'number';
     number:         number | null;
 } | {
-    type?:          "url";
+    type?:          'url';
     url:            string | null;
 } | {
-    type?:          "select";
+    type?:          'select';
     select:         SelectRequest;
 } | {
-    type?:          "multi_select";
+    type?:          'multi_select';
     multi_select:   SelectRequest[];
 } | {
-    type?:          "email";
+    type?:          'email';
     email:          string | null;
 } | {
-    type?:          "phone_number";
+    type?:          'phone_number';
     phone_number:   string | null;
 } | {
-    type?:          "checkbox";
+    type?:          'checkbox';
     checkbox:       boolean;
 } | {
-    type?:                  "files";
+    type?:                  'files';
     files:                  ({
-        type?:              "file";
+        type?:              'file';
         file: {
             url:            string;
             expiry_time?:   string;
         };
         name:               string;
                             } | {
-        type?:              "external";
+        type?:              'external';
         external: {
             url:            string;
         };
         name:               string;
                             })[];
 } | {
-    type?:          "text";
+    type?:          'text';
     content:        string;
     link:           { url: string; } | null;
 };
 
 export declare type TextRichTextItem = {
-    type?: "text";
+    type?: 'text';
     text: {
         content: string;
         link: {
@@ -106,8 +103,7 @@ export declare type TextRichTextItem = {
 
 type Request<T> = Extract<PageProperties, { type?: T }>;
 
-export type ArrayElement<ArrayType extends readonly unknown[]> =
-    ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
+export type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
 type Background<Color extends string> = `${Color}_background`;
 
@@ -132,24 +128,24 @@ export interface PageStats {
     혜택및복지:          RichText;
 }
 
-export type Prop =          keyof PageStats;
+export type Prop = keyof PageStats;
 
-export type NotionURL =     Request<"url">;
+export type NotionURL = Request<'url'>;
 
-export type RichText =      Request<"rich_text">;
+export type RichText = Request<'rich_text'>;
 
-export type MultiSelect =   Request<"multi_select">;
+export type MultiSelect = Request<'multi_select'>;
 
-export type NotionSelect =  Request<"select">;
+export type NotionSelect = Request<'select'>;
 
-export type Numeric =       Request<"number">;
+export type Numeric = Request<'number'>;
 
-export type NotionTitle =   Request<"title">;
+export type NotionTitle = Request<'title'>;
 
-export type NotionFile =    Request<"files">;
+export type NotionFile = Request<'files'>;
 
-export type NotionText =    Request<"text">;
+export type NotionText = Request<'text'>;
 
-export declare type SelectColor = "gray" | "brown" | "orange" | "yellow" | "green" | "blue" | "purple" | "pink" | "red";
+export declare type SelectColor = 'gray' | 'brown' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink' | 'red';
 
 export declare type AnnotationColor = noColor | SelectColor | Background<SelectColor>;

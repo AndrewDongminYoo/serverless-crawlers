@@ -12,9 +12,7 @@
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
         "resolveJsonModule": true,
-        "lib": [
-            "es2015"
-        ],
+        "lib": ["es2015"],
         "rootDir": "./",
         // Emit sourcemaps
         "declaration": true,
@@ -28,20 +26,9 @@
         "noFallthroughCasesInSwitch": true,
         "noUncheckedIndexedAccess": false,
         "noPropertyAccessFromIndexSignature": true,
-        "noImplicitAny": true,
+        "noImplicitAny": true
     },
-    "exclude": [
-        "node_modules"
-    ],
-    "types": [
-        "node",
-        "aws-sdk",
-        "notionhq",
-        "axios"
-    ],
-    "include": [
-        "*.ts",
-        "test/**.ts",
-        "types/**.ts"
-    ]
+    "exclude": ["node_modules"],
+    "types": ["node", "aws-sdk", "notionhq", "axios"],
+    "include": ["*.ts", "test/**.ts", "types/**.ts"]
 }

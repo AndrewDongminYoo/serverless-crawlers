@@ -1,49 +1,49 @@
 service: dev-jobs-cron
 useDotenv: true
-frameworkVersion: "3"
+frameworkVersion: '3'
 
 provider:
-  name: aws
-  runtime: nodejs14.x
-  region: ap-northeast-2
-  stage: dev
-  architecture: x86_64
-  environment:
-    NOTION_TOKEN: ${env:NOTION_TOKEN}
-    ROCKET_NOTION_DB: ${env:ROCKET_NOTION_DB}
-    WANTED_NOTION_DB: ${env:WANTED_NOTION_DB}
-    NODE_ENV: ${NODE_ENV}
-    S3_IMAGE_BUCKET: ${S3_IMAGE_BUCKET}
+    name: aws
+    runtime: nodejs14.x
+    region: ap-northeast-2
+    stage: dev
+    architecture: x86_64
+    environment:
+        NOTION_TOKEN: ${env:NOTION_TOKEN}
+        ROCKET_NOTION_DB: ${env:ROCKET_NOTION_DB}
+        WANTED_NOTION_DB: ${env:WANTED_NOTION_DB}
+        NODE_ENV: ${NODE_ENV}
+        S3_IMAGE_BUCKET: ${S3_IMAGE_BUCKET}
 
 plugins:
-  - serverless-plugin-typescript
+    - serverless-plugin-typescript
 
 package:
-  individually: true
-  patterns:
-    - "!.gitignore"
-    - "!.build/"
-    - "!.serverless/"
-    - "!.vscode/"
-    - "!node_modules/"
-    - "!.env"
-    - "!.env.sample"
-    - "!README.md"
-    - "!serverless.yml"
-    - "!*.json"
-    - "!yarn.lock"
-    - "*.ts"
+    individually: true
+    patterns:
+        - '!.gitignore'
+        - '!.build/'
+        - '!.serverless/'
+        - '!.vscode/'
+        - '!node_modules/'
+        - '!.env'
+        - '!.env.sample'
+        - '!README.md'
+        - '!serverless.yml'
+        - '!*.json'
+        - '!yarn.lock'
+        - '*.ts'
 
 custom:
-  serverlessPluginTypescript:
-    tsConfigFileLocation: "./tsconfig.json"
+    serverlessPluginTypescript:
+        tsConfigFileLocation: './tsconfig.json'
 
 functions:
-  job-collector:
-    handler: handler.run
-    events:
-      # Invoke Lambda function every 2nd minute from Mon-Fri
-      - schedule: cron(0 * ? * MON-FRI *)
-    timeout: 180
-    memorySize: 1024
-    ephemeralStorageSize: 1024
+    job-collector:
+        handler: handler.run
+        events:
+            # Invoke Lambda function every 2nd minute from Mon-Fri
+            - schedule: cron(0 * ? * MON-FRI *)
+        timeout: 180
+        memorySize: 1024
+        ephemeralStorageSize: 1024
