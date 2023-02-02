@@ -12,8 +12,8 @@ provider:
         NOTION_TOKEN: ${env:NOTION_TOKEN}
         ROCKET_NOTION_DB: ${env:ROCKET_NOTION_DB}
         WANTED_NOTION_DB: ${env:WANTED_NOTION_DB}
-        NODE_ENV: ${NODE_ENV}
-        S3_IMAGE_BUCKET: ${S3_IMAGE_BUCKET}
+        NODE_ENV: production
+        S3_IMAGE_BUCKET: ${env:S3_IMAGE_BUCKET}
 
 plugins:
     - serverless-plugin-typescript

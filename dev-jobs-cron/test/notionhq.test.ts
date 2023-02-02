@@ -1,15 +1,15 @@
-import { Client } from "@notionhq/client"
-import dotenv from "dotenv";
+import { Client } from '@notionhq/client';
+import dotenv from 'dotenv';
 
 dotenv.config()
 
-describe("Notion SDK Client", () => {
-    it("Constructs without throwing", () => {
+describe('Notion SDK Client', () => {
+    it('Constructs without throwing', () => {
         new Client({ auth: process.env['NOTION_TOKEN'] })
     })
 })
 
-describe("Notion Old Job Offers Delete", () => {
+describe('Notion Old Job Offers Delete', () => {
     const notion = new Client({
         auth: process.env['NOTION_TOKEN'],
     })
@@ -21,14 +21,17 @@ describe("Notion Old Job Offers Delete", () => {
         const pages = await notion.databases.query({
             database_id,
             filter: {
-                or: [{
-                    last_edited_time: {
-                        before: lastWeek.toISOString(),
+                or: [
+                    {
+                        last_edited_time: {
+                            before: lastWeek.toISOString(),
+                        },
+                        timestamp: 'last_edited_time',
+                        type: 'last_edited_time',
                     },
-                    timestamp: "last_edited_time",
-                    type: "last_edited_time",
-                }],
-            }, archived: false
+                ],
+            },
+            archived: false,
         })
         expect(pages).toHaveProperty('results')
         expect(pages.results).toHaveLength(0)

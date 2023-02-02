@@ -1,10 +1,10 @@
-import { iteratePaginatedAPI } from "@notionhq/client";
+import { iteratePaginatedAPI } from '@notionhq/client'
 
-describe("Notion API helpers", () => {
+describe('Notion API helpers', () => {
     describe(iteratePaginatedAPI, () => {
         const mockPaginatedEndpoint = jest.fn<
             Promise<{
-                object: "list"
+                object: 'list'
                 results: number[]
                 next_cursor: string | null
                 has_more: boolean
@@ -16,15 +16,15 @@ describe("Notion API helpers", () => {
             mockPaginatedEndpoint.mockClear()
         })
 
-        it("Paginates over two pages", async () => {
+        it('Paginates over two pages', async () => {
             mockPaginatedEndpoint.mockImplementationOnce(async () => ({
-                object: "list",
+                object: 'list',
                 results: [1, 2],
                 has_more: true,
-                next_cursor: "abc",
+                next_cursor: 'abc',
             }))
             mockPaginatedEndpoint.mockImplementationOnce(async () => ({
-                object: "list",
+                object: 'list',
                 results: [3, 4],
                 has_more: false,
                 next_cursor: null,
@@ -36,14 +36,12 @@ describe("Notion API helpers", () => {
             expect(results).toEqual([1, 2, 3, 4])
             expect(mockPaginatedEndpoint).toHaveBeenCalledTimes(2)
             expect(mockPaginatedEndpoint.mock.calls[0]?.[0].start_cursor).toBeFalsy()
-            expect(mockPaginatedEndpoint.mock.calls[1]?.[0].start_cursor).toEqual(
-                "abc"
-            )
+            expect(mockPaginatedEndpoint.mock.calls[1]?.[0].start_cursor).toEqual('abc')
         })
 
         it("Works when there's only one page", async () => {
             mockPaginatedEndpoint.mockImplementationOnce(async () => ({
-                object: "list",
+                object: 'list',
                 results: [1, 2],
                 has_more: false,
                 next_cursor: null,

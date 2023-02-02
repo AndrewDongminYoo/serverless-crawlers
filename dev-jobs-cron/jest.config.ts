@@ -6,9 +6,9 @@ const config: Config.InitialOptions = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     transform: {
-        "\\.[jt]sx?$": "ts-jest",
+        '\\.[jt]sx?$': 'ts-jest',
     },
-    transformIgnorePatterns: ["ts-jest"],
-};
+    transformIgnorePatterns: ['ts-jest'],
+}
 
-export default config;
+export default config

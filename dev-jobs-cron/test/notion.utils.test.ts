@@ -3,7 +3,6 @@ import { downloadImage } from '../notion.utils';
 import fs from 'fs';
 import path from 'path';
 
-
 describe('download image function test', () => {
     const axios = Axios.create({
         baseURL: 'https://www.rocketpunch.com',
@@ -16,11 +15,11 @@ describe('download image function test', () => {
         const clearDirectory = function (directoryPath: string) {
             if (fs.existsSync(directoryPath)) {
                 fs.readdirSync(directoryPath).forEach((file) => {
-                    const curPath = path.join(directoryPath, file);
+                    const curPath = path.join(directoryPath, file)
                     fs.lstatSync(curPath).isDirectory() ? clearDirectory(curPath) : fs.unlinkSync(curPath)
-                });
+                })
             }
-        };
+        }
         clearDirectory('images')
     })
 
@@ -33,7 +32,7 @@ describe('download image function test', () => {
     test('non-Notion-hosted Image: Download image', async () => {
         process.env['NODE_ENV'] = 'dev'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
-        const filename = await downloadImage(axios, internal) as string
+        const filename = (await downloadImage(axios, internal)) as string
         console.debug(filename)
         expect(filename).toContain('캡처_1662365516.JPG')
     })

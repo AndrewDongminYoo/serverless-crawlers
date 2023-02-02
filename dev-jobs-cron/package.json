@@ -14,7 +14,10 @@
         "wanted-crawl": "ts-node -e \"require('./wanted.main').default()\"",
         "typecheck": "tsc --noEmit",
         "build": "tsc",
-        "format": "prettier --write *.ts"
+        "format": "prettier --write *.ts",
+        "deploy": "serverless deploy --verbose",
+        "info": "serverless info --verbose",
+        "invoke": "serverless invoke --function job-collector"
     },
     "keywords": [],
     "dependencies": {
