@@ -4,14 +4,13 @@ import { delay, isEmpty } from './notion.utils'
 import dotenv from 'dotenv'
 
 dotenv.config()
-console.log()
 
 const notion = new Client({
     auth: process.env['NOTION_TOKEN'],
 })
 
 const onRejected = async (error: NotionClientError) => {
-    console.error(error)
+    console.error('🚀file:notionhq.ts:13 > error', error);
     if (error.code === 'rate_limited') {
         await delay(1000)
     }
@@ -41,7 +40,7 @@ async function writeNotion(properties: PageStats, platform: Platform) {
                         })
                         .then(
                             (res) => console.info(`${res.id} CREATED`),
-                            (error) => onRejected(error)
+                            onRejected
                         )
                 } else {
                     await notion.pages
@@ -53,11 +52,11 @@ async function writeNotion(properties: PageStats, platform: Platform) {
                         })
                         .then(
                             (res) => console.info(`${res.id} UPDATED`),
-                            (error) => onRejected(error)
+                            onRejected
                         )
                 }
             },
-            (error) => onRejected(error)
+            onRejected
         )
 }
 
@@ -84,13 +83,13 @@ export async function removeOldJobs(platform: Platform) {
         .then(
             ({ results }) => {
                 if (isEmpty(results)) {
-                    console.debug(`"No Data is Expired"`)
+                    console.debug('🚀file:notionhq.ts:86 > no expired.', results);
                     return
                 } else {
                     results.forEach((page) => {
                         if (isFullPage(page)) {
                             const TITLE = page.properties['회사명']
-                            console.debug('archived:', TITLE)
+                            console.debug('🚀file:notionhq.ts:93 > archived.', TITLE);
                             notion.pages
                                 .update({
                                     page_id: page.id,
@@ -98,15 +97,15 @@ export async function removeOldJobs(platform: Platform) {
                                 })
                                 .then(
                                     (success) => success,
-                                    (error) => onRejected(error)
+                                    onRejected
                                 )
                         }
                     })
+                    console.debug('🚀file:notionhq.ts:104 > all-job deleted.');
                 }
-                console.debug(`All Expired Job Offer is Deleted.`, {})
                 return
             },
-            (error) => onRejected(error)
+            onRejected
         )
 }
 

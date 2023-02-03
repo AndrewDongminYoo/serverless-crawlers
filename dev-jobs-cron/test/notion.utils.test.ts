@@ -33,7 +33,7 @@ describe('download image function test', () => {
         process.env['NODE_ENV'] = 'dev'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
         const filename = (await downloadImage(axios, internal)) as string
-        console.debug(filename)
+        console.debug('🚀file:test/notion.utils.test.ts:36 > filename', filename);
         expect(filename).toContain('캡처_1662365516.JPG')
     })
 
@@ -42,7 +42,7 @@ describe('download image function test', () => {
         process.env['S3_IMAGE_BUCKET'] = 'my-secret-bucket-1857'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
         const filename = await downloadImage(axios, internal)
-        console.debug(filename)
+        console.debug('🚀file:test/notion.utils.test.ts:45 > filename', filename);
         expect(filename).toContain('캡처_1662365516.JPG')
     })
 
@@ -50,6 +50,7 @@ describe('download image function test', () => {
         process.env['NODE_ENV'] = 'test'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
         const filename = await downloadImage(axios, internal)
+        console.debug('🚀file:test/notion.utils.test.ts:53 > filename', filename);
         expect(filename).toContain('data:image/jpg;base64,')
     })
 
@@ -57,6 +58,7 @@ describe('download image function test', () => {
         process.env['NODE_ENV'] = 'none'
         const internal = 'https://image.rocketpunch.com/images/2022/9/5/캡처_1662365516.JPG'
         const filename = await downloadImage(axios, internal)
+        console.debug('🚀file:test/notion.utils.test.ts:61 > filename', filename);
         expect(filename).toBeUndefined()
     })
 })

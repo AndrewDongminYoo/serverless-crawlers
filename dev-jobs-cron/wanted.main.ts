@@ -7,8 +7,11 @@ import { Response } from './types/response.types';
 import filters from './types/wanted.filters';
 
 const baseURL = 'https://www.wanted.co.kr'
+console.debug('🚀 wanted.main.ts:10:baseURL', baseURL);
 const selected: Position[] = ['웹 개발자', '서버 개발자', '소프트웨어 엔지니어', '프론트엔드 개발자', 'Node.js 개발자', '크로스플랫폼 앱 개발자']
+console.debug('🚀 wanted.main.ts:12:selected', selected);
 const platform: Platform = '원티드'
+console.debug('🚀 wanted.main.ts:14:platform', platform);
 
 const headers = {
     'Accept': 'application/json, text/plain, */*',
@@ -34,35 +37,38 @@ const axios = Axios.create({
     timeout: 10000,
     withCredentials: true,
 })
+console.debug('🚀 wanted.main.ts:41:axios', axios);
 
 const getWantedResponse = async (params: URLSearchParams): Promise<void | URLSearchParams> =>
     await axios.get('/api/v4/jobs', { params }).then(
         (res: Response<'Wanted'>) => {
-            // console.debug('res.data:', res.data);
-            // console.debug('res.request.url:', res.request.url);
+            console.debug('🚀 wanted.main.ts:41:res.request.url', res.request.url);
             res.data.data &&
                 res.data.data.forEach(async (job) => {
                     const jobID = job.id
-                    // console.debug('jobID: ', jobID);
+                    console.debug('🚀 wanted.main.ts:48:jobID', jobID);
                     await axios(`/api/v4/jobs/${jobID}`).then(
                         async (out: Response<'Detail'>) => {
                             const jobDetail = out.data.job
-                            // console.debug('jobDetail: ', jobDetail);
+                            console.debug('🚀 wanted.main.ts:61:jobDetail', jobDetail);
                             const { application } = out.data
-                            // console.debug('application: ', application);
+                            console.debug('🚀 wanted.main.ts:64:application', application);
                             const { name, industry_name, application_response_stats } = job.company
+                            console.debug('🚀 wanted.main.ts:67:name', name);
                             const { detail, skill_tags, company_images, company_tags, position, address, like_count } = jobDetail
+                            console.debug('🚀 wanted.main.ts:69:detail', detail);
                             const { requirements, main_tasks, intro, benefits, preferred_points } = detail
+                            console.debug('🚀 wanted.main.ts:71:requirements', requirements);
                             const skills = skill_tags.map((skill) => skill.title)
-                            // console.debug('skills: ', skills);
+                            console.debug('🚀 wanted.main.ts:73:skills', skills);
                             const company_types = company_tags.map((tags) => tags.title)
-                            // console.debug('company_types: ', company_types);
+                            console.debug('🚀 wanted.main.ts:76:company_types', company_types);
                             const full_address = address?.geo_location?.n_location?.address ?? address.full_location
-                            // console.debug('full_address: ', full_address);
+                            console.debug('🚀 wanted.main.ts:79:full_address', full_address);
                             const API_URL = `${baseURL}/api/v4/jobs/${jobID}`
-                            // console.debug('API_URL: ', API_URL);
+                            console.debug('🚀 wanted.main.ts:83:API_URL', API_URL);
                             const WEB_URL = `${baseURL}/wd/${jobID}`
-                            // console.debug('WEB_URL: ', WEB_URL);
+                            console.debug('🚀 wanted.main.ts:86:WEB_URL', WEB_URL);
                             const newPage: PageStats = {
                                 URL: toURL(API_URL),
                                 주요업무: richText(main_tasks),
@@ -81,45 +87,47 @@ const getWantedResponse = async (params: URLSearchParams): Promise<void | URLSea
                                 회사명: richText(name, WEB_URL),
                                 썸네일: thumbnails(company_images, name),
                             }
+                            console.debug('🚀 wanted.main.ts:105:newPage', newPage);
                             if (application !== null) {
                                 const indexOfS = Object.values(StatusText).indexOf(application.status_text)
-                                // console.debug('indexOfS: ', indexOfS);
+                                console.debug('🚀 wanted.main.ts:90:indexOfS', indexOfS);
                                 const StatusKR = Object.keys(StatusText)[indexOfS]
-                                // console.debug('StatusKR: ', StatusKR);
-                                console.log(name, StatusKR)
+                                console.debug('🚀 wanted.main.ts:93:StatusKR', StatusKR);
                             } else {
                                 await writeNotion(newPage, platform)
                             }
                         },
                         (error: AxiosError) => {
-                            console.error(`there is no more data '${error.request?.path}'`)
+                            console.debug('🚀 wanted.main.ts:118:error', error)
                         }
                     )
                 })
             const links = res.data.links
-            // console.debug('links: ', links);
+            console.debug('🚀 wanted.main.ts:106:links', links);
             if (!links.next) {
                 console.error(`there is no more data '${res.request?.path}'`)
                 return
             } else {
-                const url = new URL(links.next)
-                const urlQuery: URLSearchParams = url.searchParams
-                const nextParams = urlQuery
-                // console.debug('nextParams: ', nextParams);
+                const nextURL = new URL(links.next, baseURL);
+                console.debug('🚀 wanted.main.ts:113:nextURL', nextURL);
+                const nextParams = nextURL.searchParams;
+                console.debug('🚀 wanted.main.ts:115:nextParams', nextParams);
                 return nextParams
             }
         },
         (error: AxiosError) => {
-            console.error(`there is no more data '${error.request?.path}'`)
+            console.error('🚀 wanted.main.ts:139:error', error);
         }
     )
 
 const exploreWantedAPI = async () => {
     console.debug('WANTED API FETCHING STARTED')
     const tag_type_names = filters.positions
-    // console.debug('tag_type_names: ', tag_type_names);
+    console.debug('🚀 wanted.main.ts:129:tag_type_names', tag_type_names)
     const tag_type_ids = selected.map((v) => tag_type_names[v])
+    console.debug('🚀 wanted.main.ts:132:tag_type_ids', tag_type_ids)
     for (const tag_id of tag_type_ids) {
+        console.debug('🚀 wanted.main.ts:134:tag_id', tag_id)
         // 검색 조건을  변경하려면 파라미터를 수정하세요.
         let searchParams = new URLSearchParams({
             country: 'kr',
@@ -130,6 +138,7 @@ const exploreWantedAPI = async () => {
         })
         while (searchParams) {
             const res = await getWantedResponse(searchParams)
+            console.debug('🚀 wanted.main.ts:145:res', res)
             if (res) {
                 searchParams = res
             }

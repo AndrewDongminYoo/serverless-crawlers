@@ -1,5 +1,5 @@
-import { RocketJobDetail } from './types/rocket.types'
-import fs from 'fs'
+import { RocketJobDetail } from './types/rocket.types';
+import fs from 'fs';
 
 interface ParsedText {
     담당업무: string
@@ -66,5 +66,5 @@ export function parseText(longDocument: string): ParsedText {
 
 export function saveAllJSON(jobDetails: RocketJobDetail[]) {
     fs.writeFileSync('./job-urls.json', JSON.stringify(jobDetails, null, 2))
-    console.debug('ROCKET PUNCH URLS SAVED.')
+    console.debug('🚀file:rocket.utils.ts:69 > ROCKET PUNCH URLS SAVED.', jobDetails);
 }

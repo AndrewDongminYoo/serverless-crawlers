@@ -154,8 +154,9 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
             const { filename: Key, ext: Extension } = getFilename(url)
             const filename = `./images/${Key}`
             if (contentType && contentType.startsWith('image')) {
+                console.debug('🚀file:notion.utils.ts:158 > contentType', contentType);
                 const decodedUrl = decodeURIComponent(url)
-                console.debug(`IMAGE URL: '${decodedUrl}'`)
+                console.debug('🚀file:notion.utils.ts:160 > decodedUrl', decodedUrl);
                 return decodedUrl
             }
             switch (process.env['NODE_ENV']) {
@@ -164,7 +165,7 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
                     const fileWriter = fs.createWriteStream(filename)
                     stream.pipe(fileWriter)
                     const filePath = decodeURIComponent(filename)
-                    console.debug(`IMAGE URL: '${filePath}'`)
+                    console.debug('🚀file:notion.utils.ts:170 > filePath', filePath);
                     return filePath
                 }
                 case 'prod': {
@@ -179,7 +180,7 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
                     })
                     const location = (await uploaded.promise()).Location
                     const newLocation = decodeURIComponent(location)
-                    console.debug(`IMAGE URL: '${newLocation}'`)
+                    console.debug('🚀file:notion.utils.ts:186 > newLocation', newLocation);
                     return newLocation
                 }
                 case 'test': {
@@ -199,7 +200,7 @@ export async function downloadImage(axios: AxiosInstance, url: string, company_n
             }
         },
         (reason: AxiosError) => {
-            console.error(`download ${company_name} image failed: '${reason.message}'`)
+            console.debug('🚀file:notion.utils.ts:207 > reason', reason.message);
         }
     )
 }

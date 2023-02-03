@@ -1,15 +1,15 @@
-import Axios, { AxiosError, AxiosHeaders } from 'axios'
-import { CheerioAPI, Element, load } from 'cheerio'
-import { PageStats, Platform } from './types/notion.types'
-import { URL, URLSearchParams } from 'url'
-import { downloadImage, isEmpty, multiSelect, removeComma, richText, thumbnails, toNumber, toSelect, toTitle, toURL } from './notion.utils'
-import { parseText, pickLongest, removeWhitespace, saveAllJSON } from './rocket.utils'
-import { Response } from './types/response.types'
-import { RocketJobDetail } from './types/rocket.types'
-import fs from 'fs'
-import { isNotionClientError } from '@notionhq/client'
-import { removeOldJobs } from './notionhq'
-import writeNotion from './notionhq'
+import Axios, { AxiosError, AxiosHeaders } from 'axios';
+import { CheerioAPI, Element, load } from 'cheerio';
+import { PageStats, Platform } from './types/notion.types';
+import { URL, URLSearchParams } from 'url';
+import { downloadImage, isEmpty, multiSelect, removeComma, richText, thumbnails, toNumber, toSelect, toTitle, toURL } from './notion.utils';
+import { parseText, pickLongest, removeWhitespace, saveAllJSON } from './rocket.utils';
+import { Response } from './types/response.types';
+import { RocketJobDetail } from './types/rocket.types';
+import fs from 'fs';
+import { isNotionClientError } from '@notionhq/client';
+import { removeOldJobs } from './notionhq';
+import writeNotion from './notionhq';
 
 const baseURL = 'https://www.rocketpunch.com'
 const templateURL = '/api/jobs/template'
@@ -114,7 +114,7 @@ const shootRocketPunch = async (params: URLSearchParams): Promise<boolean> => {
                     },
                     (error: AxiosError) => {
                         if (error.code?.startsWith('ECONN')) {
-                            console.error(`⌦ can't fetch ${company_name} company page '${error.message}'`)
+                            console.error("🚀file:rocket.main.ts:118 > can't fetch", error.message);
                         }
                     }
                 )
@@ -135,12 +135,12 @@ const shootRocketPunch = async (params: URLSearchParams): Promise<boolean> => {
         },
         (error: AxiosError) => {
             if (error.status === 500) {
-                console.error("It Seems Rocket Punch Server's Error")
+                console.debug('🚀file:rocket.main.ts:139 > error', error);
                 return true
             }
             const link = new URL(templateURL, baseURL)
             link.search = params.toString()
-            console.error(`Rocket Punch Error: \n${link} \n${error.message}`)
+            console.debug('🚀file:rocket.main.ts:145 > link', link);
             return false
         }
     )
@@ -206,9 +206,9 @@ async function getDetailOfJobs(url: string, job: RocketJobDetail) {
         },
         (error) => {
             if (isNotionClientError(error)) {
-                console.error(`Notion API Failed: '${error.message}'`)
+                console.debug('🚀file:rocket.main.ts:212 > error', error.message);
             } else if (error instanceof AxiosError) {
-                console.error(`There is no data from '${url}'`)
+                console.debug('🚀file:rocket.main.ts:216 > url', url);
             }
         }
     )
