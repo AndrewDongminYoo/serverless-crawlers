@@ -5,8 +5,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "serverless-latest-layer-version": "^2.1.1",
-    "serverless-offline": "^11.1.3",
-    "serverless-python-requirements": "^5.4.0"
+    "serverless-latest-layer-version": "^2.1.2",
+    "serverless-offline": "^12.0.4",
+    "serverless-python-requirements": "^6.0.0"
   }
 }

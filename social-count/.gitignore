@@ -7,3 +7,4 @@ venv/
 __pycache__/
 data/**.csv
 data/**.xlsx
+package-lock.json
