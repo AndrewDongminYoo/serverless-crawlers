@@ -1,11 +1,34 @@
-# Bside Lays
+# 크롤링/스크래핑/자동화테스트
 
-`python`, `crawler`, `serverless`
+`python`, `crawler`, `serverless framework`, `Node.js`, `TypeScript`, `Notion API`, `Chart Scraper`
 
-## Circle chart
+[크롤링/스크래핑/자동화테스트](https://donminzzi.notion.site/ffbbc8f0c92841b885a939a65681a177)
 
-현재 크롤링은 크롬 익스텐션, 데이터 취합은 로컬 파이썬 스크립트로 진행하고 있습니다. 추후 lambda에 올려 자동화하고 TS로 변경해야 합니다.
+서버리스 프레임워크를 사용하여 AWS Lambda에서 실행되는 간단한 cron 서비스를 개발하고 배포하는 크롤링 프로젝트입니다.
 
-써클차트는 국내 및 글로벌 음악 서비스 플랫폼의 K-pop 데이터를 정식 공급받는 국내 음악차트이며, 써클차트의 월간 음반 판매량은 연예기획사들의 매달 실적을 추정할 수 있는 좋은 지표입니다.
+## Schedule event type
 
-[써클차트]((https://circlechart.kr/))의 데이터는 매주 둘째주 목요일 오전 10시에 업데이트되며, 해당 데이터를 크롤링해야 합니다. 크롤링한 이후 해당 데이터를 `producer`와 `artist`별로 구분하여 저장해야 합니다. 결과 양식은 `merge_circle_chart_data.ipynb` 파일 참고.
+이 예에서는 rateHandler와 cronHandler라는 두 가지 함수를 정의하는데, 둘 다 특정 시간 또는 특정 간격으로 실행되도록 기능을 구성하는 데 사용되는 스케줄 유형의 이벤트에 의해 트리거됩니다. 스케줄 이벤트에 대한 자세한 내용은 서버리스 문서의 해당 섹션을 참조하십시오. [docs](https://serverless.com/framework/docs/providers/aws/events/schedule/).
+
+### Cron expressions syntax
+
+```
+cron(Minutes Hours Day-of-month Month Day-of-week Year)
+```
+
+모든 필드는 필수적이며 표준 시간대는 UTC를 기준으로 합니다. (KST+09:00)
+
+| 필드 | 허용된 값 | 와일드카드 |
+| --- | --- | --- |
+| Minutes | 0-59 | , - * / |
+| Hours | 0-23 | , - * / |
+| Day-of-month | 1-31 | , - * ? / L W |
+| Month | 1-12 or JAN-DEC | , - * / |
+| Day-of-week | 1-7 or SUN-SAT | , - * ? / L # |
+| Year | 192199 | , - * / |
+
+```
+functions:    job-collector:        handler: handler.run        events:            # Invoke Lambda function every 2nd minute from Mon-Fri            - schedule: cron(0 * ? * MON-FRI *)
+```
+
+AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions).
