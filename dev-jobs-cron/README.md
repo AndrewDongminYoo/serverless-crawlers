@@ -51,7 +51,7 @@ AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/
     디펜다봇을 설정했습니다.
 - 데이터베이스나 디스플레이 측면에서 Notion API를 사용해 번거로움을 줄였습니다.
 
-## What to do after duplicating
+## What to do after clone/fork
 
 [노션 API 사이트](https://developers.notion.com/docs/getting-started)에서 API KEY를 발급받습니다.
 OAuth를 사용한 범용 API를 발급받아야 프라이빗한 노션 페이지를 조작할 수 있습니다.
@@ -147,8 +147,3 @@ type PageProperties = {
     link:           { url: string; } | null;
 };
 ```
-
-![노션 페이지 미리보기](../doc/Screenshot%202022-11-05%20at%2010.21.32%20PM.png)
-
-[원티드 스크랩 노션 페이지](https://donminzzi.notion.site/771c884efa8e404dbd193364a5172a2b?v=4272ea0005b74ebb8dcc38f14180c57f).
-[로켓펀치 스크랩 노션 페이지](https://donminzzi.notion.site/e76272fe72fb41bbbc998fc377ad0046?v=c071410b1dc14b0ba4fa7188ed527514).
