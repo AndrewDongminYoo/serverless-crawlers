@@ -810,5 +810,5 @@
     "zixdacx"
   ],
   "python.formatting.provider": "black",
-  "conventionalCommits.scopes": ["serverless", "python"]
+  "conventionalCommits.scopes": ["serverless", "python", "typescript"]
 }

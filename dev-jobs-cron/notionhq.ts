@@ -82,13 +82,13 @@ export async function removeOldJobs(platform: Platform) {
     })
     .then(({ results }) => {
       if (isEmpty(results)) {
-        console.debug("🚀file:notionhq.ts:86 > no expired.", results);
-        return;
+        console.debug("🚀file:notionhq.ts:85 > no expired.", results);
+        process.exit(0);
       } else {
         results.forEach((page) => {
           if (isFullPage(page)) {
             const TITLE = page.properties["회사명"];
-            console.debug("🚀file:notionhq.ts:93 > archived.", TITLE);
+            console.debug("🚀file:notionhq.ts:91 > archived.", TITLE);
             notion.pages
               .update({
                 page_id: page.id,
@@ -97,9 +97,9 @@ export async function removeOldJobs(platform: Platform) {
               .then((success) => success, onRejected);
           }
         });
-        console.debug("🚀file:notionhq.ts:104 > all-job deleted.");
+        console.debug("🚀file:notionhq.ts:100 > all-job deleted.");
       }
-      return;
+      process.exit(0);
     }, onRejected);
 }
 

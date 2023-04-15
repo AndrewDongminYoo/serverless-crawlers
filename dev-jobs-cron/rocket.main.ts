@@ -157,7 +157,7 @@ const shootRocketPunch = async (params: URLSearchParams): Promise<boolean> => {
           (error: AxiosError) => {
             if (error.code?.startsWith("ECONN")) {
               console.error(
-                "🚀file:rocket.main.ts:118 > can't fetch",
+                "🚀file:rocket.main.ts:160 > can't fetch",
                 error.message
               );
             }
@@ -184,12 +184,12 @@ const shootRocketPunch = async (params: URLSearchParams): Promise<boolean> => {
     },
     (error: AxiosError) => {
       if (error.status === 500) {
-        console.debug("🚀file:rocket.main.ts:139 > error", error);
+        console.debug("🚀file:rocket.main.ts:187 > error", error);
         return true;
       }
       const link = new URL(templateURL, baseURL);
       link.search = params.toString();
-      console.debug("🚀file:rocket.main.ts:145 > link", link);
+      console.debug("🚀file:rocket.main.ts:192 > link", link);
       return false;
     }
   );
@@ -264,9 +264,9 @@ async function getDetailOfJobs(url: string, job: RocketJobDetail) {
     },
     (error) => {
       if (isNotionClientError(error)) {
-        console.debug("🚀file:rocket.main.ts:212 > error", error.message);
+        console.debug("🚀file:rocket.main.ts:267 > error", error.message);
       } else if (error instanceof AxiosError) {
-        console.debug("🚀file:rocket.main.ts:216 > url", url);
+        console.debug("🚀file:rocket.main.ts:269 > url", url);
       }
     }
   );

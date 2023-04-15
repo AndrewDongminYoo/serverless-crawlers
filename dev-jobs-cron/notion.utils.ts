@@ -7,6 +7,10 @@ import {
 } from "./types/notion.types";
 import { AxiosError, AxiosInstance, AxiosResponse, ResponseType } from "axios";
 import {
+  CompleteMultipartUploadCommandOutput,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import {
   MultiSelect,
   NotionFile,
   NotionSelect,
@@ -17,8 +21,8 @@ import {
   RichText,
   SelectRequest,
 } from "./types/notion.types";
-import { PassThrough, Stream } from "node:stream";
-import S3 from "aws-sdk/clients/s3";
+import { PassThrough, Readable } from "node:stream";
+import { Upload } from "@aws-sdk/lib-storage";
 import { assert } from "console";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -187,51 +191,60 @@ export async function downloadImage(
   };
   const responseType: ResponseType = "stream";
   return await axios
-    .get<Stream, AxiosResponse<Stream>>(url, { responseType })
+    .get<Readable, AxiosResponse<Readable>>(url, { responseType })
     .then(
-      async (response: AxiosResponse<Stream>) => {
+      async (response: AxiosResponse<Readable>) => {
         const contentType = response.headers["content-type"];
-        const stream: Stream = response.data;
+        const Body: Readable = response.data;
         const { filename: Key, ext: Extension } = getFilename(url);
         const filename = `./images/${Key}`;
         if (contentType && contentType.startsWith("image")) {
-          console.debug(
-            "🚀file:notion.utils.ts:158 > contentType",
-            contentType
-          );
-          const decodedUrl = decodeURIComponent(url);
-          console.debug("🚀file:notion.utils.ts:160 > decodedUrl", decodedUrl);
-          return decodedUrl;
+          // console.debug("🚀file:notion.utils.ts:199 > contentType", contentType);
+          // const decodedUrl = decodeURIComponent(url);
+          // console.debug("🚀file:notion.utils.ts:201 > decodedUrl", decodedUrl);
         }
         switch (process.env["NODE_ENV"]) {
           case "dev": {
             // static 다운로드
             const fileWriter = fs.createWriteStream(filename);
-            stream.pipe(fileWriter);
+            Body.pipe(fileWriter);
             const filePath = decodeURIComponent(filename);
-            // console.debug('🚀file:notion.utils.ts:170 > filePath', filePath);
+            // console.debug('🚀file:notion.utils.ts:209 > filePath', filePath);
             return filePath;
           }
           case "prod": {
             // S3 업로드
             const Bucket = process.env["S3_IMAGE_BUCKET"] ?? "";
-            const s3: S3 = new S3();
-            const uploaded = s3.upload({
-              Key,
-              Bucket,
-              Body: stream,
-              ACL: "public-read",
+            const client: S3Client = new S3Client({
+              region: process.env["AWS_REGION"] ?? "",
+              credentials: {
+                accessKeyId: process.env["AWS_ACCESS_KEY_ID"] ?? "",
+                secretAccessKey: process.env["AWS_SECRET_ACCESS_KEY"] ?? "",
+              },
             });
-            const location = (await uploaded.promise()).Location;
-            const newLocation = decodeURIComponent(location);
-            // console.debug('🚀file:notion.utils.ts:186 > newLocation', newLocation);
-            return newLocation;
+            const uploaded = new Upload({
+              client,
+              params: {
+                Key,
+                Bucket,
+                Body: Body,
+                ACL: "public-read",
+              },
+            });
+            const completed: CompleteMultipartUploadCommandOutput =
+              await uploaded.done();
+            const location = completed.Location;
+            if (location === undefined) {
+              process.exit(1);
+            }
+            // console.debug('🚀file:notion.utils.ts:236 > newLocation', newLocation);
+            return decodeURIComponent(location);
           }
           case "test": {
             // base64 문자열 변환
             const encoding = "base64";
             const chunks = new PassThrough({ encoding });
-            stream.pipe(chunks);
+            Body.pipe(chunks);
             let Content = "";
             for await (const chunk of chunks) {
               Content += chunk;
@@ -244,7 +257,7 @@ export async function downloadImage(
         }
       },
       (reason: AxiosError) => {
-        console.debug("🚀file:notion.utils.ts:207 > reason", reason.message);
+        console.debug("🚀file:notion.utils.ts:256 > reason", reason.message);
       }
     );
 }

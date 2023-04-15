@@ -7,7 +7,6 @@
     "donjayamanne.python-environment-manager",
     "Boto3typed.boto3-ide",
     "DanielThielking.aws-cloudformation-yaml",
-    "ms-toolsai.jupyter",
-  ],
-  "unwantedRecommendations": []
+    "ms-toolsai.jupyter"
+  ]
 }

@@ -56,14 +56,12 @@ const axios = Axios.create({
   timeout: 10000,
   withCredentials: true,
 });
-// console.debug('🚀 wanted.main.ts:57:axios', axios);
 
 const getWantedResponse = async (
   params: URLSearchParams
 ): Promise<void | URLSearchParams> =>
   await axios.get("/api/v4/jobs", { params }).then(
     (res: Response<"Wanted">) => {
-      // console.debug('🚀 wanted.main.ts:64:res.request.url', res.request.url);
       res.data.data &&
         res.data.data.forEach(async (job) => {
           const jobID = job.id;
@@ -71,11 +69,9 @@ const getWantedResponse = async (
           await axios(`/api/v4/jobs/${jobID}`).then(
             async (out: Response<"Detail">) => {
               const { job: jobDetail, application } = out.data;
-              // console.debug('🚀 wanted.main.ts:72:jobDetail', jobDetail);
-              // console.debug('🚀 wanted.main.ts:74:application', application);
               const { name, industry_name, application_response_stats } =
                 jobDetail.company;
-              // console.debug('🚀 wanted.main.ts:76:name', name);
+              // console.debug('🚀 wanted.main.ts:74:name', name);
               const {
                 detail,
                 skill_tags,
@@ -85,7 +81,7 @@ const getWantedResponse = async (
                 address,
                 like_count,
               } = jobDetail;
-              // console.debug('🚀 wanted.main.ts:78:detail', detail);
+              // console.debug('🚀 wanted.main.ts:76:detail', detail);
               const {
                 requirements,
                 main_tasks,
@@ -93,11 +89,11 @@ const getWantedResponse = async (
                 benefits,
                 preferred_points,
               } = detail;
-              // console.debug('🚀 wanted.main.ts:80:requirements', requirements);
+              // console.debug('🚀 wanted.main.ts:78:requirements', requirements);
               const skills = skill_tags.map((skill) => skill.title);
-              // console.debug('🚀 wanted.main.ts:82:skills', skills);
+              // console.debug('🚀 wanted.main.ts:80:skills', skills);
               const company_types = company_tags.map((tags) => tags.title);
-              // console.debug('🚀 wanted.main.ts:84:company_types', company_types);
+              // console.debug('🚀 wanted.main.ts:82:company_types', company_types);
               const full_address =
                 address?.geo_location?.n_location?.address ??
                 address.full_location;

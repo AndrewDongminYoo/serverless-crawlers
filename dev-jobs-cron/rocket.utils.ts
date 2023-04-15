@@ -82,7 +82,7 @@ export function parseText(longDocument: string): ParsedText {
 export function saveAllJSON(jobDetails: RocketJobDetail[]) {
   fs.writeFileSync("./job-urls.json", JSON.stringify(jobDetails, null, 2));
   console.debug(
-    "🚀file:rocket.utils.ts:69 > ROCKET PUNCH URLS SAVED.",
+    "🚀file:rocket.utils.ts:85 > ROCKET PUNCH URLS SAVED.",
     jobDetails
   );
 }
