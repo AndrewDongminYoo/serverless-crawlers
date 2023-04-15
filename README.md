@@ -12,23 +12,30 @@
 
 ### Cron expressions syntax
 
-```
+```pseudo
 cron(Minutes Hours Day-of-month Month Day-of-week Year)
 ```
 
 모든 필드는 필수적이며 표준 시간대는 UTC를 기준으로 합니다. (KST+09:00)
 
-| 필드 | 허용된 값 | 와일드카드 |
-| --- | --- | --- |
-| Minutes | 0-59 | , - * / |
-| Hours | 0-23 | , - * / |
-| Day-of-month | 1-31 | , - * ? / L W |
-| Month | 1-12 or JAN-DEC | , - * / |
-| Day-of-week | 1-7 or SUN-SAT | , - * ? / L # |
-| Year | 192199 | , - * / |
+| 필드         | 허용된 값       | 와일드카드     |
+| ------------ | --------------- | -------------- |
+| Minutes      | 0-59            | , - \* /       |
+| Hours        | 0-23            | , - \* /       |
+| Day-of-month | 1-31            | , - \* ? / L W |
+| Month        | 1-12 or JAN-DEC | , - \* /       |
+| Day-of-week  | 1-7 or SUN-SAT  | , - \* ? / L # |
+| Year         | 192199          | , - \* /       |
 
-```
-functions:    job-collector:        handler: handler.run        events:            # Invoke Lambda function every 2nd minute from Mon-Fri            - schedule: cron(0 * ? * MON-FRI *)
+```yaml
+functions:
+  job-collector:
+    handler: handler.run
+    layers:
+      - Ref: PythonRequirementsLambdaLayer
+    events:
+      # Invoke Lambda function every 2nd minute from Mon-Fri
+      - schedule: cron(0 * ? * MON-FRI *)
 ```
 
 AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions).

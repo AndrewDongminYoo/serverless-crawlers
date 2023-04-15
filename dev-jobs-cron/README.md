@@ -12,7 +12,7 @@
 
 ### Cron expressions syntax
 
-```pseudo
+```shell
 cron(Minutes Hours Day-of-month Month Day-of-week Year)
 ```
 
@@ -27,13 +27,13 @@ cron(Minutes Hours Day-of-month Month Day-of-week Year)
 | Day-of-week  | 1-7 or SUN-SAT  | , - \* ? / L # |
 | Year         |     192199      |    , - \* /    |
 
-```yml
+```yaml
 functions:
-    job-collector:
-        handler: handler.run
-        events:
-            # Invoke Lambda function every 2nd minute from Mon-Fri
-            - schedule: cron(0 * ? * MON-FRI *)
+  job-collector:
+    handler: handler.run
+    events:
+      # Invoke Lambda function every 2nd minute from Mon-Fri
+      - schedule: cron(0 * ? * MON-FRI *)
 ```
 
 AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions).
@@ -48,7 +48,7 @@ AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/
 - 간단한 타입체크 워크플로우를 작성했습니다.
 - [Dotenv](https://www.npmjs.com/package/dotenv) 노션의 토큰과 데이터베이스 주소를 환경변수로 설정합니다.
 - [Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates)
-    디펜다봇을 설정했습니다.
+  디펜다봇을 설정했습니다.
 - 데이터베이스나 디스플레이 측면에서 Notion API를 사용해 번거로움을 줄였습니다.
 
 ## What to do after clone/fork
@@ -57,7 +57,7 @@ AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/
 OAuth를 사용한 범용 API를 발급받아야 프라이빗한 노션 페이지를 조작할 수 있습니다.
 dotenv파일을 생성합니다. `touch .env`
 
-```dotenv
+```shell
 NOTION_TOKEN=https://www.notion.so/my-integrations
 ROCKET_NOTION_DB=YOUR_DATABASE_URL
 WANTED_NOTION_DB=YOUR_DATABASE_URL
@@ -98,52 +98,66 @@ axios가 익숙해서 사용했습니다.
 노션 페이지의 데이터베이스 형태는 다음과 같습니다. rich_text가 일반 텍스트 컬럼, multi_select가 다중 선택 컬럼입니다.
 
 ```typescript
-type PageProperties = {
-    type?:          "title";
-    title:          TextRichTextItem[];
-} | {
-    type?:          "rich_text";
-    rich_text:      TextRichTextItem[];
-} | {
-    type?:          "number";
-    number:         number | null;
-} | {
-    type?:          "url";
-    url:            string | null;
-} | {
-    type?:          "select";
-    select:         SelectRequest;
-} | {
-    type?:          "multi_select";
-    multi_select:   SelectRequest[];
-} | {
-    type?:          "email";
-    email:          string | null;
-} | {
-    type?:          "phone_number";
-    phone_number:   string | null;
-} | {
-    type?:          "checkbox";
-    checkbox:       boolean;
-} | {
-    type?:                  "files";
-    files:                  ({
-        type?:              "file";
-                    file: {
-            url:            string;
-            expiry_time?:   string;
-        };
-        name:               string;
-                            } | {
-        type?:              "external";
-                    external: {
-            url:            string;
-        };
-        name:               string;
-                            })[];
-} | {
-    type?:          "text";
-    content:        string;
-    link:           { url: string; } | null;
-};
+type PageProperties =
+  | {
+      type?: "title";
+      title: TextRichTextItem[];
+    }
+  | {
+      type?: "rich_text";
+      rich_text: TextRichTextItem[];
+    }
+  | {
+      type?: "number";
+      number: number | null;
+    }
+  | {
+      type?: "url";
+      url: string | null;
+    }
+  | {
+      type?: "select";
+      select: SelectRequest;
+    }
+  | {
+      type?: "multi_select";
+      multi_select: SelectRequest[];
+    }
+  | {
+      type?: "email";
+      email: string | null;
+    }
+  | {
+      type?: "phone_number";
+      phone_number: string | null;
+    }
+  | {
+      type?: "checkbox";
+      checkbox: boolean;
+    }
+  | {
+      type?: "files";
+      files: (
+        | {
+            type?: "file";
+            file: {
+              url: string;
+              expiry_time?: string;
+            };
+            name: string;
+          }
+        | {
+            type?: "external";
+            external: {
+              url: string;
+            };
+            name: string;
+          }
+      )[];
+    }
+  | {
+      type?: "text";
+      content: string;
+      link: { url: string } | null;
+    };
 ```

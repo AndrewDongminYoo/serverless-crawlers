@@ -18,20 +18,20 @@ cron(Minutes Hours Day-of-month Month Day-of-week Year)
 
 모든 필드는 필수적이며 표준 시간대는 UTC를 기준으로 합니다. (KST+09:00)
 
-| 필드           |      허용된 값      |     와일드카드     |
-|--------------|:---------------:|:-------------:|
-| Minutes      |      0-59       |    , - * /    |
-| Hours        |      0-23       |    , - * /    |
-| Day-of-month |      1-31       | , - * ? / L W |
-| Month        | 1-12 or JAN-DEC |    , - * /    |
-| Day-of-week  | 1-7 or SUN-SAT  | , - * ? / L # |
-| Year         |     192199      |    , - * /    |
+| 필드         |    허용된 값    |   와일드카드   |
+| ------------ | :-------------: | :------------: |
+| Minutes      |      0-59       |    , - \* /    |
+| Hours        |      0-23       |    , - \* /    |
+| Day-of-month |      1-31       | , - \* ? / L W |
+| Month        | 1-12 or JAN-DEC |    , - \* /    |
+| Day-of-week  | 1-7 or SUN-SAT  | , - \* ? / L # |
+| Year         |     192199      |    , - \* /    |
 
 - 내용: 데이터 수집과 정제 기능을 AWS Lambda에 배포하고 주기적 동작 설정
-    - python을 활용 데이터 수집 및 정제 진행
-    - AWS Lambda로 배포하고, S3에서 직접 편집 가능한 entertainment.csv에서 주요 엔터사의 아티스트 리스트를 불러와 크롤링 (양식에 맞춰 추가 가능)
-    - 매달 월요일 오전 9시에 리스트 내의 아티스트들의 채널을 대상으로 유튜브 조회수 및 트위터 팔로워 수를 API fetching
-    - 가공된 데이터는 각각 S3버킷의 output 디렉토리 내에 youtube-yymmdd.xlsx, twitter-yymmdd.xlsx로 저장된다.
+  - python을 활용 데이터 수집 및 정제 진행
+  - AWS Lambda로 배포하고, S3에서 직접 편집 가능한 entertainment.csv에서 주요 엔터사의 아티스트 리스트를 불러와 크롤링 (양식에 맞춰 추가 가능)
+  - 매달 월요일 오전 9시에 리스트 내의 아티스트들의 채널을 대상으로 유튜브 조회수 및 트위터 팔로워 수를 API fetching
+  - 가공된 데이터는 각각 S3버킷의 output 디렉토리 내에 youtube-yymmdd.xlsx, twitter-yymmdd.xlsx로 저장된다.
 
 ```yml
 functions:
@@ -98,6 +98,7 @@ serverless deploy --verbose
     ServerlessDeploymentBucketName: crawl-ytb-twt-serverlessdeploymentbucket-16wfzm7k4oqtv
 
 ```
+
 이후 단계는 필수적이지 않습니다. 정의된 스케줄은 배포 후 즉시 활성화됩니다.
 
 ### Local invocation

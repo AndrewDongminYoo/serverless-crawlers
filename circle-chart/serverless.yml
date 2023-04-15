@@ -1,5 +1,5 @@
 service: get-chart
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -9,16 +9,16 @@ provider:
   architecture: x86_64
   stackName: get-chart
   iam:
-    role: 'arn:aws:iam::554974515599:role/CloudWatch_Lambda_VPC_EFS'
+    role: arn:aws:iam::554974515599:role/CloudWatch_Lambda_VPC_EFS
   vpc:
     securityGroupIds:
-      - 'sg-072f5b9f254adccfc'
+      - Fn::Base64: sg-072f5b9f254adccfc
     subnetIds:
-      - 'subnet-05f21302b208855ea'
-      - 'subnet-0d2a9d7904bebb1ca'
+      - Fn::Base64: subnet-05f21302b208855ea
+      - Fn::Base64: subnet-0d2a9d7904bebb1ca
   environment:
-    EFS_PATH: '/mnt/lambda/'
-    TMP_PATH: '/tmp/'
+    EFS_PATH: /mnt/lambda/
+    TMP_PATH: /tmp/
 
 plugins:
   - serverless-python-requirements
@@ -29,57 +29,57 @@ custom:
     pythonBin: python3
     invalidateCaches: true
     layer:
-      name: 'requirements'
-      description: 'Python requirements lambda layer'
+      name: requirements
+      description: Python requirements lambda layer
       compatibleRuntimes:
-        - 'python3.8'
+        - python3.8
       licenseInfo: MIT
       allowedAccounts:
-        - '*'
+        - "*"
     noDeploy:
-      - 'beautifulsoup4'
-      - 'pandas'
-      - 'requests'
+      - beautifulsoup4
+      - pandas
+      - requests
   serverless-offline:
-    httpsProtocol: "dev-certs"
+    httpsProtocol: dev-certs
     httpPort: 3002
     stageVariables:
-      EFS_PATH: '../data/'
-      TMP_PATH: '../data/'
+      EFS_PATH: ../data/
+      TMP_PATH: ../data/
 
 package:
   individually: true
   patterns:
-    - '!.idea'
-    - '!./node_modules/**'
-    - '!./venv'
-    - '!README.md'
-    - '!requirements.txt'
-    - '!.requirements.zip'
-    - '!*.json'
-    - '!.env'
+    - "!.idea"
+    - "!./node_modules/**"
+    - "!./venv"
+    - "!README.md"
+    - "!requirements.txt"
+    - "!.requirements.zip"
+    - "!*.json"
+    - "!.env"
 
 functions:
   worker:
     layers:
-      - Ref: PythonRequirementsLambdaLayer
-      - 'arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1'
-      - 'arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-requests:7'
+      - ref: PythonRequirementsLambdaLayer
+      - arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1
+      - arn:aws:lambda:ap-northeast-2:770693421928:layer:Klayers-p38-requests:7
     handler: handler.run
     events:
       - eventBridge:
           schedule: cron(10 1 ? * 2#4 *)
     fileSystemConfig:
       localMountPath: /mnt/lambda
-      arn: 'arn:aws:elasticfilesystem:ap-northeast-2:554974515599:access-point/fsap-02ad908821bd03bc6'
+      arn: arn:aws:elasticfilesystem:ap-northeast-2:554974515599:access-point/fsap-02ad908821bd03bc6
     timeout: 180
     memorySize: 1024
     ephemeralStorageSize: 1024
     package:
       patterns:
-        - 'api.py'
-        - 'browser.py'
-        - 'common.py'
-        - 'handler.py'
-        - 'utils.py'
-        - 'gaon_data.py'
+        - api.py
+        - browser.py
+        - common.py
+        - handler.py
+        - utils.py
+        - gaon_data.py

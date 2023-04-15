@@ -1,5 +1,5 @@
 service: cron-artist
-frameworkVersion: '3'
+frameworkVersion: "3"
 useDotenv: true
 
 provider:
@@ -10,7 +10,7 @@ provider:
   architecture: x86_64
   stackName: crawl-ytb-twt
   iam:
-    role: 'arn:aws:iam::554974515599:role/CloudWatch_Lambda_VPC_EFS'
+    role: arn:aws:iam::554974515599:role/CloudWatch_Lambda_VPC_EFS
   environment:
     YOUTUBE_API_KEY: ${env:YOUTUBE_API_KEY}
     AWS_S3_BUCKET: entertainment-statistics
@@ -24,37 +24,37 @@ custom:
     pythonBin: python3
     invalidateCaches: true
     layer:
-      name: 'requirements'
-      description: 'Python requirements lambda layer'
+      name: requirements
+      description: Python requirements lambda layer
       compatibleRuntimes:
-        - 'python3.8'
+        - python3.8
       licenseInfo: MIT
       allowedAccounts:
-        - '*'
+        - "*"
     noDeploy:
-      - 'numpy'
-      - 'pandas'
+      - numpy
+      - pandas
 
 package:
   individually: true
   patterns:
-    - '!.idea'
-    - '!./node_modules/**'
-    - '!./venv'
-    - '!README.md'
-    - '!requirements.txt'
-    - '!*.json'
-    - '!.env'
-    - '!*.csv'
-    - '!*.xlsx'
-    - '!.gitignore'
+    - "!.idea"
+    - "!./node_modules/**"
+    - "!./venv"
+    - "!README.md"
+    - "!requirements.txt"
+    - "!*.json"
+    - "!.env"
+    - "!*.csv"
+    - "!*.xlsx"
+    - "!.gitignore"
 
 functions:
   cronHandler:
     handler: handler.run
     layers:
       - Ref: PythonRequirementsLambdaLayer
-      - 'arn:aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1'
+        arn: aws:lambda:ap-northeast-2:336392948345:layer:AWSSDKPandas-Python38:1
     events:
       # Invoke Lambda function every 2nd minute from Mon-Fri
       - schedule: cron(0 * ? * MON *)
@@ -63,6 +63,6 @@ functions:
     ephemeralStorageSize: 1024
     package:
       patterns:
-        - 'handler.py'
-        - 'youtube.py'
-        - 'social_blade.py'
+        - handler.py
+        - youtube.py
+        - social_blade.py

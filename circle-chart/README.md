@@ -4,9 +4,9 @@
 
 ## Schedule event type
 
-이 예에서는 rateHandler와 cronHandler라는 두 가지 함수를 정의하는데, 
-둘 다 특정 시간 또는 특정 간격으로 실행되도록 기능을 구성하는 데 사용되는 스케줄 유형의 
-이벤트에 의해 트리거됩니다. 
+이 예에서는 rateHandler와 cronHandler라는 두 가지 함수를 정의하는데,
+둘 다 특정 시간 또는 특정 간격으로 실행되도록 기능을 구성하는 데 사용되는 스케줄 유형의
+이벤트에 의해 트리거됩니다.
 스케줄 이벤트에 대한 자세한 내용은 서버리스 문서의 해당 섹션을 참조하십시오.
 [docs](https://serverless.com/framework/docs/providers/aws/events/schedule/).
 
@@ -18,16 +18,17 @@ cron(Minutes Hours Day-of-month Month Day-of-week Year)
 
 모든 필드는 필수적이며 표준 시간대는 UTC를 기준으로 합니다. (KST+09:00)
 
-| 필드           |      허용된 값      |     와일드카드     |
-|--------------|:---------------:|:-------------:|
-| Minutes      |      0-59       |    , - * /    |
-| Hours        |      0-23       |    , - * /    |
-| Day-of-month |      1-31       | , - * ? / L W |
-| Month        | 1-12 or JAN-DEC |    , - * /    |
-| Day-of-week  | 1-7 or SUN-SAT  | , - * ? / L # |
-| Year         |     192199      |    , - * /    |
+| 필드         |    허용된 값    |   와일드카드   |
+| ------------ | :-------------: | :------------: |
+| Minutes      |      0-59       |    , - \* /    |
+| Hours        |      0-23       |    , - \* /    |
+| Day-of-month |      1-31       | , - \* ? / L W |
+| Month        | 1-12 or JAN-DEC |    , - \* /    |
+| Day-of-week  | 1-7 or SUN-SAT  | , - \* ? / L # |
+| Year         |     192199      |    , - \* /    |
 
 *매달 둘째주 목요일 오전 10:10*에 해당 달에 새로 공개된 데이터에 한해 크롤링이 실행될 수 있도록 반복 설정
+
 - 내용: 데이터 수집과 정제 기능을 AWS Lambda에 배포하고 주기적 설정 진행
   - python을 활용 데이터 수집 및 정제 진행
   - AWS Lambda로 배포하고 수집한 데이터와 정제된 데이터 모두 CSV 형태로 EFS에 저장 (S3와 다르게 append 가능)
@@ -51,6 +52,7 @@ AWS CRON 레퍼런스 : [AWS docs](https://docs.aws.amazon.com/AmazonCloudWatch/
 ### Deployment
 
 배포 순서
+
 ```shell
 touch .env
 ```
@@ -89,6 +91,7 @@ serverless deploy --verbose
     PythonRequirementsLambdaLayerHash: 967ca84335e6f03a1c7740d20801520720bd88cb
     ServerlessDeploymentBucketName: get-chart-serverlessdeploymentbucket-47r5f59t4gsl
 ```
+
 이후 단계는 필수적이지 않습니다. 정의된 스케줄은 배포 후 즉시 활성화됩니다.
 
 ### Local invocation
@@ -96,10 +99,10 @@ serverless deploy --verbose
 기능을 테스트하려면 다음 명령을 사용하여 기능을 호출할 수 있습니다.
 
 ```shell
-serverless invoke --verbose --function worker --path ./event.json 
+serverless invoke --verbose --function worker --path ./event.json
 ```
 
-오프라인 실행을 위해 `serverless-offline` 플러그인을 설치했습니다. 
+오프라인 실행을 위해 `serverless-offline` 플러그인을 설치했습니다.
 [serverless docs.](https://www.serverless.com/plugins/serverless-offline)
 
 ```shell
@@ -109,7 +112,7 @@ serverless offline start --verbose
 로컬에서 함수 컨테이너가 동작합니다. 다음의 명령어를 통해 실행할 수 있습니다.
 
 ```shell
-aws lambda invoke /dev/log/ \     
+aws lambda invoke /dev/log/ \
   --endpoint-url http://localhost:3002 \
   --function get-chart-dev-worker --payload fileb://event.json
 ```
@@ -147,7 +150,7 @@ invoke local                    로컬 호출 함수를 로컬로 호출합니�
 
 ### Bundling dependencies
 
-Serverless Plugin 중 하나인 `serverless-python-requirements`를 사용했습니다. 
+Serverless Plugin 중 하나인 `serverless-python-requirements`를 사용했습니다.
 다음과 같은 명령어로 설치 가능합니다.
 
 ```bash
