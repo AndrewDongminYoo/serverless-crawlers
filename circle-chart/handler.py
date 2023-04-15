@@ -1,12 +1,13 @@
-import os
 import json
 import logging
+import os
 from datetime import datetime
+
 from api import fetch_api_data
 from browser import crawl_browser_data
 from common import EFS_PATH, TMP_PATH
-from gaon_data import chart_processor
 from dotenv import load_dotenv
+from gaon_data import chart_processor
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -18,13 +19,13 @@ TAB = chr(0x09)
 
 def run(event, _context=None):
     paths = [os.curdir, os.pardir]
-    for (_, dirNames, filenames) in os.walk(EFS_PATH):
+    for _, dirNames, filenames in os.walk(EFS_PATH):
         for d in dirNames:
             paths.append(d + "/")
         paths.extend(filenames)
     logger.info(f"EFS PATH: {TAB.join(paths)}")
     paths = [os.curdir, os.pardir]
-    for (_, dirNames, filenames) in os.walk(TMP_PATH):
+    for _, dirNames, filenames in os.walk(TMP_PATH):
         for d in dirNames:
             paths.append(d + "/")
         paths.extend(filenames)
@@ -53,8 +54,7 @@ def delete():
             elif os.path.isdir(file_path):
                 os.rmdir(file_path)
         except Exception as e:
-            logger.exception('Failed to delete %s. Reason: %s' %
-                             (file_path, e))
+            logger.exception("Failed to delete %s. Reason: %s" % (file_path, e))
 
 
 def main():
@@ -73,6 +73,6 @@ def cron():
         crawl_browser_data("a")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _event = json.load(open("./event.json", mode="r"))
     run(_event)

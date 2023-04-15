@@ -1,22 +1,21 @@
 import csv
-from os.path import join as join_path, realpath
-from os import environ
-from xlsxwriter import Workbook
 from abc import ABC
-
+from os import environ
+from os.path import join as join_path
+from os.path import realpath
 
 header = [
-    'month',
-    'link',
-    'image',
-    'album',
-    'artist',
-    'distributor',
-    'producer',
-    'ranking',
-    'rank_status',
-    'sales_volume',
-    'title',
+    "month",
+    "link",
+    "image",
+    "album",
+    "artist",
+    "distributor",
+    "producer",
+    "ranking",
+    "rank_status",
+    "sales_volume",
+    "title",
 ]
 
 EFS_PATH = environ.get("EFS_PATH", "./data/")
@@ -51,19 +50,21 @@ class Chart(ABC):
             self.writer.writerow(header)
 
     def to_csv(self):
-        self.writer.writerow([
-            self.month,
-            self.link,
-            self.image,
-            self.album,
-            self.artist,
-            self.distributor,
-            self.producer,
-            self.ranking,
-            self.rank_status,
-            self.sales_volume,
-            self.title,
-        ])
+        self.writer.writerow(
+            [
+                self.month,
+                self.link,
+                self.image,
+                self.album,
+                self.artist,
+                self.distributor,
+                self.producer,
+                self.ranking,
+                self.rank_status,
+                self.sales_volume,
+                self.title,
+            ]
+        )
         self.file.close()
         return self.__dict__
 
@@ -73,15 +74,15 @@ class GlobalChart(Chart):
         super().__init__()
         self.month = month[2:]
         self.link = url
-        self.image = "https://circlechart.kr/uploadDir/" + data['ALBUMIMG']
-        self.album = data['Album']
-        self.artist = data['Artist']
-        self.distributor = data['CompanyDist']
-        self.producer = data['CompanyMake']
-        self.ranking = data['Rank']  # 랭킹
-        self.rank_status = str(data['RankStatus'])  # 전월대비 (+1)
-        # self.sales_volume = data[""]
-        self.title = data['Title']  # 곡명
+        self.image = "https://circlechart.kr/uploadDir/" + data["ALBUMIMG"]
+        self.album = data["Album"]
+        self.artist = data["Artist"]
+        self.distributor = data["CompanyDist"]
+        self.producer = data["CompanyMake"]
+        self.ranking = data["Rank"]  # 랭킹
+        self.rank_status = str(data["RankStatus"])  # 전월대비 (+1)
+        # self.sales_volume = data['']
+        self.title = data["Title"]  # 곡명
 
 
 class AlbumChart(Chart):
@@ -89,16 +90,18 @@ class AlbumChart(Chart):
         super().__init__()
         self.month = month[2:]
         self.link = url
-        self.image = "https://circlechart.kr" + data['FILE_NAME']
-        self.album = data['ALBUM_NAME']
-        self.artist = data['ARTIST_NAME']
-        self.distributor = data['de_nm']
+        self.image = "https://circlechart.kr" + data["FILE_NAME"]
+        self.album = data["ALBUM_NAME"]
+        self.artist = data["ARTIST_NAME"]
+        self.distributor = data["de_nm"]
         # self.producer = data['de_nm']
-        self.ranking = data['SERVICE_RANKING']  # 랭킹
+        self.ranking = data["SERVICE_RANKING"]  # 랭킹
         self.rank_status = rank_to_string(
-            data['RankStatus'], data['RankChange'])  # 전월대비 (1up)
-        self.sales_volume = data["Album_CNT"] + \
-            " / " + data["Total_CNT"]  # 앨범 판매량 / 전체 판매량
+            data["RankStatus"], data["RankChange"]
+        )  # 전월대비 (1up)
+        self.sales_volume = (
+            data["Album_CNT"] + " / " + data["Total_CNT"]
+        )  # 앨범 판매량 / 전체 판매량
         # self.title = data['']
 
 

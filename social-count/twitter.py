@@ -1,6 +1,7 @@
-import requests
 import os
 from urllib.parse import quote
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,7 +12,7 @@ def create_url(query: str, service: str):
     if service == "get-user-id":
         path = f"by/username/{quote(query)}"
     if service == "user":
-        path = f"by/?usernames=TwitterDev,TwitterAPI&user.fields=description,created_at"
+        path = "by/?usernames=TwitterDev,TwitterAPI&user.fields=description,created_at"
     elif service == "followers":
         path = f"{query}?user.fields=public_metrics"
     url = f"https://api.twitter.com/2/users/{path}"
@@ -20,7 +21,7 @@ def create_url(query: str, service: str):
 
 def bearer_oauth(r):
     """
-    Method required by bearer token authentication.
+    Require bearer token for authentication.
     """
     r.headers["Authorization"] = f"Bearer {bearer_token}"
     r.headers["User-Agent"] = "v2UserLookupPython"

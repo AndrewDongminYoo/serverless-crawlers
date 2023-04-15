@@ -10,13 +10,13 @@ def set_queries(queries: dict):
 
 
 def date_to_string(dts: datetime, fmt: str):
-    if fmt == 'day':
-        return dts.strftime('%Y%m%d')
-    elif fmt == 'month':
-        return dts.strftime('%Y%m')
-    elif fmt == 'year':
+    if fmt == "day":
+        return dts.strftime("%Y%m%d")
+    elif fmt == "month":
+        return dts.strftime("%Y%m")
+    elif fmt == "year":
         return str(dts.year)
-    elif fmt == 'M':
+    elif fmt == "M":
         return str(dts.month)
 
 
@@ -32,6 +32,9 @@ def roll(today: datetime, func, chart_type: str, term: int, month: str, count: i
         func(month, chart_type, n_month_ago)
 
 
-def nth(tag: str, order: int): return f"{tag}:nth-child({order})"
-def css(selectors: list): return " > ".join(selectors)
+def nth(tag: str, order: int):
+    return f"{tag}:nth-child({order})"
 
+
+def css(selectors: list):
+    return " > ".join(selectors)

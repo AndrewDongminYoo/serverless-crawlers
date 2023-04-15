@@ -1,17 +1,18 @@
 import logging
 import os
 from datetime import datetime
+
 import boto3
 import pandas as pd
-from youtube import youtube_query
-from twitter import change_to_id, get_public_metrics
 from dotenv import load_dotenv
+from twitter import change_to_id, get_public_metrics
+from youtube import youtube_query
 
 pd.set_option("styler.format.thousands", ",")
 load_dotenv()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-S3 = boto3.client('s3')
+S3 = boto3.client("s3")
 TMP_PATH = os.environ.get("TMP_PATH", os.curdir)
 INPUT_DF = os.path.join(TMP_PATH, "entertainment.csv")
 
@@ -21,14 +22,24 @@ def load_csv(use_cols=None):
         S3.download_file(
             Bucket=os.environ["AWS_S3_BUCKET"],
             Key="entertainment.csv",
-            Filename=INPUT_DF)
+            Filename=INPUT_DF,
+        )
         logger.info(
-            f'downloaded file from {os.environ["AWS_S3_BUCKET"]}/entertainment.csv to /tmp/ folder')
+            f'downloaded file from {os.environ["AWS_S3_BUCKET"]}/entertainment.csv to /tmp/ folder'
+        )
     if use_cols:
         return pd.read_csv(INPUT_DF, encoding="utf-8", usecols=use_cols, dtype="str")
     else:
-        use_cols = ["company", 'artist', 'YOUTUBE_URL', 'TWITTER_URL', 'bladeYoutube', 'bladeTwitter',
-                    'TWITTER_ID', 'TWITTER_NAME']
+        use_cols = [
+            "company",
+            "artist",
+            "YOUTUBE_URL",
+            "TWITTER_URL",
+            "bladeYoutube",
+            "bladeTwitter",
+            "TWITTER_ID",
+            "TWITTER_NAME",
+        ]
         return pd.read_csv(INPUT_DF, encoding="utf-8", usecols=use_cols, dtype="str")
 
 
@@ -39,9 +50,8 @@ def save_to_s3(table: pd.DataFrame, file_name):
     if ext == "csv":
         table.to_csv(OUTPUT_DF, encoding="utf-8", index=False)
         S3.upload_file(
-            Bucket=os.environ["AWS_S3_BUCKET"],
-            Key=file_name,
-            Filename=OUTPUT_DF)
+            Bucket=os.environ["AWS_S3_BUCKET"], Key=file_name, Filename=OUTPUT_DF
+        )
     elif ext == "xlsx":
         today = datetime.today().strftime(fmt)
         file_name = f"{name}_{today}.{ext}"
@@ -49,9 +59,11 @@ def save_to_s3(table: pd.DataFrame, file_name):
         S3.upload_file(
             Bucket=os.environ["AWS_S3_BUCKET"],
             Key=f"output/{file_name}",
-            Filename=OUTPUT_DF)
+            Filename=OUTPUT_DF,
+        )
     logger.info(
-        f'uploaded file to {os.environ["AWS_S3_BUCKET"]}/output/{file_name} from /tmp/ folder')
+        f'uploaded file to {os.environ["AWS_S3_BUCKET"]}/output/{file_name} from /tmp/ folder'
+    )
     os.remove(OUTPUT_DF)
 
 
@@ -65,7 +77,7 @@ def fill_twitter_id():
 
 def fill_youtube_url():
     df = load_csv()
-    for i, artist in df.iterrows():
+    for _i, artist in df.iterrows():
         query = artist["artist"]
         if artist.isna()["YOUTUBE_URL"]:
             channel_id = youtube_query(query, "channel_id")
@@ -85,10 +97,14 @@ def fill_twitter_statistics():
         df.loc[i, "t_followers"] = large_num(statistics["followers_count"])
         df.loc[i, "t_following"] = statistics["following_count"]
         df.loc[i, "t_tweets"] = statistics["tweet_count"]
-    df = df.astype({"t_followers": 'string',
-                    "t_following": 'int64',
-                    "t_tweets": 'int64',
-                    }, errors='ignore')
+    df = df.astype(
+        {
+            "t_followers": "string",
+            "t_following": "int64",
+            "t_tweets": "int64",
+        },
+        errors="ignore",
+    )
     save_to_s3(df, "twitter.xlsx")
 
 
@@ -98,18 +114,19 @@ def fill_youtube_statistics():
     df["y_views"] = None
     for i, artist in df.iterrows():
         channel_id = artist["YOUTUBE_URL"].replace(
-            "https://www.youtube.com/channel/", "")
+            "https://www.youtube.com/channel/", ""
+        )
         data = youtube_query(channel_id, "list-channels")
         if not data["hiddenSubscriberCount"]:
             df.loc[i, "y_subscribes"] = large_num(data["subscriberCount"])
         df.loc[i, "viewCount"] = int(data["viewCount"])
     df = df[["company", "artist", "y_subscribes", "y_views"]]
     index = pd.MultiIndex.from_frame(
-        df[["company", "artist"]], names=("company", "artist"))
+        df[["company", "artist"]], names=("company", "artist")
+    )
     df.set_index(index, inplace=True)
     df.drop(["company", "artist"], inplace=True, axis=1)
-    df = df.astype({"y_subscribes": 'string',
-                   "y_views": 'int64'}, errors='ignore')
+    df = df.astype({"y_subscribes": "string", "y_views": "int64"}, errors="ignore")
     save_to_s3(df, "youtube.xlsx")
 
 
@@ -129,5 +146,5 @@ def run(event, context):
     fill_youtube_statistics()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run(None, None)

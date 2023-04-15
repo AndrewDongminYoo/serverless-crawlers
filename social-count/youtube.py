@@ -1,8 +1,9 @@
+import argparse
+import os
+
+from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-import argparse
-from dotenv import load_dotenv
-import os
 
 load_dotenv()
 DEVELOPER_KEY = os.environ["YOUTUBE_API_KEY"]
@@ -12,22 +13,20 @@ YOUTUBE_API_VERSION = "v3"
 
 def get_youtube_response(options, api_type):
     youtube = build(
-        YOUTUBE_API_SERVICE_NAME,
-        YOUTUBE_API_VERSION,
-        developerKey=DEVELOPER_KEY
+        YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, developerKey=DEVELOPER_KEY
     )
     if api_type == "search":
-        return youtube.search().list(
-            q=options.q,
-            part="id,snippet",
-            maxResults=options.max_results
-        ).execute()
+        return (
+            youtube.search()
+            .list(q=options.q, part="id,snippet", maxResults=options.max_results)
+            .execute()
+        )
     elif api_type == "channels":
-        return youtube.channels().list(
-            id=options.id,
-            part="statistics",
-            maxResults=options.max_results
-        ).execute()
+        return (
+            youtube.channels()
+            .list(id=options.id, part="statistics", maxResults=options.max_results)
+            .execute()
+        )
 
 
 def search_all(options):
@@ -37,11 +36,17 @@ def search_all(options):
     playlists = []
     for search_result in search_response.get("items", []):
         if search_result["id"]["kind"] == "youtube#video":
-            videos.append(f"{search_result['snippet']['title']} ({search_result['id']['videoId']}) : (채널명 {search_result['snippet']['channelTitle']})")
+            videos.append(
+                f"{search_result['snippet']['title']} ({search_result['id']['videoId']}) : (채널명 {search_result['snippet']['channelTitle']})"
+            )
         elif search_result["id"]["kind"] == "youtube#channel":
-            channels.append(f"{search_result['snippet']['title']} ({search_result['id']['channelId']}) : (채널명 {search_result['snippet']['channelTitle']})")
+            channels.append(
+                f"{search_result['snippet']['title']} ({search_result['id']['channelId']}) : (채널명 {search_result['snippet']['channelTitle']})"
+            )
         elif search_result["id"]["kind"] == "youtube#playlist":
-            playlists.append(f"{search_result['snippet']['title']} ({search_result['id']['playlistId']}) : (채널명 {search_result['snippet']['channelTitle']})")
+            playlists.append(
+                f"{search_result['snippet']['title']} ({search_result['id']['playlistId']}) : (채널명 {search_result['snippet']['channelTitle']})"
+            )
     return dict(videos=videos, channels=channels, playlists=playlists)
 
 
