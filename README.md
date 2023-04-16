@@ -7,7 +7,7 @@
 
 > `python`, `crawler`, `serverless framework`, `Selenium`, `Pandas`, `BeautifulSoup4` > `Node.js`, `TypeScript`, `Notion API`, `Chart Scraper`, `Axios`
 
-[완료된 크롤링 프로젝트](https://github.com/AndrewDongminYoo/Serverless-Framework-Crawlers/blob/main/doc/크롤링%20스크래핑%20자동화테스트/완료된%20크롤링%20프로젝트.csv)
+[완료된 크롤링 프로젝트](https://github.com/AndrewDongminYoo/Serverless-Framework-Crawlers/blob/main/docs/크롤링%20스크래핑%20자동화테스트/완료된%20크롤링%20프로젝트.csv)
 
 ## Schedule event type
 
@@ -94,6 +94,6 @@ S3_IMAGE_BUCKET=
 
 ---
 
-[원티드](https://github.com/AndrewDongminYoo/Serverless-Framework-Crawlers/blob/main/doc/크롤링%20스크래핑%20자동화테스트/완료된%20크롤링%20프로젝트/원티드%20구인공고%20크롤링.md)
+[원티드](https://github.com/AndrewDongminYoo/Serverless-Framework-Crawlers/blob/main/docs/크롤링%20스크래핑%20자동화테스트/완료된%20크롤링%20프로젝트/원티드%20구인공고%20크롤링.md)
 
-[로켓펀치](https://github.com/AndrewDongminYoo/Serverless-Framework-Crawlers/blob/main/doc/크롤링%20스크래핑%20자동화테스트/완료된%20크롤링%20프로젝트/로켓펀치%20구인공고%20크롤링.md)
+[로켓펀치](https://github.com/AndrewDongminYoo/Serverless-Framework-Crawlers/blob/main/docs/크롤링%20스크래핑%20자동화테스트/완료된%20크롤링%20프로젝트/로켓펀치%20구인공고%20크롤링.md)
