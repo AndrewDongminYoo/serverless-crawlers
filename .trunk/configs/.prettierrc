@@ -1,0 +1,40 @@
+{
+  "tabWidth": 2,
+  "useTabs": false,
+  "proseWrap": "preserve",
+  "singleAttributePerLine": false,
+  "overrides": [
+    {
+      "files": ["*.html"],
+      "options": {
+        "vueIndentScriptAndStyle": true,
+        "bracketSameLine": true,
+        "htmlWhitespaceSensitivity": "css",
+        "parser": "html",
+        "useTabs": false,
+        "trailingComma": "es5",
+        "tabWidth": 2,
+        "printWidth": 200
+      }
+    },
+    {
+      "files": ["*.md"],
+      "options": {
+        "embeddedLanguageFormatting": "auto",
+        "parser": "markdown"
+      }
+    },
+    {
+      "files": ["*.json", "*.json5", "*.jsonc"],
+      "options": {
+        "parser": "json5"
+      }
+    },
+    {
+      "files": ["*.css", "*.scss", "*.less", "*.sass"],
+      "options": {
+        "parser": "css"
+      }
+    }
+  ]
+}
