@@ -27,7 +27,7 @@
     {
       "files": ["*.json", "*.json5", "*.jsonc"],
       "options": {
-        "parser": "json5"
+        "parser": "json"
       }
     },
     {

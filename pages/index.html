@@ -4,6 +4,7 @@
     <title>크롤링/스크래핑/자동화테스트</title>
     <link rel="stylesheet" href="index.css" />
   </head>
+
   <body>
     <article id="ffbbc8f0-c928-41b8-85a9-39a65681a177" class="page sans">
       <header>
@@ -13,16 +14,16 @@
         <h1 class="page-title">크롤링/스크래핑/자동화테스트</h1>
       </header>
       <div class="page-body">
-        <figure class="block-color-gray_background callout" style="white-space: pre-wrap; display: flex" id="62bef43a-648f-4a64-923c-9b5343777b5c">
+        <figure class="block-color-gray_background callout" style="display: flex" id="62bef43a-648f-4a64-923c-9b5343777b5c">
           <div style="font-size: 1.5em">
             <span class="icon">💡</span>
           </div>
           <div style="width: 100%">서버리스 프레임워크를 사용하여 AWS Lambda에서 실행되는 간단한 cron 서비스를 개발하고 배포하는 크롤링 프로젝트입니다.</div>
         </figure>
         <blockquote id="8205c1d9-44ba-4253-a1bb-1c0bc4e45212">
-          <code> python</code>, <code> crawler</code>, <code> serverless framework</code>, <code> Selenium</code>, <code> Pandas</code>, <code> BeautifulSoup4</code> <code> Node.js</code>,
-          <code> TypeScript</code>, <code> Notion API</code>, <code> Chart Scraper</code>,
-          <code> Axios</code>
+          <code>python</code>, <code>crawler</code>, <code>serverless framework</code>, <code>Selenium</code>, <code>Pandas</code>, <code>BeautifulSoup4</code> <code>Node.js</code>,
+          <code>TypeScript</code>, <code>Notion API</code>, <code>Chart Scraper</code>,
+          <code>Axios</code>
         </blockquote>
         <div id="08f94356-229a-480b-aef2-fb0827ec6da1" class="collection-content">
           <h4 class="collection-title">완료된 크롤링 프로젝트</h4>
@@ -97,7 +98,7 @@
                   >
                 </td>
                 <td class="cell-j&lt;td">
-                  <span class="selected-value select-value-color-orange"> Develeper job</span>
+                  <span class="selected-value select-value-color-orange"> Developer job</span>
                 </td>
                 <td class="cell-:Zx~">
                   <span class="selected-value select-value-color-blue"> TypeScript</span>
@@ -111,7 +112,7 @@
                   >
                 </td>
                 <td class="cell-j&lt;td">
-                  <span class="selected-value select-value-color-orange"> Develeper job</span>
+                  <span class="selected-value select-value-color-orange"> Developer job</span>
                 </td>
                 <td class="cell-:Zx~">
                   <span class="selected-value select-value-color-blue"> TypeScript</span>
@@ -124,11 +125,12 @@
         <p id="42003b3d-5431-48a2-8a35-b6ec5e463d45">
           이 예에서는 rateHandler와 cronHandler라는 두 가지 함수를 정의하는데, 둘 다 특정 시간 또는 특정 간격으로 실행되도록 기능을 구성하는 데 사용되는 스케줄 유형의 이벤트에 의해 트리거됩니다.
           스케줄 이벤트에 대한 자세한 내용은 서버리스 문서의 해당 섹션을 참조하십시오.
-          <a href="https://serverless.com/framework/docs/providers/aws/events/schedule/"> docs</a>.
+          <a href="https://serverless.com/framework/docs/providers/aws/events/schedule/"> docs</a>
+          .
         </p>
         <h3 id="24f1e29b-6f1b-4d33-8594-aeb67ae37c51">Cron expressions syntax</h3>
         <p id="1af56ea9-6a5c-4c69-89bc-3156120787ea">
-          <code> cron(Minutes Hours Day-of-month Month Day-of-week Year)</code>
+          <code>cron(Minutes Hours Day-of-month Month Day-of-week Year)</code>
         </p>
         <p id="5b7a10a5-b4d2-47ed-8b17-ce16f930c1ec">모든 필드는 필수적이며 표준 시간대는 UTC를 기준으로 합니다. (KST+09:00)</p>
         <table id="ea9837a1-cec1-46b1-9d06-926f9dbdb3fb" class="simple-table">
@@ -170,12 +172,19 @@
             </tr>
           </tbody>
         </table>
-        <p id="00f37f15-57fc-4ec9-a699-d329f6eb5365">
-          <code> functions: job-collector: handler: handler.run events: # Invoke Lambda function every 2nd minute from Mon-Fri - schedule: cron(0 * ? * MON-FRI *)</code>
-        </p>
+        <pre class="code"><span class="pl-ent">functions</span>:
+  <span class="pl-ent">job-collector</span>:
+    <span class="pl-ent">handler</span>: <span class="pl-s">handler.run</span>
+    <span class="pl-ent">events</span>:
+      <span class="pl-c"><span class="pl-c">#</span> Invoke Lambda function every 2nd minute from Mon-Fri</span>
+      - <span class="pl-ent">schedule</span>: <span class="pl-s">cron(0 * ? * MON-FRI *)</span>
+    <span class="pl-ent">timeout</span>: <span class="pl-c1">180</span>
+    <span class="pl-ent">memorySize</span>: <span class="pl-c1">1024</span>
+    <span class="pl-ent">ephemeralStorageSize</span>: <span class="pl-c1">1024</span></pre>
         <p id="9180903d-35d1-4139-9567-78dc47704e87">
           AWS CRON 레퍼런스 :
-          <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions"> AWS docs</a>.
+          <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#CronExpressions"> AWS docs</a>
+          .
         </p>
         <h2 id="af082e06-5ea5-470f-81c5-8dd6f657ce1b">notion-sdk-typescript-starter</h2>
         <p id="b63bdada-b6ac-4793-8639-5ada3c0cb8a5">
@@ -209,26 +218,31 @@
         <p id="b1cef295-287e-409f-80a2-bfe65c7c4a08">
           <a href="https://developers.notion.com/docs/getting-started"> 노션 API 사이트</a>
           에서 API KEY를 발급받습니다. OAuth를 사용한 범용 API를 발급받아야 프라이빗한 노션 페이지를 조작할 수 있습니다. dotenv파일을 생성합니다.
-          <code> touch .env</code>
+          <code>touch .env</code>
         </p>
-        <pre id="f110ac03-c36b-491a-975d-2ebcc5fdd4bd" class="code code-wrap">
-<code>
+        <pre class="code">
 NOTION_TOKEN=https://www.notion.so/my-integrations
 ROCKET_NOTION_DB=YOUR_DATABASE_URL
 WANTED_NOTION_DB=YOUR_DATABASE_URL
 NODE_ENV=
-S3_IMAGE_BUCKET=</code>
-</pre>
+S3_IMAGE_BUCKET=</pre
+        >
         <p id="ef21e6d6-4fc8-40a6-8404-a858a2ae39d9">노션 토큰과 데이터베이스 아이디를 셋팅합니다.</p>
         <h2 id="05135511-aece-4e71-a712-59fb4845192f">NPM Scripts</h2>
-        <p id="934390e6-4a6a-4315-9840-00f8fc0bfbdf">
-          <code> npm test</code> TS Jest를 작동합니다. <code> npm run tslint</code> TS Lint를 작동합니다.
-          <code>&gt;&gt;&gt; Tried to lint handler.ts but found no valid, enabled rules for this file type and file path in the resolved configuration.</code>
-          <code> npm run lint</code> ESLint를 작동합니다. 콘솔 출력은 없습니다. <code> npm start</code> TS NodeJS 명령어로 handler 파일의 run을 실행합니다. <code> npm run rocket-punch</code> TS NodeJS
-          명령어로 rocket.main 파일을 실행합니다. <code> npm run wanted-crawl</code> TS NodeJS 명령어로 wanted.main 파일을 실행합니다. <code> npm run typecheck</code> 타입 정의 중 중복되거나 잘못된
-          정의를 확인합니다. 1회성입니다. <code> npm run watch</code> 타입 정의 중 중복되거나 잘못된 정의를 확인합니다. 실시간으로 파일 변화를 감지합니다. <code> npm run build</code> 타입 정의 중
-          중복되거나 잘못된 정의를 확인, ES스크립트로 컴파일합니다. <code> npm run format</code> 프리티어 코드 포매터를 실행합니다.
-        </p>
+        <ul id="934390e6-4a6a-4315-9840-00f8fc0bfbdf">
+          <li><code>npm test</code> TS Jest를 작동합니다.</li>
+          <li><code>npm run tslint</code> TS Lint를 작동합니다.</li>
+          <li><code>npm run lint</code> ESLint를 작동합니다. 콘솔 출력은 없습니다.</li>
+          <li><code>npm start</code> TS NodeJS 명령어로 handler 파일의 run을 실행합니다.</li>
+          <li><code>npm run rocket-punch</code> TS NodeJS 명령어로 rocket.main 파일을 실행합니다.</li>
+          <li><code>npm run wanted-crawl</code> TS NodeJS 명령어로 wanted.main 파일을 실행합니다.</li>
+
+          <li><code>npm run typecheck</code> 타입 정의 중 중복되거나 잘못된 정의를 확인합니다. 1회성입니다.</li>
+          <li><code>npm run watch</code> 타입 정의 중 중복되거나 잘못된 정의를 확인합니다. 실시간으로 파일 변화를 감지합니다.</li>
+
+          <li><code>npm run build</code> 타입 정의 중 중복되거나 잘못된 정의를 확인, ES스크립트로 컴파일합니다.</li>
+          <li><code>npm run format</code> 프리티어 코드 포매터를 실행합니다.</li>
+        </ul>
         <figure id="771c884e-fa8e-404d-bd19-3364a5172a2b" class="link-to-page"></figure>
         <figure id="e76272fe-72fb-41bb-bc99-8fc377ad0046" class="link-to-page"></figure>
         <p id="9cdb8748-b8e9-4936-ac51-8f78834ea250"></p>
