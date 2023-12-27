@@ -1,7 +1,7 @@
 beautifulsoup4==4.11.2
 packaging==23.0
 pandas==1.5.3
-pip==23.0
+pip==23.3
 requests==2.31.0
 selenium~=4.8.0
 python-dotenv==0.21.1
