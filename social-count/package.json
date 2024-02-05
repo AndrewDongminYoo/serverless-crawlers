@@ -5,9 +5,9 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "serverless-python-requirements": "^6.0.0"
+    "serverless-python-requirements": "^6.0.1"
   },
-  "peerDependencies": {
-    "serverless": "^2.32 || 3"
+  "resolutions": {
+    "serverless": "^2.32 || 3.2.0"
   }
 }

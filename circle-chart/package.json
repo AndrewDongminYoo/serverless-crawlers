@@ -6,10 +6,10 @@
   "license": "MIT",
   "devDependencies": {
     "serverless-latest-layer-version": "^2.1.2",
-    "serverless-offline": "^12.0.4",
-    "serverless-python-requirements": "^6.0.0"
+    "serverless-offline": "^13.3.3",
+    "serverless-python-requirements": "^6.0.1"
   },
-  "peerDependencies": {
-    "serverless": "^3"
+  "resolutions": {
+    "serverless": "^2.32 || 3.2.0"
   }
 }
