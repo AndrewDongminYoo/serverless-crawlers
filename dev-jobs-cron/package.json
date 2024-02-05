@@ -48,6 +48,7 @@
   },
   "resolutions": {
     "aws-sdk": "^2.1550.0",
+    "follow-redirects": "^1.15.4",
     "serverless": "^2.32 || 3.2.0"
   }
 }
