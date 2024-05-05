@@ -1,34 +1,34 @@
 {
-    "compilerOptions": {
-        "preserveConstEnums": true,
-        "strictNullChecks": true,
-        "sourceMap": true,
-        "allowJs": true,
-        "target": "ES2015",
-        "outDir": ".build",
-        "module": "CommonJS",
-        "moduleResolution": "node",
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true,
-        "resolveJsonModule": true,
-        "lib": ["es2015"],
-        "rootDir": "./",
-        // Emit sourcemaps
-        "declaration": true,
-        "declarationMap": true,
-        "inlineSources": true,
-        // Emit type definitions
-        "strict": true,
-        // Linter style rules
-        "noUnusedLocals": true, // Disabled because we use eslint for this.
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "noUncheckedIndexedAccess": false,
-        "noPropertyAccessFromIndexSignature": true,
-        "noImplicitAny": true
-    },
-    "exclude": ["node_modules"],
-    "types": ["node", "aws-sdk", "notionhq", "axios"],
-    "include": ["*.ts", "test/**.ts", "types/**.ts"]
+  "compilerOptions": {
+    "preserveConstEnums": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "allowJs": true,
+    "target": "ES2015",
+    "outDir": ".build",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "lib": ["es2015"],
+    "rootDir": "./",
+    // Emit sourcemaps
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    // Emit type definitions
+    "strict": true,
+    // Linter style rules
+    "noUnusedLocals": true, // Disabled because we use eslint for this.
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": false,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitAny": true
+  },
+  "exclude": ["node_modules"],
+  "types": ["node", "aws-sdk", "notionhq", "axios"],
+  "include": ["*.ts", "test/**.ts", "types/**.ts"]
 }

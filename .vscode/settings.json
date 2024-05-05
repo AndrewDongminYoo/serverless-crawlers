@@ -830,13 +830,13 @@
     "zeronsoftn",
     "zerontech",
     "zipfund",
-    "zixdacx",
+    "zixdacx"
   ],
   "python.formatting.provider": "black",
   "conventionalCommits.scopes": [
     "serverless",
     "python",
     "typescript",
-    "documents",
-  ],
+    "documents"
+  ]
 }
